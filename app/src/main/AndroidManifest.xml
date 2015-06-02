@@ -24,7 +24,7 @@
         </activity>
 
         <activity
-            android:name=".messageSender"
+            android:name="com.bccs.bsecure.messageSender"
             android:label="encrypted_messaging" />
 
         <!-- Declare my receiver class -->
