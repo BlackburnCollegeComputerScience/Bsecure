@@ -29,7 +29,7 @@
 
         <!-- Declare my receiver class -->
         <receiver
-            android:name="smsBroadcastReceiver"
+            android:name="com.bccs.bsecure.smsBroadcastReceiver"
             android:enabled="true"
             android:exported="true">
 
