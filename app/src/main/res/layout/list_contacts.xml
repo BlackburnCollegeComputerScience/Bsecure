@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- ################### Start comment block ###########################
+
+    Created by traci.kamp on 10/07/2014.
+        This is the view that the ListUsers activity will use to list
+        the contacts stored in the phone.
+
+    Modified by traci.kamp on 11/10/2014 -> renamed to listContacts.
+        Renamed to better fit functionality of calling activity
+        (also renamed to listContacts). Will likely need minimal
+        updating; another file rename likely when functionality
+        is added to the rest of the application. Will display a
+        list of contacts that have an active conversation in a
+        database (which is to be further investigated).
+
+################## End comment block ############################## -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <ListView
+
+        android:id="@+id/usersListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ffffffff"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:title="Users"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true" />
+
+    <Button
+        android:id="@+id/New"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/chatText"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:text="New">
+
+    </Button>
+
+</RelativeLayout>
