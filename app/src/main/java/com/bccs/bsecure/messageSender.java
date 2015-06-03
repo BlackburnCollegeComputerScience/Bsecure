@@ -105,7 +105,10 @@ public class messageSender extends Activity {
     myMessage message;
     String key1 = "Bar12345Bar12345"; // 128 bit key
     String key2 = "ThisIsASecretKey";
+    String prepend = "-&*&-"; // current message header
     dbHelper helper;
+    boolean dbActive = false;
+    boolean receiversRegistered = false; // track if receivers are registered or not
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -116,6 +119,7 @@ public class messageSender extends Activity {
             */
         }
     };
+
     smsBroadcastReceiver onNewMsgSend = new smsBroadcastReceiver();
     private ListView listView;
     private ArrayAdapter chatAdapter;
@@ -123,7 +127,7 @@ public class messageSender extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Intitialize the user view
+        // Initialize the user view
         setContentView(R.layout.convo_with_bubbles);
 
         // Initialize variables from intent information passed
@@ -140,6 +144,7 @@ public class messageSender extends Activity {
 
         // Initialize database variables
         helper = new dbHelper(this);
+        dbActive = true;
         ArrayList<String> conversation = readConvo(number); // outbox history
 
         // Initialize layout variables
@@ -182,21 +187,30 @@ public class messageSender extends Activity {
 
         registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
         registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
+        receiversRegistered = true;
 
     }
 
     protected void onStart() {
         System.out.println("Sender onStart");
-        registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
-        registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
+
+        if (!receiversRegistered) {
+            registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
+            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
+            receiversRegistered = true;
+        }
         //open database here
         super.onStart();
     }
 
     protected void onResume() {
         System.out.println("Sender onResume");
-        registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
-        registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
+
+        if (!receiversRegistered) {
+            registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
+            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
+            receiversRegistered = true;
+        }
         //open database here
         super.onResume();
     }
@@ -206,30 +220,51 @@ public class messageSender extends Activity {
 
     protected void onPause() {
         System.out.println("Sender onPause");
-        unregisterReceiver(onNewMsg);
-        unregisterReceiver(onNewMsgSend);
+
+        if (receiversRegistered) {
+            unregisterReceiver(onNewMsg);
+            unregisterReceiver(onNewMsgSend);
+            receiversRegistered = false;
+        }
+
+        //old code for preventing crash when pressing back button
+        //try { unregisterReceiver(onNewMsg); } catch (IllegalArgumentException iae) { };
+        //try { unregisterReceiver(onNewMsgSend); } catch (IllegalArgumentException iae) { };
+
         helper.close();
         super.onPause();
     }
 
     protected void onStop() {
         System.out.println("Sender onStop");
-        unregisterReceiver(onNewMsg);
-        unregisterReceiver(onNewMsgSend);
+        if (receiversRegistered) {
+            unregisterReceiver(onNewMsg);
+            unregisterReceiver(onNewMsgSend);
+            receiversRegistered = false;
+        }
         helper.close();
         super.onStop();
     }
 
     protected void onDestroy() {
         System.out.println("Sender onDestroy");
-        unregisterReceiver(onNewMsg);
-        unregisterReceiver(onNewMsgSend);
+        if (receiversRegistered) {
+            unregisterReceiver(onNewMsg);
+            unregisterReceiver(onNewMsgSend);
+            receiversRegistered = false;
+        }
         helper.close();
         super.onDestroy();
     }
 
+
     private void sendMsg(String no, String msg) {
         System.out.println("Creating message object: ");
+        SmsManager sms = SmsManager.getDefault();
+
+
+
+
         /*
             The name field is being filled with "emulator" for now but will need to be changed
             when the app is running properly so it reflects the appropriate contact information.
@@ -237,11 +272,16 @@ public class messageSender extends Activity {
         myMessage msgObj = new myMessage("emulator", no, msg);
         helper.addRecord(msgObj);
         System.out.println(msgObj.toString());
-        SmsManager sms = SmsManager.getDefault();
-        String prepend = "-&*&-";
         msg = encrypt(msg);
         String newMsg = prepend + msg;
-        sms.sendTextMessage(no, null, newMsg, null, null);
+
+        //new multipart text test
+        ArrayList<String> messages = sms.divideMessage(newMsg);
+        sms.sendMultipartTextMessage(no, null, messages, null, null);
+
+
+        //sms.sendTextMessage(no, null, newMsg, null, null);
+
         //I cannot remember why the below line is commented out.
         //sms.sendTextMessage(no, null, msg, null, null);
         System.out.println("Message sent: " + newMsg);

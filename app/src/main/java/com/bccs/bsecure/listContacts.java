@@ -9,10 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.bccs.bsecure.R;
-import com.bccs.bsecure.dbHelper;
-import com.bccs.bsecure.messageSender;
-
 import java.util.ArrayList;
 
 /*
@@ -64,6 +60,7 @@ public class listContacts extends Activity {
 
     //The SQLite DB helper - traverses outbox
     public dbHelper appHelper;
+    private boolean dbActive = false;
     //The adapter to use when displaying to the screen.
     private ArrayAdapter<String> activeInfoAdapter;
     //The list view that contains the on-screen info being displayed
@@ -91,6 +88,7 @@ public class listContacts extends Activity {
         setContentView(R.layout.list_contacts);
         setTitle("Conversations");
         appHelper = new dbHelper(this);
+        dbActive = true;
         newConvButton = (Button) findViewById(R.id.New);
         //initialize global variables
         userListView = (ListView) findViewById(R.id.usersListView);
@@ -113,21 +111,33 @@ public class listContacts extends Activity {
 
     protected void onStart() {
         System.out.println("Convo view onStart");
+        if (!dbActive) {
+            appHelper = new dbHelper(this);
+            dbActive = true;
+        }
         super.onStart();
     }
 
     protected void onResume() {
         System.out.println("Convo view onResume");
+        if (!dbActive) {
+            appHelper = new dbHelper(this);
+            dbActive = true;
+        }
         super.onResume();
     }
 
     protected void onPause() {
         System.out.println("Convo view onPause");
+        appHelper.close();
+        dbActive = false;
         super.onPause();
     }
 
     protected void onStop() {
         System.out.println("Convo view onStop");
+        appHelper.close();
+        dbActive = false;
         super.onStop();
     }
 

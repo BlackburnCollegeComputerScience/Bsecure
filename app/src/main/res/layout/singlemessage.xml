@@ -27,10 +27,10 @@ Created by traci.kamp on 11/28/2014.
             android:layout_height="115dp"
             android:layout_gravity="center"
             android:layout_margin="5dip"
-            android:background="@mipmap/bubble_b"
             android:paddingLeft="10dip"
             android:paddingRight="10dip"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"
+            android:nestedScrollingEnabled="false" />
 
     </LinearLayout>
 
