@@ -1,8 +1,12 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <item name="android:actionBarStyle">@style/ActionBarHelper</item>
+        <item name="actionBarStyle">@style/ActionBarHelper</item>
+        <item name="icon">@drawable/ic_security_black_48dp</item>
     </style>
-
+    <style name="ActionBarHelper" parent="Widget.AppCompat.ActionBar">
+        <item name="displayOptions">homeAsUp|showHome|showTitle</item>
+    </style>
 </resources>
