@@ -158,12 +158,12 @@ public class messageSender extends Activity {
 
         // Give the listView an adapter - From example
         listView.setAdapter(chatAdapter);
-
+        final EditText number = (EditText) findViewById(R.id.editText);
         // Create the on-click listener for the send button
         send.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO: CAREFUL! THIS IS HARD-CODED TO SEND TO EMULATOR!
-                String recipientNo = "5556";
+                String recipientNo = number.getText().toString();
                 String message = typeMessage.getText().toString();
                 typeMessage.setText("");
 
@@ -264,12 +264,13 @@ public class messageSender extends Activity {
 
 
 
-
+        final EditText number = (EditText) findViewById(R.id.editText);
+        no = number.getText().toString();
         /*
             The name field is being filled with "emulator" for now but will need to be changed
             when the app is running properly so it reflects the appropriate contact information.
           */
-        myMessage msgObj = new myMessage("emulator", no, msg);
+        myMessage msgObj = new myMessage(no, no, msg);
         helper.addRecord(msgObj);
         System.out.println(msgObj.toString());
         msg = encrypt(msg);
