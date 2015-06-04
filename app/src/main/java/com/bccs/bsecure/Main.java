@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ public class Main extends AppCompatActivity {
     private ListView userListView;
     //ArrayList storing names and numbers in outbox
     private ArrayList<String>[] activeNums;
-    private Button newConvButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +36,6 @@ public class Main extends AppCompatActivity {
 //        ActionBar actionBar = getActionBar();
         appHelper = new dbHelper(this);
         dbActive = true;
-        newConvButton = (Button) findViewById(R.id.New);
         //initialize global variables
         userListView = (ListView) findViewById(R.id.usersListView);
         //Define Listener method
@@ -50,13 +47,6 @@ public class Main extends AppCompatActivity {
                 (getApplicationContext(), R.layout.row_layout, activeNums[1]);
         //Display the names.
         userListView.setAdapter(activeInfoAdapter);
-        newConvButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent cI = new Intent(getApplicationContext(), messageSender.class);
-                startActivity(cI);
-            }
-        });
-
     }
     private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
