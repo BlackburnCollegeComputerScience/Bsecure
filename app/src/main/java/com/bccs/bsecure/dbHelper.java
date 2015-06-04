@@ -14,12 +14,12 @@ import java.util.ArrayList;
  * This file serves as the creator and traverses
  * the outbox database required by this
  * application.
- * <p/>
+ *
  * Modified by traci.kamp on 11/17/2014.
  * Added getConversation() method to read the outbox
  * for all messages from a specified phone number
  * for display in the conversation history.
- * <p/>
+ *
  * Modified by traci.kamp on 12/1/2014.
  * Removed system.outs used for debugging. Some
  * bugs remain and need to be resolved. Why
@@ -30,13 +30,14 @@ import java.util.ArrayList;
 public class dbHelper extends SQLiteOpenHelper {
     public static final String TABLE_MESSAGES = "messages";
     //Table Info
-    public static final String COLUMN_ID = "id";
-    public static final String COLUMN_SEND_TO_NAME = "send_to_name";
-    public static final String COLUMN_SEND_TO_NUM = "send_to_num";
-    public static final String COLUMN_BODY = "msg_body";
+    public static final String COLUMN_ID = "id"; //ID of message
+    public static final String COLUMN_SEND_TO_NUM = "send_to_num"; // number sent to / received from
+    public static final String COLUMN_BODY = "msg_body"; // body of the message
+    public static final String COLUMN_SENT = "sent"; // whether it was sent or received
+    public static final String COLUMN_TIME = "msg_time"; // time message sent / received
     //Database Info
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "outgoingMsgs.db";
+    private static final String DATABASE_NAME = "Msgs.db";
 
     public dbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -46,8 +47,9 @@ public class dbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_MESSAGES_TABLE = "CREATE TABLE " + TABLE_MESSAGES +
-                "(" + COLUMN_ID + " INTEGER PRIMARY KEY," + COLUMN_SEND_TO_NAME + " TEXT," +
-                COLUMN_SEND_TO_NUM + " TEXT," + COLUMN_BODY + " TEXT" + ")";
+                "(" + COLUMN_ID + " INTEGER PRIMARY KEY," +
+                COLUMN_SEND_TO_NUM + " TEXT," + COLUMN_BODY + " TEXT," + COLUMN_SENT + " INTEGER," +
+                COLUMN_TIME + " INTEGER" + ")";
         db.execSQL(CREATE_MESSAGES_TABLE);
     }
 
@@ -63,9 +65,10 @@ public class dbHelper extends SQLiteOpenHelper {
         SQLiteDatabase dbase = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
         // Fill vals with appropriate content
-        vals.put(COLUMN_SEND_TO_NAME, msg.get_name());
         vals.put(COLUMN_SEND_TO_NUM, msg.get_number());
         vals.put(COLUMN_BODY, msg.getBody());
+        vals.put(COLUMN_SENT, msg.getSent() ? 1 : 0);
+        vals.put(COLUMN_TIME, msg.get_time());
         // Insert
         dbase.insert(TABLE_MESSAGES, null, vals);
         Log.i("Adding record: ", msg.get_name() + " " + msg.get_number());
@@ -85,9 +88,10 @@ public class dbHelper extends SQLiteOpenHelper {
             c.moveToFirst();
         }
 
-        myMessage retObj = new myMessage(Integer.parseInt(c.getString(0)),
-                c.getString(1), c.getString(2), c.getString(3));
-
+        myMessage retObj = new myMessage(c.getString(1), c.getString(2), c.getInt(3) == 1);
+        retObj.setId(Integer.parseInt(c.getString(0)));
+        retObj.set_time(c.getInt(4));
+        c.close();
         dbase.close();
         return retObj;
     }
@@ -141,7 +145,7 @@ public class dbHelper extends SQLiteOpenHelper {
     public void deleteRecord(myMessage msg) {
         SQLiteDatabase dbase = this.getWritableDatabase();
         dbase.delete(TABLE_MESSAGES, COLUMN_ID + " = ?",
-                new String[]{String.valueOf(msg.get_id())});
+                new String[]{String.valueOf(msg.getId())});
         dbase.close();
     }
 }

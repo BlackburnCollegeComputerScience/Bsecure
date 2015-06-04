@@ -6,13 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
-import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 //import org.apache.commons.codec.binary.Base64;
 
@@ -61,6 +56,10 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
         context.sendBroadcast(new Intent("onNewMsgSend"));
     }
 
+    private void addReceivedMessageToDatabase(myMessage message) {
+        //dbHelper helper = new dbHelper();
+    }
+
     void handleIncMessage(Bundle bundle, Context context) {
 
         if (bundle != null) {
@@ -81,7 +80,7 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
                     for (int j = 5; j < message.length(); j++) {
                         fixed += message.charAt(j);
                     }
-                    fixed = decrypt(fixed);
+                    fixed = messageCipher.decrypt(fixed, key1, key2);
                 }
 
                 //display a toast notification
@@ -96,6 +95,13 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
                         (fixed == null ? message : fixed);
                 Toast.makeText(context, toastString, duration).show();
 
+                myMessage msgObj = new myMessage(sendingNum,
+                        fixed == null ? message : fixed, false);
+
+                addReceivedMessageToDatabase(msgObj);
+
+
+
                 //print information to logcat
                 //updated to use ternary on 11.3.14
                 Log.i(TAG, "SENDER: " + sendingNum + "; Message: " +
@@ -109,28 +115,4 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
             Log.e(ERROR, "bundle was null");
         }
     }
-
-
-    //Dr. Coogan's decrypt method, some variations made
-    //not in running state but need Dr. Coogan's expertise on Base64
-
-    private String decrypt(String encrypted) {
-        try {
-            IvParameterSpec iv = new IvParameterSpec(key2.getBytes("UTF-8"));
-
-            SecretKeySpec skeySpec = new SecretKeySpec(key1.getBytes("UTF-8"),
-                    "AES");
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
-            //byte[] original = cipher.doFinal(Base64.decodeBase64(encrypted));
-            byte[] original = cipher.doFinal(Base64.decode(encrypted, 0));
-
-
-            return new String(original);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
 }

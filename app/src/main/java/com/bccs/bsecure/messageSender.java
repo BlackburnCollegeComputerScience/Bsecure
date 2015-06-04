@@ -1,6 +1,9 @@
 package com.bccs.bsecure;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.view.View;
@@ -9,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -101,16 +105,28 @@ public class messageSender extends Activity {
     boolean dbActive = false;
     boolean receiversRegistered = false; // track if receivers are registered or not
     ArrayList<String> conversation;
-    /*
+
 
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
+            Toast.makeText(getBaseContext(), "Message received!", Toast.LENGTH_LONG).show();
+            System.out.println("Message received in messageSender!");
         }
     };
 
-    */
+    IntentFilter onNewMsgFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+    {
+        onNewMsgFilter.setPriority(1000);
+        System.out.println("Priority Set");
+    }
+            /*
+                        <intent-filter android:priority="1000" >
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+             */
+
+
 
    // smsBroadcastReceiver onNewMsgSend = new smsBroadcastReceiver();
     private ListView listView;
@@ -181,7 +197,7 @@ public class messageSender extends Activity {
             }
         });
 
- //       registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
+        registerReceiver(onNewMsg, onNewMsgFilter);
 //        registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
         receiversRegistered = true;
         updateConvo(number);
@@ -191,7 +207,7 @@ public class messageSender extends Activity {
         System.out.println("Sender onStart");
 
         if (!receiversRegistered) {
-//            registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
+            registerReceiver(onNewMsg, onNewMsgFilter);
 //            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
             receiversRegistered = true;
         }
@@ -203,7 +219,7 @@ public class messageSender extends Activity {
         System.out.println("Sender onResume");
 
         if (!receiversRegistered) {
-//            registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
+            registerReceiver(onNewMsg, onNewMsgFilter);
 //            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
             receiversRegistered = true;
         }
@@ -218,7 +234,7 @@ public class messageSender extends Activity {
         System.out.println("Sender onPause");
 
         if (receiversRegistered) {
-//            unregisterReceiver(onNewMsg);
+            unregisterReceiver(onNewMsg);
 //            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
@@ -234,7 +250,7 @@ public class messageSender extends Activity {
     protected void onStop() {
         System.out.println("Sender onStop");
         if (receiversRegistered) {
-//            unregisterReceiver(onNewMsg);
+            unregisterReceiver(onNewMsg);
 //            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
@@ -245,7 +261,7 @@ public class messageSender extends Activity {
     protected void onDestroy() {
         System.out.println("Sender onDestroy");
         if (receiversRegistered) {
-//            unregisterReceiver(onNewMsg);
+            unregisterReceiver(onNewMsg);
 //            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
