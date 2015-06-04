@@ -1,13 +1,8 @@
 package com.bccs.bsecure;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.DataSetObserver;
 import android.os.Bundle;
-import android.telephony.SmsManager;
-import android.util.Base64;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
@@ -16,10 +11,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 //import org.apache.commons.codec.binary.Base64;
 
@@ -109,18 +100,19 @@ public class messageSender extends Activity {
     dbHelper helper;
     boolean dbActive = false;
     boolean receiversRegistered = false; // track if receivers are registered or not
+    ArrayList<String> conversation;
+    /*
+
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            /*
-                It has been determined that this method is not
-                executed. not sure if it is necessary to have
-                here or if it is taking up space...
-            */
+
         }
     };
 
-    smsBroadcastReceiver onNewMsgSend = new smsBroadcastReceiver();
+    */
+
+   // smsBroadcastReceiver onNewMsgSend = new smsBroadcastReceiver();
     private ListView listView;
     private ArrayAdapter chatAdapter;
 
@@ -130,6 +122,7 @@ public class messageSender extends Activity {
         // Initialize the user view
         setContentView(R.layout.convo_with_bubbles);
 
+        System.out.println("Sender OnCreate");
         // Initialize variables from intent information passed
         if (getIntent().hasExtra("name") && getIntent().hasExtra("number")) {
             name = getIntent().getStringExtra("name");
@@ -145,7 +138,8 @@ public class messageSender extends Activity {
         // Initialize database variables
         helper = new dbHelper(this);
         dbActive = true;
-        ArrayList<String> conversation = readConvo(number); // outbox history
+        conversation = readConvo(number); // outbox history
+
 
         // Initialize layout variables
         typeMessage = (EditText) findViewById(R.id.chatText); // Layout file from example
@@ -158,12 +152,13 @@ public class messageSender extends Activity {
 
         // Give the listView an adapter - From example
         listView.setAdapter(chatAdapter);
-        final EditText number = (EditText) findViewById(R.id.editText);
+        final EditText newNumber = (EditText) findViewById(R.id.editText);
         // Create the on-click listener for the send button
         send.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO: CAREFUL! THIS IS HARD-CODED TO SEND TO EMULATOR!
-                String recipientNo = number.getText().toString();
+                String recipientNo = newNumber.getText().toString().equals("") ? "5556" :
+                        newNumber.getText().toString();
                 String message = typeMessage.getText().toString();
                 typeMessage.setText("");
 
@@ -174,29 +169,30 @@ public class messageSender extends Activity {
         });
 
         // The following was added from ChatBubble example.
+
         listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-        listView.setAdapter(chatAdapter);
+
         // Scrolls to the bottom in the event of data change.
         chatAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
                 super.onChanged();
-                listView.setSelection(chatAdapter.getCount() - 1);
+                listView.setSelection(chatAdapter.getCount());
             }
         });
 
-        registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
-        registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
+ //       registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
+//        registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
         receiversRegistered = true;
-
+        updateConvo(number);
     }
 
     protected void onStart() {
         System.out.println("Sender onStart");
 
         if (!receiversRegistered) {
-            registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
-            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
+//            registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
+//            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
             receiversRegistered = true;
         }
         //open database here
@@ -207,8 +203,8 @@ public class messageSender extends Activity {
         System.out.println("Sender onResume");
 
         if (!receiversRegistered) {
-            registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
-            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
+//            registerReceiver(onNewMsg, new IntentFilter("onNewMsg"));
+//            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
             receiversRegistered = true;
         }
         //open database here
@@ -222,8 +218,8 @@ public class messageSender extends Activity {
         System.out.println("Sender onPause");
 
         if (receiversRegistered) {
-            unregisterReceiver(onNewMsg);
-            unregisterReceiver(onNewMsgSend);
+//            unregisterReceiver(onNewMsg);
+//            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
 
@@ -238,8 +234,8 @@ public class messageSender extends Activity {
     protected void onStop() {
         System.out.println("Sender onStop");
         if (receiversRegistered) {
-            unregisterReceiver(onNewMsg);
-            unregisterReceiver(onNewMsgSend);
+//            unregisterReceiver(onNewMsg);
+//            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
         helper.close();
@@ -249,8 +245,8 @@ public class messageSender extends Activity {
     protected void onDestroy() {
         System.out.println("Sender onDestroy");
         if (receiversRegistered) {
-            unregisterReceiver(onNewMsg);
-            unregisterReceiver(onNewMsgSend);
+//            unregisterReceiver(onNewMsg);
+//            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
         helper.close();
@@ -259,61 +255,33 @@ public class messageSender extends Activity {
 
 
     private void sendMsg(String no, String msg) {
-        System.out.println("Creating message object: ");
-        SmsManager sms = SmsManager.getDefault();
-
-
-
         final EditText number = (EditText) findViewById(R.id.editText);
         no = number.getText().toString();
-        /*
-            The name field is being filled with "emulator" for now but will need to be changed
-            when the app is running properly so it reflects the appropriate contact information.
-          */
-        myMessage msgObj = new myMessage(no, no, msg);
+        myMessage msgObj =  sendMessage.send(no, msg);
         helper.addRecord(msgObj);
-        System.out.println(msgObj.toString());
-        msg = encrypt(msg);
-        String newMsg = prepend + msg;
-
-        //new multipart text test
-        ArrayList<String> messages = sms.divideMessage(newMsg);
-        sms.sendMultipartTextMessage(no, null, messages, null, null);
-
-
-        //sms.sendTextMessage(no, null, newMsg, null, null);
-
-        //I cannot remember why the below line is commented out.
-        //sms.sendTextMessage(no, null, msg, null, null);
-        System.out.println("Message sent: " + newMsg);
+        updateConvo(no);
     }
+
+    private void updateConvo(String pNum) {
+        System.out.println("Updating conversation " + pNum);
+        helper.close();
+        helper = new dbHelper(this);
+        final String phoneNumFinal = pNum;
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                chatAdapter.clear();
+                conversation = readConvo(phoneNumFinal);
+                for (String s : conversation) {
+                    chatAdapter.add(s);
+                }
+                chatAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
 
     private ArrayList<String> readConvo(String pNum) {
         return helper.getConversation(pNum);
     }
-
-
-    //Dr. Coogan's encrypt method, some variations made
-
-    public String encrypt(String value) {
-
-        try {
-            IvParameterSpec iv = new IvParameterSpec(key2.getBytes("UTF-8"));
-
-            SecretKeySpec skeySpec = new SecretKeySpec(key1.getBytes("UTF-8"),
-                    "AES");
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
-            byte[] encrypted = cipher.doFinal(value.getBytes());
-
-            System.out.println("encrypted string:"
-                    + Base64.encodeToString(encrypted, 0));
-            return Base64.encodeToString(encrypted, 0);
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
 }

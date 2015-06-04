@@ -115,6 +115,7 @@ public class listContacts extends Activity {
             appHelper = new dbHelper(this);
             dbActive = true;
         }
+        activeInfoAdapter.notifyDataSetChanged();
         super.onStart();
     }
 
@@ -124,6 +125,7 @@ public class listContacts extends Activity {
             appHelper = new dbHelper(this);
             dbActive = true;
         }
+        activeInfoAdapter.notifyDataSetChanged();
         super.onResume();
     }
 

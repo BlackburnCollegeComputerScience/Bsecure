@@ -118,7 +118,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
     public ArrayList<String> getConversation(String no) {
         ArrayList<String> ret = new ArrayList<String>();
-        for (int i = 1; i < this.getRecordCount(); i++) {
+        for (int i = 1; i <= this.getRecordCount(); i++) {
             if (this.getSingleMessage(i).get_number().equalsIgnoreCase(no)) {
                 ret.add(this.getSingleMessage(i).getBody());
             }
