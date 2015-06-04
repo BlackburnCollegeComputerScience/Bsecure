@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
@@ -37,7 +36,6 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = "smsBroadcastReceiver";
     private static final String SMS_SENT = "android.provider.Telephony.SMS_SENT";
     private static final String ERROR = "Error: ";
-    final SmsManager mySMSManager = SmsManager.getDefault();
     String phoneNumber;
     String key1 = "Bar12345Bar12345"; // 128 bit key
     String key2 = "ThisIsASecretKey";
@@ -56,8 +54,9 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
         context.sendBroadcast(new Intent("onNewMsgSend"));
     }
 
-    private void addReceivedMessageToDatabase(myMessage message) {
-        //dbHelper helper = new dbHelper();
+    private void addReceivedMessageToDatabase(myMessage message, Context context) {
+        dbHelper database = new dbHelper(context);
+        database.addRecord(message);
     }
 
     void handleIncMessage(Bundle bundle, Context context) {
@@ -98,8 +97,7 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
                 myMessage msgObj = new myMessage(sendingNum,
                         fixed == null ? message : fixed, false);
 
-                addReceivedMessageToDatabase(msgObj);
-
+                addReceivedMessageToDatabase(msgObj, context);
 
 
                 //print information to logcat

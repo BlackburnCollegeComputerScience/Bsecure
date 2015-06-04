@@ -39,7 +39,6 @@ public class sendMessage {
         ArrayList<String> messages = sms.divideMessage(newMsg);
         sms.sendMultipartTextMessage(number, null, messages, null, null);
 
-
         System.out.println("Message sent: " + newMsg);
         return msgObj;
     }

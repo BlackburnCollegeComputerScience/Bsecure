@@ -54,6 +54,9 @@ public class CreateMessage extends ActionBarActivity {
         @Override
         public void onClick(View v) {
             for (String number : recipientStrings) {
+
+                dbHelper database = new dbHelper(getApplicationContext());
+                database.addRecord(new myMessage(number, messageText.getText().toString(), true));
                 com.bccs.bsecure.sendMessage.send(number, messageText.getText().toString());
             }
         }
