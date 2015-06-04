@@ -35,7 +35,7 @@ public class Main extends AppCompatActivity {
 //        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
 //        ActionBar actionBar = getActionBar();
         appHelper = new dbHelper(this);
-        appHelper.
+        //appHelper.
         dbActive = true;
         //initialize global variables
         userListView = (ListView) findViewById(R.id.usersListView);
@@ -51,10 +51,10 @@ public class Main extends AppCompatActivity {
     }
     private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
-//            Intent conversationIntent = new Intent(getApplicationContext(), messageSender.class);
-//            conversationIntent.putExtra("name", activeNums[1].get(pos));
-//            conversationIntent.putExtra("number", activeNums[0].get(pos));
-//            startActivity(conversationIntent);
+            Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
+            conversationIntent.putExtra("name", activeNums[1].get(pos));
+            conversationIntent.putExtra("number", activeNums[0].get(pos));
+            startActivity(conversationIntent);
         }
     };
     @Override

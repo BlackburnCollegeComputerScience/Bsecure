@@ -59,6 +59,62 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
         database.addRecord(message);
     }
 
+    public static myMessage handleIncomingMessage(Bundle bundle, String key1, String key2) {
+        if (bundle != null) {
+            Object[] pdus = (Object[]) bundle.get("pdus");
+            for (int i = 0; i < pdus.length; i++) {
+                //extract message information
+                SmsMessage currMessage = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                String sendingNum = currMessage.getDisplayOriginatingAddress();
+                String message = currMessage.getDisplayMessageBody();
+                System.out.println("Message before chop: " + message);
+
+                //Handling chars to remove if decrypt needed
+                //added 11.3.14
+                String fixed = null;
+                if (message.contains("-&*&-")) {
+                    fixed = "";
+                    for (int j = 5; j < message.length(); j++) {
+                        fixed += message.charAt(j);
+                    }
+                    fixed = messageCipher.decrypt(fixed, key1, key2);
+                }
+
+                //display a toast notification
+                int duration = Toast.LENGTH_LONG;
+
+                /*
+                    Used the ternary operator <condition> ? true : false
+                    for ease of switching out necessary messages
+                    added 11.3.14
+                 */
+               // String toastString = "sender: " + sendingNum + "; message: " +
+                //        (fixed == null ? message : fixed);
+                //Toast.makeText(context, toastString, duration).show();
+
+                myMessage msgObj = new myMessage(sendingNum,
+                        fixed == null ? message : fixed, false);
+
+
+
+
+
+                //print information to logcat
+                //updated to use ternary on 11.3.14
+                Log.i(TAG, "SENDER: " + sendingNum + "; Message: " +
+                        (fixed == null ? message : fixed));
+
+                return msgObj;
+            }
+
+        } else {
+            //bundle was null, print an error in logcat
+            Log.e(ERROR, "bundle was null");
+            return null;
+        }
+        return null;
+    }
+
     void handleIncMessage(Bundle bundle, Context context) {
 
         if (bundle != null) {

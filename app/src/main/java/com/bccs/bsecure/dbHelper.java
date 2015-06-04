@@ -130,6 +130,16 @@ public class dbHelper extends SQLiteOpenHelper {
         return ret;
     }
 
+    public ArrayList<myMessage> getConversationMessages(String no) {
+        ArrayList<myMessage> ret = new ArrayList<>();
+        for (int i = 1; i <= this.getRecordCount(); i++) {
+            if (this.getSingleMessage(i).get_number().equalsIgnoreCase(no)) {
+                ret.add(this.getSingleMessage(i));
+            }
+        }
+        return ret;
+    }
+
     //gets a count of records stored in DB
     public int getRecordCount() {
         String countQuery = "SELECT * FROM " + TABLE_MESSAGES;

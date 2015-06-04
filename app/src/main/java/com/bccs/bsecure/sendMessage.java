@@ -1,6 +1,9 @@
 package com.bccs.bsecure;
 
+import android.os.Bundle;
 import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -41,6 +44,52 @@ public class sendMessage {
 
         System.out.println("Message sent: " + newMsg);
         return msgObj;
+    }
+    public static myMessage handleIncomingMessage(Bundle bundle) {
+        if (bundle != null) {
+            Object[] pdus = (Object[]) bundle.get("pdus");
+            for (int i = 0; i < pdus.length; i++) {
+                //extract message information
+                SmsMessage currMessage = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                String sendingNum = currMessage.getDisplayOriginatingAddress();
+                String message = currMessage.getDisplayMessageBody();
+                System.out.println("Message before chop: " + message);
+
+                //Handling chars to remove if decrypt needed
+                //added 11.3.14
+                String fixed = null;
+                if (message.contains("-&*&-")) {
+                    fixed = "";
+                    for (int j = 5; j < message.length(); j++) {
+                        fixed += message.charAt(j);
+                    }
+                    fixed = messageCipher.decrypt(fixed, key1, key2);
+                }
+
+                //display a toast notification
+                int duration = Toast.LENGTH_LONG;
+
+                /*
+                    Used the ternary operator <condition> ? true : false
+                    for ease of switching out necessary messages
+                    added 11.3.14
+                 */
+                // String toastString = "sender: " + sendingNum + "; message: " +
+                //        (fixed == null ? message : fixed);
+                //Toast.makeText(context, toastString, duration).show();
+
+                myMessage msgObj = new myMessage(sendingNum,
+                        fixed == null ? message : fixed, false);
+
+                return msgObj;
+            }
+
+        } else {
+            //bundle was null, print an error in logcat
+
+            return null;
+        }
+        return null;
     }
 
     public static String getPrepend() {
