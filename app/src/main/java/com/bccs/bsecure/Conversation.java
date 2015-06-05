@@ -61,7 +61,9 @@ public class Conversation extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         if (getIntent().hasExtra("number")) {
             currentNumber = getIntent().getStringExtra("number");
-        } else { currentNumber = "5556"; };
+        } else {
+            currentNumber = "5556";
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
         setTitle(currentNumber);
@@ -133,7 +135,7 @@ public class Conversation extends ActionBarActivity {
 
 
         final ArrayList<myMessage> newConversation = checkConversation;
-        runOnUiThread(new Runnable(){
+        runOnUiThread(new Runnable() {
             public void run() {
                 for (myMessage m : newConversation) {
                     chatAdapter.addItem(m.getBody(), m.getSent());
@@ -305,13 +307,7 @@ public class Conversation extends ActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        onBackPressed();
+        return true;
     }
 }
