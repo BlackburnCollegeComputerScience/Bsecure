@@ -10,7 +10,7 @@ import java.util.Calendar;
  * outbox provider (default SMS app functionality not
  * implemented due to time constraints).
  *
- * Modified by lucas.burdlel 6/5/2015.
+ * Modified by lucas.burdell 6/5/2015.
  * Reorganized class now prepares a time stamp and
  * a boolean check for whether the message was sent or received.
  * This class may be temporary for when we prepare a more
@@ -29,7 +29,7 @@ public class myMessage {
     public myMessage() {
     }
 
-    // Specific constructor
+    // non-specific constructor
     public myMessage(String number, String body) {
         this(number, body, true);
     }
@@ -47,24 +47,12 @@ public class myMessage {
         return _name;
     }
 
-    public void set_name(String n) {
-        this._name = n;
-    }
-
     public String get_number() {
         return _number;
     }
 
-    public void set_number(String num) {
-        this._number = num;
-    }
-
     public String getBody() {
         return _body;
-    }
-
-    public void setBody(String body) {
-        this._body = body;
     }
 
     // General toString method. Prints contact name, number, and message body.
@@ -74,14 +62,6 @@ public class myMessage {
 
     public boolean getSent() {
         return this._sent;
-    }
-
-    public boolean isSent() {
-        return this.getSent();
-    }
-
-    public void setSent(boolean b) {
-        this._sent = b;
     }
 
     public void setId(int id) {
