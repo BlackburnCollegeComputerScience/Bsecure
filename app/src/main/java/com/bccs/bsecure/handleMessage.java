@@ -3,7 +3,6 @@ package com.bccs.bsecure;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -13,7 +12,7 @@ import java.util.ArrayList;
  * This file will handle sending outbound messages, which includes setting the header and calling
  * the cipher module for encryption.
  */
-public class sendMessage {
+public class handleMessage {
 
     // TODO: Replace temporary keys with key pair associated with each contact
     private static final String key1 = "Bar12345Bar12345"; // 128 bit key
@@ -47,17 +46,22 @@ public class sendMessage {
     }
 
 
-
+    /**
+     * Handle incoming message and return myMessage object to be added to the DB
+     * @param bundle data bundle from an intent (intent.getExtras())
+     * @return myMessage object to represent the message
+     */
     public static myMessage handleIncomingMessage(Bundle bundle) {
         if (bundle != null) {
             Object[] pdus = (Object[]) bundle.get("pdus");
             for (int i = 0; i < pdus.length; i++) {
+
                 //extract message information
                 SmsMessage currMessage = SmsMessage.createFromPdu((byte[]) pdus[i]);
                 String sendingNum = currMessage.getDisplayOriginatingAddress();
                 String message = currMessage.getDisplayMessageBody();
-                System.out.println("Message received from " + sendingNum);
-                System.out.println("Message before chop: " + message);
+                //System.out.println("Message received from " + sendingNum);
+                //System.out.println("Message before chop: " + message);
 
                 //Handling chars to remove if decrypt needed
                 //added 11.3.14
@@ -70,17 +74,11 @@ public class sendMessage {
                     fixed = messageCipher.decrypt(fixed, key1, key2);
                 }
 
-                //display a toast notification
-                int duration = Toast.LENGTH_LONG;
-
                 /*
                     Used the ternary operator <condition> ? true : false
                     for ease of switching out necessary messages
                     added 11.3.14
                  */
-                // String toastString = "sender: " + sendingNum + "; message: " +
-                //        (fixed == null ? message : fixed);
-                //Toast.makeText(context, toastString, duration).show();
 
                 myMessage msgObj = new myMessage(sendingNum,
                         fixed == null ? message : fixed, false);

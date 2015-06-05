@@ -9,6 +9,12 @@ import java.util.Calendar;
  * the app cannot currently write to Android's default
  * outbox provider (default SMS app functionality not
  * implemented due to time constraints).
+ *
+ * Modified by lucas.burdlel 6/5/2015.
+ * Reorganized class now prepares a time stamp and
+ * a boolean check for whether the message was sent or received.
+ * This class may be temporary for when we prepare a more
+ * robust database to retrieve contact information.
  */
 
 public class myMessage {

@@ -44,7 +44,7 @@ public class Conversation extends ActionBarActivity {
                 updateConvo();
             }
             /*
-            myMessage msgObj =  sendMessage.handleIncomingMessage(intent.getExtras());
+            myMessage msgObj =  handleMessage.handleIncomingMessage(intent.getExtras());
             if (msgObj.get_number().equals(currentNumber)) {
                 updateConvo();
             } else {
@@ -85,7 +85,7 @@ public class Conversation extends ActionBarActivity {
                 typeMessage.setText("");
 
                 if (currentNumber.length() > 0 && message.length() > 0) {
-                    myMessage msgObj = sendMessage.send(currentNumber, message);
+                    myMessage msgObj = handleMessage.send(currentNumber, message);
                     dbHelper helper = new dbHelper(getBaseContext());
                     helper.addRecord(msgObj);
                     helper.close();

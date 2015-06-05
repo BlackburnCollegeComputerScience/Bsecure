@@ -28,15 +28,21 @@ import android.support.v4.content.LocalBroadcastManager;
     be relocated to a specialized java file. Base64 jar
     files are still needed for this project.
 
+ * Modified by lucas.burdell on 6/5/2015.
+    Message unpacking and decryption migrated to handleMessage file.
+    Notifications are now built by this class. This class tracks
+    the most recentNumber received and notifications will display the
+    most recent message. Taping the notification brings user to the conversation
+    of the most recently received message.
  */
 
 public class smsBroadcastReceiver extends BroadcastReceiver {
     private static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
 
     public static String recentNumber = "5556";
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        //System.out.println("RECEIVED");
         if (intent.getAction().equals(SMS_RECEIVED)) handleIncomingMessage(intent.getExtras(), context);
     }
 
@@ -47,13 +53,13 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
     }
 
     public void handleIncomingMessage(Bundle bundle, Context context) {
-        myMessage msg = sendMessage.handleIncomingMessage(bundle);
+        myMessage msg = handleMessage.handleIncomingMessage(bundle);
         addReceivedMessageToDatabase(msg, context);
         Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
         receivedMSG.putExtra("number", msg.get_number());
         recentNumber = msg.get_number();
+        messageReceivedNotification.cancel(context); //cancel old message
         messageReceivedNotification.notify(context, msg.get_number(), msg.getBody());
-        //receivedMSG.putExtra("body", msg.getBody());
         LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
     }
 

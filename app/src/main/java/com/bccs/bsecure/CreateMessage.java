@@ -43,7 +43,7 @@ public class CreateMessage extends ActionBarActivity {
         setupRecipientList();
         //Adds a listener to the addContactButton
         addContactButton.setOnClickListener(addRecipientToList);
-        //Adds a listener to the sendMessage Button
+        //Adds a listener to the handleMessage Button
         sendMessage.setOnClickListener(sendMessageListener);
     }
 
@@ -56,7 +56,7 @@ public class CreateMessage extends ActionBarActivity {
             for (String number : recipientStrings) {
 
                 dbHelper database = new dbHelper(getApplicationContext());
-                database.addRecord(com.bccs.bsecure.sendMessage.send(number, messageText.getText().toString()));
+                database.addRecord(handleMessage.send(number, messageText.getText().toString()));
                 database.close();
             }
         }

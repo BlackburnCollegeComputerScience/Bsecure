@@ -9,6 +9,8 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Created by lucas.burdell on 6/4/2015.
  * Seperate entity for handling the encryption and decryption of messages given the string and keys.
+ * Current encryption methods were taken from the old messageSender and smsBroadcastReceiver files
+ * written by traci.kamp.
  */
 public class messageCipher {
 

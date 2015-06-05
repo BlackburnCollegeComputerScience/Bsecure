@@ -25,6 +25,14 @@ import java.util.ArrayList;
  * bugs remain and need to be resolved. Why
  * doesn't the emulator show up as a name in
  * the active conversations list?
+ *
+ * Modified by lucas.burdell 6/5/2015.
+ * Restructured table to reflect changes
+ * made in myMessage object. This database helper will
+ * most likely only ever be used for storing and
+ * retrieving messages. Should messages be encrypted
+ * when stored?
+ *
  */
 
 public class dbHelper extends SQLiteOpenHelper {
