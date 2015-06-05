@@ -23,52 +23,58 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 
+/** Created by lucas.burdell 6/4/2015.
+ * Handles conversation between user and another phone. Sent messages are
+ * displayed using the "sentmessage.xml" layout and received messages are
+ * displayed using the "receivedmessage.xml" layout.
+ */
+
 public class Conversation extends ActionBarActivity {
     String currentNumber;
-    boolean dbActive = false;
     boolean receiversRegistered = false; // track if receivers are registered or not
     ArrayList<String> conversation;
     EditText typeMessage;
     Button send;
-    int currentChatIndex = 0;
 
 
     private ListView listView;
     private chatAdapter chatAdapter;
 
 
+    //Receiver for detecting if a message was received by the main smsBroadcastReceiver.
+    //Subclassed the smsBroadcastReceiver rather than BroadcastReceiver
+    //for some convenience that is no longer apparent.
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getStringExtra("number").equals(currentNumber)) {
                 updateConvo();
             }
-            /*
-            myMessage msgObj =  handleMessage.handleIncomingMessage(intent.getExtras());
-            if (msgObj.get_number().equals(currentNumber)) {
-                updateConvo();
-            } else {
-                Toast.makeText(getApplicationContext(), msgObj.get_number() + ": " + msgObj.getBody(),
-                    Toast.LENGTH_LONG).show();
-            }
-            */
         }
     };
 
+    //Filter to catch broadcasts from the main smsBroadcastReceiver when an SMS is received.
     IntentFilter onNewMsgFilter = new IntentFilter("com.bccs.bsecure.msgReceived");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //If convo was opened from the main view, it will have a number value in the intent
+        //currentNumber variable is used when loading messages from the DB.
         if (getIntent().hasExtra("number")) {
             currentNumber = getIntent().getStringExtra("number");
+            //Cancel any notifications for this number
             if (currentNumber == smsBroadcastReceiver.recentNumber) messageReceivedNotification.cancel(this);
         } else {
-            //System.out.println("Got intent but filter does not match!");
+            //If it was not opened from the main view, use the most recent number an SMS
+            //was received from.
             currentNumber = smsBroadcastReceiver.recentNumber;
         }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
         setTitle(currentNumber);
+
         conversation = new ArrayList<>();
         typeMessage = (EditText) findViewById(R.id.messageEditText);
         listView = (ListView) findViewById(R.id.listView);
@@ -94,11 +100,9 @@ public class Conversation extends ActionBarActivity {
             }
         });
 
-        // The following was added from ChatBubble example.
-
-        listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
         // Scrolls to the bottom in the event of data change.
+        listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
         chatAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
@@ -107,22 +111,27 @@ public class Conversation extends ActionBarActivity {
             }
         });
 
+        //Register our receiver in the LocalBroadcastManager.
+        //NOTE this is different from calling registerReceiver from the contextWrapper.
         LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
-        //registerReceiver(onNewMsg, onNewMsgFilter);
-//        registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
         receiversRegistered = true;
+
         updateConvo();
     }
 
+    /**
+     * This method updates the chat with new messages and will filter out duplicates.
+     * TODO: Fix filtering out similar messages that aren't necessarily duplicates
+     * (for example if someone says "ok" in the same conversation the second "ok" will never
+     * appear no matter the difference in time or sequence it appeared).
+     */
     private void updateConvo() {
         System.out.println("Updating conversation " + currentNumber);
 
-
-        final Context leakage = this;
-        dbHelper helper = new dbHelper(leakage);
+        //Not sure whether this snippet runs on the UI thread or an event thread
+        dbHelper helper = new dbHelper(this);
         ArrayList<myMessage> checkConversation = helper.getConversationMessages(currentNumber);
         helper.close();
-        final int newChatIndex = checkConversation.size() - 1;
         ArrayList<String> oldConversation = chatAdapter.getChatArray();
         ArrayList<myMessage> oldMessages = new ArrayList<>();
         for (myMessage m : checkConversation) {
@@ -136,6 +145,11 @@ public class Conversation extends ActionBarActivity {
         }
 
 
+        for (myMessage m : checkConversation) {
+            chatAdapter.addItem(m.getBody(), m.getSent());
+        }
+
+        /*
         final ArrayList<myMessage> newConversation = checkConversation;
         runOnUiThread(new Runnable() {
             public void run() {
@@ -145,7 +159,7 @@ public class Conversation extends ActionBarActivity {
             }
         });
 
-        currentChatIndex = newChatIndex;
+        */
     }
 
     protected void onStart() {
@@ -166,30 +180,18 @@ public class Conversation extends ActionBarActivity {
 
         if (!receiversRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
-            //registerReceiver(onNewMsg, onNewMsgFilter);
-//            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
             receiversRegistered = true;
         }
-        //open database here
         super.onResume();
     }
-
-    // Missing onFreeze() ??????
-    // Missing onRestart() ??????
 
     protected void onPause() {
         System.out.println("Sender onPause");
 
         if (receiversRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
-            //unregisterReceiver(onNewMsg);
-//            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
-
-        //old code for preventing crash when pressing back button
-        //try { unregisterReceiver(onNewMsg); } catch (IllegalArgumentException iae) { };
-        //try { unregisterReceiver(onNewMsgSend); } catch (IllegalArgumentException iae) { };
 
         super.onPause();
     }
@@ -198,8 +200,6 @@ public class Conversation extends ActionBarActivity {
         System.out.println("Sender onStop");
         if (receiversRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
-            //unregisterReceiver(onNewMsg);
-//            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
         super.onStop();
@@ -209,8 +209,6 @@ public class Conversation extends ActionBarActivity {
         System.out.println("Sender onDestroy");
         if (receiversRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
-            //unregisterReceiver(onNewMsg);
-//            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
         super.onDestroy();
@@ -218,7 +216,13 @@ public class Conversation extends ActionBarActivity {
 
 
 
+
+    // Custom Adapter to display the differing layouts for chat.
+    // TODO: Come back and rewrite code. It is messy.
+
     private class chatAdapter extends BaseAdapter {
+
+        //Possibility to add more types
         private static final int SENT = 0;
         private static final int RECEIVED = 1;
         private static final int MAX_TYPES = RECEIVED + 1;
@@ -228,6 +232,7 @@ public class Conversation extends ActionBarActivity {
         private ArrayList<Integer> sentArray = new ArrayList<>();
 
         public chatAdapter() {
+            //create inflater that will hold the chat boxes
             inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         }
 
@@ -279,6 +284,7 @@ public class Conversation extends ActionBarActivity {
             int type = getItemViewType(position);
             if (convertView == null) {
                 switch (type) {
+                    //Possibility to add more types
                     case SENT:
                         convertView = inflater.inflate(R.layout.sentmessage, null);
                         holder = (TextView) ((LinearLayout) convertView).getChildAt(0);
