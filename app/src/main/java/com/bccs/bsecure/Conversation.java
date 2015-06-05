@@ -111,13 +111,20 @@ public class Conversation extends ActionBarActivity {
     private void updateConvo() {
         System.out.println("Updating conversation " + currentNumber);
         dbHelper helper = new dbHelper(this);
-        final ArrayList<myMessage> newConversation = helper.getConversationMessages(currentNumber);
-        final int newChatIndex = newConversation.size() - 1;
+        ArrayList<myMessage> checkConversation = helper.getConversationMessages(currentNumber);
+        final int newChatIndex = checkConversation.size() - 1;
+        ArrayList<String> oldConversation = chatAdapter.getChatArray();
+        for (myMessage m : checkConversation) {
+            if (oldConversation.contains(m.getBody())) {
+                checkConversation.remove(m);
+            }
+        }
+        final ArrayList<myMessage> newConversation = checkConversation;
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                for (int i = currentChatIndex; i <= newChatIndex; i++) {
-                    chatAdapter.addItem(newConversation.get(i).getBody(), newConversation.get(i).getSent());
+                for (myMessage m : newConversation) {
+                    chatAdapter.addItem(m.getBody(), m.getSent());
                 }
                 currentChatIndex = newChatIndex;
             }
@@ -212,6 +219,9 @@ public class Conversation extends ActionBarActivity {
         }
 
 
+        public ArrayList<String> getChatArray() {
+            return (ArrayList<String>) chatArray.clone();
+        }
 
 
         @Override
