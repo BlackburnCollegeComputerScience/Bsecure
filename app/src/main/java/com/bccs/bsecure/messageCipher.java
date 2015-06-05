@@ -29,7 +29,7 @@ public class messageCipher {
             byte[] encrypted = cipher.doFinal(value.getBytes());
 
 //            System.out.println("encrypted string:"
-//                    + Base64.encodeToString(encrypted, 0));
+//                    + Base64.encodeToString(encrypted, 0)           );
             return Base64.encodeToString(encrypted, 0);
 
         } catch (Exception ex) {

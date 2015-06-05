@@ -58,6 +58,7 @@ public class CreateMessage extends ActionBarActivity {
                 dbHelper database = new dbHelper(getApplicationContext());
                 database.addRecord(handleMessage.send(number, messageText.getText().toString()));
                 database.close();
+                onBackPressed();
             }
         }
     };
