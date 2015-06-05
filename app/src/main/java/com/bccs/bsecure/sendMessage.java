@@ -45,6 +45,9 @@ public class sendMessage {
         System.out.println("Message sent: " + newMsg);
         return msgObj;
     }
+
+
+
     public static myMessage handleIncomingMessage(Bundle bundle) {
         if (bundle != null) {
             Object[] pdus = (Object[]) bundle.get("pdus");
@@ -53,6 +56,7 @@ public class sendMessage {
                 SmsMessage currMessage = SmsMessage.createFromPdu((byte[]) pdus[i]);
                 String sendingNum = currMessage.getDisplayOriginatingAddress();
                 String message = currMessage.getDisplayMessageBody();
+                System.out.println("Message received from " + sendingNum);
                 System.out.println("Message before chop: " + message);
 
                 //Handling chars to remove if decrypt needed

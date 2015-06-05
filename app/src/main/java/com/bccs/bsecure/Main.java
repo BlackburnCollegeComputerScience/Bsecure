@@ -18,14 +18,12 @@ public class Main extends AppCompatActivity {
     //Global class variables
 
     //The SQLite DB helper - traverses outbox
-    public dbHelper appHelper;
-    private boolean dbActive = false;
     //The adapter to use when displaying to the screen.
     private ArrayAdapter<String> activeInfoAdapter;
     //The list view that contains the on-screen info being displayed
     private ListView userListView;
     //ArrayList storing names and numbers in outbox
-    private ArrayList<String>[] activeNums;
+    private ArrayList<String> activeNums = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,26 +32,24 @@ public class Main extends AppCompatActivity {
         //Get ActionBar Item
 //        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
 //        ActionBar actionBar = getActionBar();
-        appHelper = new dbHelper(this);
-        //appHelper.
-        dbActive = true;
+
         //initialize global variables
         userListView = (ListView) findViewById(R.id.usersListView);
         //Define Listener method
         userListView.setOnItemClickListener(onListClick);
         //Read outbox for active conversation information
-        activeNums = appHelper.getActiveNumbers();
         //Initialize the adapter to hold the names of active contacts
         activeInfoAdapter = new ArrayAdapter<String>
-                (getApplicationContext(), R.layout.row_layout, activeNums[1]);
+                (getApplicationContext(), R.layout.row_layout, activeNums);
         //Display the names.
+        updateActiveNums();
         userListView.setAdapter(activeInfoAdapter);
     }
     private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
             Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
-            conversationIntent.putExtra("name", activeNums[1].get(pos));
-            conversationIntent.putExtra("number", activeNums[0].get(pos));
+            conversationIntent.putExtra("name", activeNums.get(pos));
+            conversationIntent.putExtra("number", activeNums.get(pos));
             startActivity(conversationIntent);
         }
     };
@@ -120,30 +116,30 @@ public class Main extends AppCompatActivity {
     }
     protected void onStart() {
         System.out.println("Convo view onStart");
-        if (!dbActive) {
-            appHelper = new dbHelper(this);
-            activeNums = appHelper.getActiveNumbers();
-            activeInfoAdapter.notifyDataSetChanged();
-            dbActive = true;
-        }
+        updateActiveNums();
         super.onStart();
     }
 
+
+    private void updateActiveNums() {
+        dbHelper appHelper = new dbHelper(this);
+        ArrayList<String> newNums = appHelper.getActiveNumbers();
+        for (String s : newNums) {
+            if (!activeNums.contains(s)) {
+                activeNums.add(s);
+            }
+        }
+        appHelper.close();
+        activeInfoAdapter.notifyDataSetChanged();
+    }
     protected void onResume() {
         System.out.println("Convo view onResume");
-        if (!dbActive) {
-            appHelper = new dbHelper(this);
-            activeNums = appHelper.getActiveNumbers();
-            activeInfoAdapter.notifyDataSetChanged();
-            dbActive = true;
-        }
+        updateActiveNums();
         super.onResume();
     }
 
     protected void onPause() {
         System.out.println("Convo view onPause");
-        appHelper.close();
-        dbActive = false;
         super.onPause();
     }
 }

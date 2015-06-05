@@ -56,14 +56,14 @@ public class CreateMessage extends ActionBarActivity {
             for (String number : recipientStrings) {
 
                 dbHelper database = new dbHelper(getApplicationContext());
-                database.addRecord(new myMessage(number, messageText.getText().toString(), true));
-                com.bccs.bsecure.sendMessage.send(number, messageText.getText().toString());
+                database.addRecord(com.bccs.bsecure.sendMessage.send(number, messageText.getText().toString()));
+                database.close();
             }
         }
     };
 
     /**
-     * This will apply all nessesary settings to the recipientList
+     * This will apply all necessary settings to the recipientList
      */
     private void setupRecipientList() {
         //Grab the recipientList object

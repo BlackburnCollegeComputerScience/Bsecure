@@ -96,26 +96,28 @@ public class dbHelper extends SQLiteOpenHelper {
         return retObj;
     }
 
-    public ArrayList<String>[] getActiveNumbers() {
-        ArrayList<String>[] activeInfo = new ArrayList[2];
+    public ArrayList<String> getActiveNumbers() {
+        ArrayList<String> activeInfo = new ArrayList<>();
         ArrayList<String> nums = new ArrayList<String>();
         ArrayList<String> names = new ArrayList<String>();
         for (int i = 1; i < this.getRecordCount(); i++) {
             //get phone number out of message object and add it to array list
             String pNum = this.getSingleMessage(i).get_number();
 
-            String cName = this.getSingleMessage(i).get_name();
-            if (!nums.contains(pNum)) {
-                nums.add(pNum);
-                names.add(cName);
+            //String cName = this.getSingleMessage(i).get_name();
+            System.out.println(pNum);
+            //System.out.println(cName);
+            if (!activeInfo.contains(pNum)) {
+                activeInfo.add(pNum);
+                //names.add(cName);
             } else {
 
             }
 
             //if(!names.contains(cName)) names.add(cName);
         }
-        activeInfo[0] = nums;
-        activeInfo[1] = names;
+        //activeInfo[0] = nums;
+        //activeInfo[1] = names;
 
         return activeInfo;
     }

@@ -43,7 +43,9 @@ public class Conversation extends ActionBarActivity {
             dbHelper helper = new dbHelper(getBaseContext());
             helper.addRecord(msgObj);
             helper.close();
-            updateConvo();
+            if (msgObj.get_number().equals(currentNumber)) {
+                updateConvo();
+            }
         }
     };
 
