@@ -122,6 +122,8 @@ public class Main extends AppCompatActivity {
         System.out.println("Convo view onStart");
         if (!dbActive) {
             appHelper = new dbHelper(this);
+            activeNums = appHelper.getActiveNumbers();
+            activeInfoAdapter.notifyDataSetChanged();
             dbActive = true;
         }
         super.onStart();
@@ -131,6 +133,8 @@ public class Main extends AppCompatActivity {
         System.out.println("Convo view onResume");
         if (!dbActive) {
             appHelper = new dbHelper(this);
+            activeNums = appHelper.getActiveNumbers();
+            activeInfoAdapter.notifyDataSetChanged();
             dbActive = true;
         }
         super.onResume();

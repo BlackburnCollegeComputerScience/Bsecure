@@ -29,7 +29,7 @@ public class myMessage {
     }
 
     public myMessage(String number, String body, boolean sent) {
-//        this._name = name;
+        this._name = number;
         this._number = number;
         this._body = body;
         this._sent = sent;
