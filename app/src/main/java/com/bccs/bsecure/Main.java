@@ -1,7 +1,10 @@
 package com.bccs.bsecure;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,6 +27,23 @@ public class Main extends AppCompatActivity {
     private ListView userListView;
     //ArrayList storing names and numbers in outbox
     private ArrayList<String> activeNums = new ArrayList<>();
+    private boolean receiverRegistered = false;
+
+    smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateActiveNums(intent.getStringExtra("number"));
+            /*
+            myMessage msgObj =  sendMessage.handleIncomingMessage(intent.getExtras());
+            dbHelper helper = new dbHelper(getBaseContext());
+            helper.addRecord(msgObj);
+            helper.close();
+            */
+        }
+    };
+
+    IntentFilter onNewMsgFilter = new IntentFilter("com.bccs.bsecure.msgReceived");
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +64,8 @@ public class Main extends AppCompatActivity {
         //Display the names.
         updateActiveNums();
         userListView.setAdapter(activeInfoAdapter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
+        receiverRegistered = true;
     }
     private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
@@ -116,10 +138,27 @@ public class Main extends AppCompatActivity {
     }
     protected void onStart() {
         System.out.println("Convo view onStart");
+        if (!receiverRegistered) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
+            receiverRegistered = true;
+        }
         updateActiveNums();
         super.onStart();
     }
 
+
+    private void updateActiveNums(String newNumber) {
+        dbHelper appHelper = new dbHelper(this);
+        ArrayList<String> newNums = appHelper.getActiveNumbers();
+        if (!activeNums.contains(newNumber)) activeNums.add(newNumber);
+        for (String s : newNums) {
+            if (!activeNums.contains(s)) {
+                activeNums.add(s);
+            }
+        }
+        appHelper.close();
+        activeInfoAdapter.notifyDataSetChanged();
+    }
 
     private void updateActiveNums() {
         dbHelper appHelper = new dbHelper(this);
@@ -134,12 +173,39 @@ public class Main extends AppCompatActivity {
     }
     protected void onResume() {
         System.out.println("Convo view onResume");
+        if (!receiverRegistered) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
+            receiverRegistered = true;
+        }
         updateActiveNums();
         super.onResume();
     }
 
     protected void onPause() {
         System.out.println("Convo view onPause");
+        if (receiverRegistered) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
+            receiverRegistered = false;
+        }
         super.onPause();
+    }
+
+    protected void onStop() {
+        System.out.println("Convo view onStop");
+        if (receiverRegistered) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
+            receiverRegistered = false;
+        }
+        super.onStop();
+    }
+
+
+    protected void onDestroy() {
+        System.out.println("Convo view onDestroy");
+        if (receiverRegistered) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
+            receiverRegistered = false;
+        }
+        super.onDestroy();
     }
 }

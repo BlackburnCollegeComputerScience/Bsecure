@@ -4,9 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.telephony.SmsMessage;
-import android.util.Log;
-import android.widget.Toast;
+import android.support.v4.content.LocalBroadcastManager;
 
 //import org.apache.commons.codec.binary.Base64;
 
@@ -33,140 +31,26 @@ import android.widget.Toast;
 
 public class smsBroadcastReceiver extends BroadcastReceiver {
     private static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
-    private static final String TAG = "smsBroadcastReceiver";
-    private static final String SMS_SENT = "android.provider.Telephony.SMS_SENT";
-    private static final String ERROR = "Error: ";
-    String phoneNumber;
-    String key1 = "Bar12345Bar12345"; // 128 bit key
-    String key2 = "ThisIsASecretKey";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
-        if (intent.getAction().equals(SMS_RECEIVED)) handleIncMessage(intent.getExtras(), context);
-        else if (intent.getAction().equals(SMS_SENT)) sendSMS(intent.getExtras(), context);
-
-    }
-
-    void sendSMS(Bundle bundle, Context context) {
-        phoneNumber = bundle.getString(Intent.EXTRA_PHONE_NUMBER);
-        Log.i("info", "Outgoing Number: " + phoneNumber);
-        context.sendBroadcast(new Intent("onNewMsgSend"));
+        //System.out.println("RECEIVED");
+        if (intent.getAction().equals(SMS_RECEIVED)) handleIncomingMessage(intent.getExtras(), context);
     }
 
     private void addReceivedMessageToDatabase(myMessage message, Context context) {
         dbHelper database = new dbHelper(context);
         database.addRecord(message);
+        database.close();
     }
 
-    public static myMessage handleIncomingMessage(Bundle bundle, String key1, String key2) {
-        if (bundle != null) {
-            Object[] pdus = (Object[]) bundle.get("pdus");
-            for (int i = 0; i < pdus.length; i++) {
-                //extract message information
-                SmsMessage currMessage = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                String sendingNum = currMessage.getDisplayOriginatingAddress();
-                String message = currMessage.getDisplayMessageBody();
-                System.out.println("Message before chop: " + message);
-
-                //Handling chars to remove if decrypt needed
-                //added 11.3.14
-                String fixed = null;
-                if (message.contains("-&*&-")) {
-                    fixed = "";
-                    for (int j = 5; j < message.length(); j++) {
-                        fixed += message.charAt(j);
-                    }
-                    fixed = messageCipher.decrypt(fixed, key1, key2);
-                }
-
-                //display a toast notification
-                int duration = Toast.LENGTH_LONG;
-
-                /*
-                    Used the ternary operator <condition> ? true : false
-                    for ease of switching out necessary messages
-                    added 11.3.14
-                 */
-               // String toastString = "sender: " + sendingNum + "; message: " +
-                //        (fixed == null ? message : fixed);
-                //Toast.makeText(context, toastString, duration).show();
-
-                myMessage msgObj = new myMessage(sendingNum,
-                        fixed == null ? message : fixed, false);
-
-
-
-
-
-                //print information to logcat
-                //updated to use ternary on 11.3.14
-                Log.i(TAG, "SENDER: " + sendingNum + "; Message: " +
-                        (fixed == null ? message : fixed));
-
-                return msgObj;
-            }
-
-        } else {
-            //bundle was null, print an error in logcat
-            Log.e(ERROR, "bundle was null");
-            return null;
-        }
-        return null;
+    public void handleIncomingMessage(Bundle bundle, Context context) {
+        myMessage msg = sendMessage.handleIncomingMessage(bundle);
+        addReceivedMessageToDatabase(msg, context);
+        Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
+        receivedMSG.putExtra("number", msg.get_number());
+        //receivedMSG.putExtra("body", msg.getBody());
+        LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
     }
 
-    void handleIncMessage(Bundle bundle, Context context) {
-
-        if (bundle != null) {
-
-            Object[] pdus = (Object[]) bundle.get("pdus");
-            for (int i = 0; i < pdus.length; i++) {
-                //extract message information
-                SmsMessage currMessage = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                String sendingNum = currMessage.getDisplayOriginatingAddress();
-                String message = currMessage.getDisplayMessageBody();
-                System.out.println("Message before chop: " + message);
-
-                //Handling chars to remove if decrypt needed
-                //added 11.3.14
-                String fixed = null;
-                if (message.contains("-&*&-")) {
-                    fixed = "";
-                    for (int j = 5; j < message.length(); j++) {
-                        fixed += message.charAt(j);
-                    }
-                    fixed = messageCipher.decrypt(fixed, key1, key2);
-                }
-
-                //display a toast notification
-                int duration = Toast.LENGTH_LONG;
-
-                /*
-                    Used the ternary operator <condition> ? true : false
-                    for ease of switching out necessary messages
-                    added 11.3.14
-                 */
-                String toastString = "sender: " + sendingNum + "; message: " +
-                        (fixed == null ? message : fixed);
-                Toast.makeText(context, toastString, duration).show();
-
-                myMessage msgObj = new myMessage(sendingNum,
-                        fixed == null ? message : fixed, false);
-
-                addReceivedMessageToDatabase(msgObj, context);
-
-
-                //print information to logcat
-                //updated to use ternary on 11.3.14
-                Log.i(TAG, "SENDER: " + sendingNum + "; Message: " +
-                        (fixed == null ? message : fixed));
-
-
-            }
-
-        } else {
-            //bundle was null, print an error in logcat
-            Log.e(ERROR, "bundle was null");
-        }
-    }
 }

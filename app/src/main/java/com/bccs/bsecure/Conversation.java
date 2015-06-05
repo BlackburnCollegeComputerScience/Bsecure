@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.DataSetObserver;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,22 +40,22 @@ public class Conversation extends ActionBarActivity {
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            myMessage msgObj =  sendMessage.handleIncomingMessage(intent.getExtras());
-            dbHelper helper = new dbHelper(getBaseContext());
-            helper.addRecord(msgObj);
-            helper.close();
-            if (msgObj.get_number().equals(currentNumber)) {
+            if (intent.getStringExtra("number").equals(currentNumber)) {
                 updateConvo();
             }
+            /*
+            myMessage msgObj =  sendMessage.handleIncomingMessage(intent.getExtras());
+            if (msgObj.get_number().equals(currentNumber)) {
+                updateConvo();
+            } else {
+                Toast.makeText(getApplicationContext(), msgObj.get_number() + ": " + msgObj.getBody(),
+                    Toast.LENGTH_LONG).show();
+            }
+            */
         }
     };
 
-    IntentFilter onNewMsgFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
-    {
-        onNewMsgFilter.setPriority(1000);
-        System.out.println("Priority Set");
-    }
-
+    IntentFilter onNewMsgFilter = new IntentFilter("com.bccs.bsecure.msgReceived");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +103,8 @@ public class Conversation extends ActionBarActivity {
             }
         });
 
-        registerReceiver(onNewMsg, onNewMsgFilter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
+        //registerReceiver(onNewMsg, onNewMsgFilter);
 //        registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
         receiversRegistered = true;
         updateConvo();
@@ -110,33 +112,44 @@ public class Conversation extends ActionBarActivity {
 
     private void updateConvo() {
         System.out.println("Updating conversation " + currentNumber);
-        dbHelper helper = new dbHelper(this);
+
+
+        final Context leakage = this;
+        dbHelper helper = new dbHelper(leakage);
         ArrayList<myMessage> checkConversation = helper.getConversationMessages(currentNumber);
+        helper.close();
         final int newChatIndex = checkConversation.size() - 1;
         ArrayList<String> oldConversation = chatAdapter.getChatArray();
+        ArrayList<myMessage> oldMessages = new ArrayList<>();
         for (myMessage m : checkConversation) {
             if (oldConversation.contains(m.getBody())) {
-                checkConversation.remove(m);
+                oldMessages.add(m);
             }
         }
+
+        for (myMessage m : oldMessages) {
+            checkConversation.remove(m);
+        }
+
+
         final ArrayList<myMessage> newConversation = checkConversation;
-        this.runOnUiThread(new Runnable() {
-            @Override
+        runOnUiThread(new Runnable(){
             public void run() {
                 for (myMessage m : newConversation) {
                     chatAdapter.addItem(m.getBody(), m.getSent());
                 }
-                currentChatIndex = newChatIndex;
             }
         });
-        helper.close();
+
+        currentChatIndex = newChatIndex;
     }
 
     protected void onStart() {
         System.out.println("Sender onStart");
 
         if (!receiversRegistered) {
-            registerReceiver(onNewMsg, onNewMsgFilter);
+            LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
+            //registerReceiver(onNewMsg, onNewMsgFilter);
 //            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
             receiversRegistered = true;
         }
@@ -148,7 +161,8 @@ public class Conversation extends ActionBarActivity {
         System.out.println("Sender onResume");
 
         if (!receiversRegistered) {
-            registerReceiver(onNewMsg, onNewMsgFilter);
+            LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
+            //registerReceiver(onNewMsg, onNewMsgFilter);
 //            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
             receiversRegistered = true;
         }
@@ -163,7 +177,8 @@ public class Conversation extends ActionBarActivity {
         System.out.println("Sender onPause");
 
         if (receiversRegistered) {
-            unregisterReceiver(onNewMsg);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
+            //unregisterReceiver(onNewMsg);
 //            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
@@ -178,7 +193,8 @@ public class Conversation extends ActionBarActivity {
     protected void onStop() {
         System.out.println("Sender onStop");
         if (receiversRegistered) {
-            unregisterReceiver(onNewMsg);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
+            //unregisterReceiver(onNewMsg);
 //            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
@@ -188,7 +204,8 @@ public class Conversation extends ActionBarActivity {
     protected void onDestroy() {
         System.out.println("Sender onDestroy");
         if (receiversRegistered) {
-            unregisterReceiver(onNewMsg);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
+            //unregisterReceiver(onNewMsg);
 //            unregisterReceiver(onNewMsgSend);
             receiversRegistered = false;
         }
@@ -220,7 +237,11 @@ public class Conversation extends ActionBarActivity {
 
 
         public ArrayList<String> getChatArray() {
-            return (ArrayList<String>) chatArray.clone();
+            ArrayList<String> newChat = new ArrayList<>();
+            for (String s : chatArray) {
+                newChat.add(s);
+            }
+            return newChat;
         }
 
 

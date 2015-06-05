@@ -25,21 +25,20 @@
         </activity>
 
         <!-- Declare my receiver class -->
-        <!--
+
         <receiver
             android:name=".smsBroadcastReceiver"
             android:enabled="true"
             android:exported="true" >
-        -->
+
 
 
         <!-- Declare intent filter and up my app's priority (max) for the broadcast -->
-        <!--
+
             <intent-filter android:priority="1000" >
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
-        -->
 
         <activity
             android:name=".Settings"
@@ -69,6 +68,7 @@
             android:name=".Conversation"
             android:label="@string/title_activity_conversation" >
         </activity>
+
     </application>
 
 </manifest>
