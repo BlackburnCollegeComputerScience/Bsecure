@@ -27,11 +27,13 @@ import android.support.v4.content.LocalBroadcastManager;
     changes are necessary, the cipher functions will likely
     be relocated to a specialized java file. Base64 jar
     files are still needed for this project.
+
  */
 
 public class smsBroadcastReceiver extends BroadcastReceiver {
     private static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
 
+    public static String recentNumber = "5556";
     @Override
     public void onReceive(Context context, Intent intent) {
         //System.out.println("RECEIVED");
@@ -49,6 +51,8 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
         addReceivedMessageToDatabase(msg, context);
         Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
         receivedMSG.putExtra("number", msg.get_number());
+        recentNumber = msg.get_number();
+        messageReceivedNotification.notify(context, msg.get_number(), msg.getBody());
         //receivedMSG.putExtra("body", msg.getBody());
         LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
     }

@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.RECEIVE_MMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -31,9 +32,7 @@
             android:enabled="true"
             android:exported="true" >
 
-
-
-        <!-- Declare intent filter and up my app's priority (max) for the broadcast -->
+            <!-- Declare intent filter and up my app's priority (max) for the broadcast -->
 
             <intent-filter android:priority="1000" >
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
@@ -66,9 +65,12 @@
         </activity>
         <activity
             android:name=".Conversation"
-            android:label="@string/title_activity_conversation" >
+            android:label="@string/title_activity_conversation"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.bccs.bsecure.recentconversation" />
+            </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

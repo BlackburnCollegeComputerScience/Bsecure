@@ -61,8 +61,10 @@ public class Conversation extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         if (getIntent().hasExtra("number")) {
             currentNumber = getIntent().getStringExtra("number");
+            if (currentNumber == smsBroadcastReceiver.recentNumber) messageReceivedNotification.cancel(this);
         } else {
-            currentNumber = "5556";
+            //System.out.println("Got intent but filter does not match!");
+            currentNumber = smsBroadcastReceiver.recentNumber;
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
