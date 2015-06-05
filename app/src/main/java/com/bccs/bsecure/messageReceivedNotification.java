@@ -30,10 +30,10 @@ public class messageReceivedNotification {
      * Shows the notification, or updates a previously shown notification of
      * this type, with the given parameters.
      * <p/>
-     * TODO: Customize this method's arguments to present relevant content in
+     * Customize this method's arguments to present relevant content in
      * the notification.
      * <p/>
-     * TODO: Customize the contents of this method to tweak the behavior and
+     * Customize the contents of this method to tweak the behavior and
      * presentation of message received notifications. Make
      * sure to follow the
      * <a href="https://developer.android.com/design/patterns/notifications.html">
@@ -46,8 +46,8 @@ public class messageReceivedNotification {
         final Resources res = context.getResources();
 
         // This image is used as the notification's large icon (thumbnail).
-        // TODO: Remove this if your notification has no relevant thumbnail.
-        final Bitmap picture = BitmapFactory.decodeResource(res, R.drawable.notificationimage);
+        // Remove this if your notification has no relevant thumbnail.
+        final Bitmap picture = BitmapFactory.decodeResource(res, R.drawable.ic_security_black_48dp);
 
 
         final String text = body;
@@ -62,7 +62,7 @@ public class messageReceivedNotification {
 
                         // Set required fields, including the small icon, the
                         // notification title, and text.
-                .setSmallIcon(R.drawable.notificationimage)
+                .setSmallIcon(R.drawable.ic_security_black_48dp)
                 .setContentTitle(title)
                 .setContentText(text)
 
@@ -82,7 +82,7 @@ public class messageReceivedNotification {
                         // should set the relevant time information using the setWhen
                         // method below. If this call is omitted, the notification's
                         // timestamp will by set to the time at which it was shown.
-                        // TODO: Call setWhen if this notification relates to a past or
+                        // Call setWhen if this notification relates to a past or
                         // upcoming event. The sole argument to this method should be
                         // the notification timestamp in milliseconds.
                         //.setWhen(...)
@@ -103,28 +103,6 @@ public class messageReceivedNotification {
                         .setBigContentTitle(title)
                         .setSummaryText(body))
 
-                        // Example additional actions for this notification. These will
-                        // only show on devices running Android 4.1 or later, so you
-                        // should ensure that the activity in this notification's
-                        // content intent provides access to the same actions in
-                        // another way.
-                /*
-                .addAction(
-                        R.drawable.ic_action_stat_share,
-                        res.getString(R.string.action_share),
-                        PendingIntent.getActivity(
-                                context,
-                                0,
-                                Intent.createChooser(new Intent(Intent.ACTION_SEND)
-                                        .setType("text/plain")
-                                        .putExtra(Intent.EXTRA_TEXT, "Dummy text"), "Dummy title"),
-                                PendingIntent.FLAG_UPDATE_CURRENT))
-                .addAction(
-                        R.drawable.ic_action_stat_reply,
-                        res.getString(R.string.action_reply),
-                        null)
-
-                */
                         // Automatically dismiss the notification when it is touched.
                 .setAutoCancel(true);
 
