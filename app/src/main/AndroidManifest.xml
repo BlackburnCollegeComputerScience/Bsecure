@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bccs.bsecure" >
-    <uses-feature android:name="android.hardware.nfc" android:required="true" />
 
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
@@ -11,11 +13,11 @@
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- http://stackoverflow.com/questions/642076/how-to-save-sms-to-inbox-in-android -->
     <!-- <uses-permission android:name="android.permission.READ_SMS"/> -->
     <!-- <uses-permission android:name="android.permission.WRITE_SMS"/> -->
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -71,11 +73,15 @@
         </activity>
         <activity
             android:name=".Conversation"
-            android:label="@string/title_activity_conversation"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/title_activity_conversation">
             <intent-filter>
                 <action android:name="com.bccs.bsecure.recentconversation" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".NoNFC"
+            android:label="@string/title_activity_no_nfc">
         </activity>
     </application>
 

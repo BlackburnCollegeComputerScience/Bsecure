@@ -3,7 +3,6 @@ package com.bccs.bsecure;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
 //import org.apache.commons.codec.binary.Base64;
@@ -43,7 +42,7 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals(SMS_RECEIVED)) handleIncomingMessage(intent.getExtras(), context);
+        if (intent.getAction().equals(SMS_RECEIVED)) handleIncomingMessage(intent, context);
     }
 
     private void addReceivedMessageToDatabase(myMessage message, Context context) {
@@ -52,8 +51,9 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
         database.close();
     }
 
-    public void handleIncomingMessage(Bundle bundle, Context context) {
-        myMessage msg = handleMessage.handleIncomingMessage(bundle);
+    public void handleIncomingMessage(Intent intent, Context context) {
+
+        myMessage msg = handleMessage.handleIncomingMessage(intent);
         addReceivedMessageToDatabase(msg, context);
         Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
         receivedMSG.putExtra("number", msg.get_number());

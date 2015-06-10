@@ -91,7 +91,7 @@ public class Conversation extends ActionBarActivity {
                 typeMessage.setText("");
 
                 if (currentNumber.length() > 0 && message.length() > 0) {
-                    myMessage msgObj = handleMessage.send(currentNumber, message);
+                    myMessage msgObj = handleMessage.send(currentNumber, message, getApplicationContext());
                     dbHelper helper = new dbHelper(getBaseContext());
                     helper.addRecord(msgObj);
                     helper.close();
