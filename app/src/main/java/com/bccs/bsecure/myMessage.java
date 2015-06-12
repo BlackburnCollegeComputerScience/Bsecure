@@ -15,6 +15,9 @@ import java.util.Calendar;
  * a boolean check for whether the message was sent or received.
  * This class may be temporary for when we prepare a more
  * robust database to retrieve contact information.
+ *
+ * Modified by lucas.burdell 6/12/2015.
+ * Added boolean to check whether a message is encrypted or not.
  */
 
 public class myMessage {
@@ -25,6 +28,7 @@ public class myMessage {
     private boolean _sent = true;
     private int _time;
     private boolean isDHKey = false;
+    private boolean _encrypted = false;
 
     // Empty constructor
     public myMessage() {
@@ -87,5 +91,13 @@ public class myMessage {
 
     public void setIsDHKey(boolean isDHKey) {
         this.isDHKey = isDHKey;
+    }
+
+    public boolean is_encrypted() {
+        return _encrypted;
+    }
+
+    public void set_encrypted(boolean _encrypted) {
+        this._encrypted = _encrypted;
     }
 }

@@ -1,10 +1,13 @@
 package com.bccs.bsecure;
 
+import android.util.Base64;
+
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -31,18 +34,18 @@ public class DiffieHellmanKeySession {
     //Generator g
     private final BigInteger g = BigInteger.valueOf(2);
 
-    private final int l = 56;
+    //private final int l = 256;
 
     private KeyAgreement keyAgreement;
     private KeyPair pair;
+    private SecretKey secret;
+    private String hashOfSecret;
 
 
     public DiffieHellmanKeySession() throws Exception {
-        DHParameterSpec dhGenParameterSpec = new DHParameterSpec(p, g, l);
+        DHParameterSpec dhGenParameterSpec = new DHParameterSpec(p, g);
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
         keyPairGenerator.initialize(dhGenParameterSpec);
-
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
         this.pair = keyPairGenerator.genKeyPair();
         this.keyAgreement = KeyAgreement.getInstance("DH");
         this.keyAgreement.init(pair.getPrivate());
@@ -61,8 +64,8 @@ public class DiffieHellmanKeySession {
     public DiffieHellmanKeySession(byte[] encodedKey) throws Exception {
         KeyFactory keyFac = KeyFactory.getInstance("DH");
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(encodedKey);
-        PublicKey alicePubKey = keyFac.generatePublic(x509KeySpec);
-        DHParameterSpec dhParamSpec = ((DHPublicKey)alicePubKey).getParams();
+        DHPublicKey alicePubKey = (DHPublicKey) keyFac.generatePublic(x509KeySpec);
+        DHParameterSpec dhParamSpec = alicePubKey.getParams();
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
         keyPairGenerator.initialize(dhParamSpec);
 
@@ -86,7 +89,10 @@ public class DiffieHellmanKeySession {
     }
 
     public String packKey(byte[] encodedKey) {
-        return toHexString(encodedKey);
+        String s = toHexString(encodedKey);
+        System.out.println("public key byte size: " + encodedKey.length);
+        System.out.println("public key char length: " + s.length());
+        return s;
         //return Base64.getEncoder().encodeToString(encodedKey);
     }
 
@@ -103,24 +109,40 @@ public class DiffieHellmanKeySession {
     }
 
     public SecretKey generateSecret(String otherPublicKey) throws Exception {
-        return this.generateSecret(unpackKey(otherPublicKey));
+        secret = this.generateSecret(unpackKey(otherPublicKey));
+        return secret;
     }
 
+    public SecretKey getSecret() {
+        return secret;
+    }
+
+    public String hashSecret() throws Exception {
+        if (hashOfSecret == null) {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] DHOut = secret.getEncoded();
+            md.update(DHOut);
+            byte[] digest = md.digest();
+            hashOfSecret = toHexString(DHOut);
+        }
+        return hashOfSecret;
+    }
     public String packSecret(String otherPublicKey) throws Exception {
+        this.generateSecret(otherPublicKey);
         MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] DHOut = this.generateSecret(otherPublicKey).getEncoded();
+        byte[] DHOut = secret.getEncoded();
         String hexDHOut = toHexString(DHOut);
-        System.out.println("Old key: ");
+/*        System.out.println("Old key: ");
         System.out.println(hexDHOut);
         System.out.println("Of length: " + hexDHOut.length());
-        System.out.println("With byte size " + DHOut.length);
+        System.out.println("With byte size " + DHOut.length);*/
         md.update(DHOut);
         byte[] digest = md.digest();
         String secretKey = toHexString(digest);
-        System.out.println("New key: ");
+/*        System.out.println("New key: ");
         System.out.println(secretKey);
         System.out.println("Of length: " + secretKey.length());
-        System.out.println("With byte size " + digest.length);
+        System.out.println("With byte size " + digest.length);*/
         return secretKey;
     }
 
@@ -201,6 +223,25 @@ public class DiffieHellmanKeySession {
         int low = (b & 0x0f);
         buf.append(hexChars[high]);
         buf.append(hexChars[low]);
+    }
+
+    public static byte[] getHash(byte[] block) {
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        md.update(block);
+        return md.digest();
+    }
+
+    public static byte[] fromBase64String(String s) {
+        return Base64.decode(s, 0);
+    }
+    public static String toBase64String(byte[] block) {
+        //return Base64.getEncoder().encodeToString(encodedKey) //This is for vanilla Java Base64 lib
+        return Base64.encodeToString(block, 0); //This is for Android's version
     }
 
 

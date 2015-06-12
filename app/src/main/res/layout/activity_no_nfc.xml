@@ -22,7 +22,9 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/textView2"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:measureWithLargestChild="false"
+        android:baselineAligned="false">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -56,9 +58,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/progressBar"
-            android:layout_weight="1"
             android:layout_gravity="center_vertical"
-            android:max="100" />
+            android:max="100"
+            android:layout_weight="1" />
 
         <TextView
             android:layout_width="fill_parent"
@@ -67,6 +69,48 @@
             android:gravity="center_horizontal"
             android:id="@+id/progressTextView"
             android:layout_weight="5" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Manual key:"
+                    android:id="@+id/textView4"
+                    android:textIsSelectable="false"
+                    android:textSize="20sp"
+                    android:layout_gravity="center_vertical" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textMultiLine"
+                    android:ems="10"
+                    android:id="@+id/manualKey"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:text="Enter"
+                android:id="@+id/manualButton"
+                android:layout_gravity="center"
+                android:layout_weight="1" />
+        </LinearLayout>
 
     </LinearLayout>
 

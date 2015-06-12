@@ -18,12 +18,22 @@ import java.util.ArrayList;
  * Modified by shane.nalezyty on 6/9/2015
  * Edited the Sms receiving method to recognise sms split into parts and append them back together
  * before decryption.
+ *
+ * Modified by lucas.burdell on 6/12/2015
+ * Changed original temporary keys to a Diffie-Hellman generated key and an SHA-256 hash of the
+ * that key. Both were converted to hexadecimal represented in a string.
+ * Added very basic functionality to database to store and retrieve DH keys
+ *
+ *
  */
 public class handleMessage {
 
     // TODO: Replace temporary keys with key pair associated with each contact
-    private static final String key1 = "Bar12345Bar12345"; // 128 bit key
-    private static final String key2 = "ThisIsASecretKey";
+    //These temp keys were generated with Diffie-Hellman key exchange. The second key (the IV for the cipher)
+    //Is a SHA-256 hash of the key1, a Diffie-Hellman generated key.
+    private static final String key1 = "524F0D82AFA4779CB7A55358798117A88A90549730659C0778CEBE5BAD7FDD77";
+    private static final String key2 = "5155F276EB66C9D56D3335A3B7150E621CA012EF6A660834D90EB67341BA36C6";
+    //old keys were 256-bit (16 chars) (32 bytes)
 
 
     private static final String prepend = "-&*&-"; // current message header
@@ -39,34 +49,6 @@ public class handleMessage {
         return send(number, msg, context, false);
     }
 
-    public static ArrayList<String> safeDivide(String msg) {
-        ArrayList<String> list = new ArrayList<>();
-        if (msg.length() + prepend.length() < 160) {
-            list.add(msg);
-            return list;
-        } else {
-            System.out.println("dividing message:");
-            System.out.println(msg.length());
-            int total = msg.length() + (((int) ((msg.length() / 160.) + 0.5)) * prepend.length());
-            int msgTotal = msg.length();
-            int timesToDivide = (int) ((total / 160.) + 0.5);
-            System.out.println("Total: " + total);
-            System.out.println("Division time: " + timesToDivide);
-            String msgToCut = msg;
-            for (int i = 0; i < timesToDivide; i++) {
-                if (msgTotal + prepend.length()> 160) {
-                    list.add(prepend + msg.substring(0, 160 - prepend.length()));
-                    msgToCut = msgToCut.substring(160 - prepend.length() + 1);
-                    total = total - 160;
-                    msgTotal = msgTotal - (160 - prepend.length());
-                } else {
-                    list.add(prepend + msgToCut);
-                    return list;
-                }
-            }
-            return list; //this should never be reached
-        }
-    }
 
     public static myMessage send(String number, String msg, Context context, boolean isDH) {
         if (!isDH) {
@@ -76,11 +58,17 @@ public class handleMessage {
             myMessage msgObj = new myMessage(number, msg, true);
             System.out.println(msgObj.toString());
 
-            //        msg = messageCipher.encrypt(msg, key1, key2);
-            //        String newMsg = getPrepend() + msg;
+            //PULL FROM DB
+            dbHelper helper = new dbHelper(context);
+            String[] keys = helper.getKey(number);
+            helper.close();
+            if (keys != null) {
+                msg = messageCipher.encrypt(msg, keys[0], keys[1]);
+            }
+            String newMsg = getPrepend() + msg;
 
             //new multipart text messages
-            ArrayList<String> messages = sms.divideMessage(msg);
+            ArrayList<String> messages = sms.divideMessage(newMsg);
             int numberOfParts = messages.size();
             System.out.println(numberOfParts);
 
@@ -96,14 +84,14 @@ public class handleMessage {
             }
 
             sms.sendMultipartTextMessage(number, null, messages, sentIntents, deliveryIntents);
-
+            msgObj.set_encrypted(true);
 
             System.out.println("Message sent: " + msg);
             return msgObj;
         } else {
             System.out.println("Creating message object: ");
             SmsManager sms = SmsManager.getDefault();
-            ArrayList<String> messages = safeDivide(msg);
+            ArrayList<String> messages = sms.divideMessage(msg);
             int numberOfParts = messages.size();
             System.out.println(numberOfParts);
             for (String s : messages) {
@@ -112,6 +100,18 @@ public class handleMessage {
             System.out.printf("Total: " + msg.length());
             myMessage msgObj = new myMessage(number, msg, true);
             msgObj.setIsDHKey(true);
+
+            ArrayList<PendingIntent> sentIntents = new ArrayList<PendingIntent>();
+            ArrayList<PendingIntent> deliveryIntents = new ArrayList<PendingIntent>();
+
+            Intent mSendIntent = new Intent("CTS_SMS_SEND_ACTION");
+            Intent mDeliveryIntent = new Intent("CTS_SMS_DELIVERY_ACTION");
+
+            for (int i = 0; i < numberOfParts; i++) {
+                sentIntents.add(PendingIntent.getBroadcast(context, 0, mSendIntent, 0));
+                deliveryIntents.add(PendingIntent.getBroadcast(context, 0, mDeliveryIntent, 0));
+            }
+
             sms.sendMultipartTextMessage(number, null, messages, null, null);
             System.out.println("Message sent: " + msg);
             return msgObj;
@@ -120,11 +120,42 @@ public class handleMessage {
 
 
     /**
+     * Handle outgoing messages not sent by this application
+     * @param intent Intent from received message
+     * @return myMessage object to represent message
+     */
+    public static myMessage handleOutgoingMessage(Intent intent) {
+        Bundle bundle = intent.getExtras();
+        if (bundle != null && bundle.containsKey("pdus")) {
+            //Get Sms objects
+            Object[] pdus = (Object[]) bundle.get("pdus");
+            if (pdus.length == 0) {
+                return null;
+            }
+            //Large messages might be broken into an array
+            SmsMessage[] smsMessages = new SmsMessage[pdus.length];
+            StringBuilder stringBuilder = new StringBuilder();
+            System.out.println(pdus.length);
+            for (int i = 0; i < pdus.length; i++) {
+                smsMessages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                stringBuilder.append(smsMessages[i].getMessageBody().toString());
+            }
+            String sender = smsMessages[0].getOriginatingAddress();
+            String message = stringBuilder.toString();
+            System.out.println("Here is the message you sent: " + message);
+            myMessage msgObj = new myMessage(sender, message);
+            msgObj.set_encrypted(false);
+            return msgObj;
+        }
+        return null;
+    }
+
+    /**
      * Handle incoming message and return myMessage object to be added to the DB
      * @param intent Intent from the received message
      * @return myMessage object to represent the message
      */
-    public static myMessage handleIncomingMessage(Intent intent) {
+    public static myMessage handleIncomingMessage(Intent intent, Context context) {
         Bundle bundle = intent.getExtras();
         if (bundle != null && bundle.containsKey("pdus")) {
             //Get Sms objects
@@ -145,12 +176,19 @@ public class handleMessage {
             System.out.println("Here is the message you sent: " + message);
             //Handling check for encryption and decryption
             String fixed = null;
-            if (message.contains(getPrepend())) {
+            boolean encrypted = false;
+            dbHelper helper = new dbHelper(context);
+            String[] keys = helper.getKey(sender);
+            helper.close();
+            if (message.contains(getPrepend()) && keys != null) {
                 fixed = "";
+                encrypted = true;
                 for (int j = getPrepend().length(); j < message.length(); j++) {
                     fixed += message.charAt(j);
                 }
-                fixed = messageCipher.decrypt(fixed, key1, key2);
+                fixed = messageCipher.decrypt(fixed, keys[0], keys[1]);
+                //fixed = messageCipher.decrypt(fixed, key1, key2);
+
             } else if (message.contains(prependDH)) {
                 fixed = "";
                 for (int j = prependDH.length(); j < message.length(); j++) {
@@ -160,6 +198,7 @@ public class handleMessage {
 
             //Return the Message
             myMessage msgObj = new myMessage(sender, fixed, false);
+            msgObj.set_encrypted(encrypted);
             if (message.contains(prependDH)) {
                 msgObj.setIsDHKey(true);
             }

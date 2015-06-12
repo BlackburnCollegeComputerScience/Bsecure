@@ -33,16 +33,23 @@ import android.support.v4.content.LocalBroadcastManager;
     the most recentNumber received and notifications will display the
     most recent message. Taping the notification brings user to the conversation
     of the most recently received message.
+
+ * Modified by lucas.burdell on 6/12/2015
+    Added handle for outgoing messages sent by other applications to appear in conversation as well.
+    This is so if you send messages via the android messenger app it will appear in conversation in
+    BSecure.
  */
 
 public class smsBroadcastReceiver extends BroadcastReceiver {
     private static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+    private static final String SMS_SENT = "android.provider.Telephony.SMS_SENT";
 
     public static String recentNumber = "5556";
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(SMS_RECEIVED)) handleIncomingMessage(intent, context);
+        if (intent.getAction().equals(SMS_SENT)) handleOutgoingMessage(intent, context);
     }
 
     private void addReceivedMessageToDatabase(myMessage message, Context context) {
@@ -51,22 +58,31 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
         database.close();
     }
 
+    public void handleOutgoingMessage(Intent intent, Context context) {
+        myMessage msg = handleMessage.handleOutgoingMessage(intent);
+        if (msg != null) {
+            addReceivedMessageToDatabase(msg, context);
+        }
+    }
+
     public void handleIncomingMessage(Intent intent, Context context) {
 
-        myMessage msg = handleMessage.handleIncomingMessage(intent);
-        if (!msg.isDHKey()) {
-            addReceivedMessageToDatabase(msg, context);
-            Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
-            receivedMSG.putExtra("number", msg.get_number());
-            recentNumber = msg.get_number();
-            messageReceivedNotification.cancel(context); //cancel old message
-            messageReceivedNotification.notify(context, msg.get_number(), msg.getBody());
-            LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
-        } else {
-            Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived_DH");
-            receivedMSG.putExtra("body", msg.getBody());
-            receivedMSG.putExtra("number", msg.get_number());
-            LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
+        myMessage msg = handleMessage.handleIncomingMessage(intent, context);
+        if (msg != null) {
+            if (!msg.isDHKey()) {
+                addReceivedMessageToDatabase(msg, context);
+                Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
+                receivedMSG.putExtra("number", msg.get_number());
+                recentNumber = msg.get_number();
+                messageReceivedNotification.cancel(context); //cancel old message
+                messageReceivedNotification.notify(context, msg.get_number(), msg.getBody());
+                LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
+            } else {
+                Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived_DH");
+                receivedMSG.putExtra("body", msg.getBody());
+                receivedMSG.putExtra("number", msg.get_number());
+                LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
+            }
         }
 
     }

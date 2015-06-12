@@ -33,7 +33,6 @@ public class Main extends AppCompatActivity {
     //ArrayList storing names and numbers in outbox
     private ArrayList<String> activeNums = new ArrayList<>();
     private boolean receiverRegistered = false;
-    public static boolean appIsInForeground = false;
 
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
@@ -66,7 +65,6 @@ public class Main extends AppCompatActivity {
         userListView.setAdapter(activeInfoAdapter);
         LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
         receiverRegistered = true;
-        appIsInForeground = true;
     }
     private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
@@ -157,7 +155,6 @@ public class Main extends AppCompatActivity {
             receiverRegistered = true;
         }
         updateActiveNums();
-        appIsInForeground = true;
         super.onStart();
     }
 
@@ -194,7 +191,6 @@ public class Main extends AppCompatActivity {
             receiverRegistered = true;
         }
         updateActiveNums();
-        appIsInForeground = true;
         super.onResume();
     }
 
@@ -223,7 +219,6 @@ public class Main extends AppCompatActivity {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
             receiverRegistered = false;
         }
-        appIsInForeground = false;
         super.onDestroy();
     }
 }

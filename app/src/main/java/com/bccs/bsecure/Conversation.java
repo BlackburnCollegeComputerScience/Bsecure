@@ -27,6 +27,11 @@ import java.util.ArrayList;
  * Handles conversation between user and another phone. Sent messages are
  * displayed using the "sentmessage.xml" layout and received messages are
  * displayed using the "receivedmessage.xml" layout.
+ *
+ * Modified by lucas.burdell 6/12/2015.
+ * Now checks whether a message was encrypted or not when it was sent/received.
+ * Sent and received messages that were not encrypted are displayed using the
+ * "sentmessagenoenc.xml" and "receivedmessagenoenc.xml" layouts.
  */
 
 public class Conversation extends ActionBarActivity {
@@ -86,7 +91,6 @@ public class Conversation extends ActionBarActivity {
         // Create the on-click listener for the send button
         send.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                // TODO: CAREFUL! THIS IS HARD-CODED TO SEND TO EMULATOR!
                 String message = typeMessage.getText().toString();
                 typeMessage.setText("");
 
@@ -134,10 +138,8 @@ public class Conversation extends ActionBarActivity {
         helper.close();
         ArrayList<String> oldConversation = chatAdapter.getChatArray();
         ArrayList<myMessage> oldMessages = new ArrayList<>();
-        for (myMessage m : checkConversation) {
-            if (oldConversation.contains(m.getBody())) {
-                oldMessages.add(m);
-            }
+        for (int i = 0; i < oldConversation.size(); i++) {
+            oldMessages.add(checkConversation.get(i));
         }
 
         for (myMessage m : oldMessages) {
@@ -146,7 +148,7 @@ public class Conversation extends ActionBarActivity {
 
 
         for (myMessage m : checkConversation) {
-            chatAdapter.addItem(m.getBody(), m.getSent());
+            chatAdapter.addItem(m.getBody(), m.getSent(), m.is_encrypted());
         }
 
         /*
@@ -225,22 +227,28 @@ public class Conversation extends ActionBarActivity {
         //Possibility to add more types
         private static final int SENT = 0;
         private static final int RECEIVED = 1;
-        private static final int MAX_TYPES = RECEIVED + 1;
+        private static final int SENT_NOENC = 2;
+        private static final int RECEIVED_NOENC = 3;
+        private static final int MAX_TYPES = 4;
 
         private ArrayList<String> chatArray = new ArrayList<>();
         private LayoutInflater inflater;
-        private ArrayList<Integer> sentArray = new ArrayList<>();
+        private ArrayList<Integer> typeArray = new ArrayList<>();
 
         public chatAdapter() {
             //create inflater that will hold the chat boxes
             inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         }
 
-        public void addItem(String text, boolean isSent) {
+        public void addItem(String text, boolean isSent, boolean isEncrypted) {
             chatArray.add(text);
-            if (isSent) {
-                sentArray.add(chatArray.size() - 1);
+            int type = RECEIVED;
+            if (!isEncrypted) {
+                type = isSent ? SENT_NOENC : RECEIVED_NOENC;
+            } else {
+                type = isSent ? SENT : RECEIVED;
             }
+            typeArray.add(type);
             notifyDataSetChanged();
         }
 
@@ -256,7 +264,7 @@ public class Conversation extends ActionBarActivity {
 
         @Override
         public int getItemViewType(int position) {
-            return sentArray.contains(position) ? SENT : RECEIVED;
+            return typeArray.get(position);
         }
 
         @Override
@@ -291,6 +299,14 @@ public class Conversation extends ActionBarActivity {
                         break;
                     case RECEIVED:
                         convertView = inflater.inflate(R.layout.receivedmessage, null);
+                        holder = (TextView) ((LinearLayout) convertView).getChildAt(0);
+                        break;
+                    case SENT_NOENC:
+                        convertView = inflater.inflate(R.layout.sentmessagenoenc, null);
+                        holder = (TextView) ((LinearLayout) convertView).getChildAt(0);
+                        break;
+                    case RECEIVED_NOENC:
+                        convertView = inflater.inflate(R.layout.receivedmessagenoenc, null);
                         holder = (TextView) ((LinearLayout) convertView).getChildAt(0);
                         break;
                 }

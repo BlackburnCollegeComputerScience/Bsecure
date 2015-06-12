@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <!-- http://stackoverflow.com/questions/642076/how-to-save-sms-to-inbox-in-android -->
     <!-- <uses-permission android:name="android.permission.READ_SMS"/> -->
@@ -44,6 +45,7 @@
 
             <intent-filter android:priority="1000" >
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+                <action android:name="android.provider.Telephony.SMS_SENT" />
             </intent-filter>
         </receiver>
 

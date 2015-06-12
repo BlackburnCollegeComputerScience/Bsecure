@@ -26,6 +26,10 @@ public class NoNFC extends ActionBarActivity {
     TextView progressTextView;
     Button startButton;
 
+    //TEMPORARY THINGS
+    TextView manualKey;
+    Button manualButton;
+
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -35,7 +39,8 @@ public class NoNFC extends ActionBarActivity {
                         dbHelper helper = new dbHelper(context);
                         progressTextView.append("Received g^b%p from " + currentNumber);
                         helper.addKey(intent.getStringExtra("number"),
-                                currentSession.packSecret(intent.getStringExtra("body")));
+                                currentSession.packSecret(intent.getStringExtra("body")),
+                                currentSession.hashSecret());
                         helper.close();
                         progressTextView.append("Secret key successfully created.");
                         System.out.println("Secret is: ");
@@ -45,6 +50,7 @@ public class NoNFC extends ActionBarActivity {
                         e.printStackTrace();
                     }
                     currentlyWorking = false;
+                    progressBar.setProgress(100);
                 }
             } else {
                 try {
@@ -56,6 +62,7 @@ public class NoNFC extends ActionBarActivity {
                     handleMessage.send(currentNumber,
                             currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                             getApplicationContext(), true);
+                    progressBar.setProgress(50);
                     System.out.println("Sent g^b%p");
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -76,6 +83,10 @@ public class NoNFC extends ActionBarActivity {
         progressTextView = (TextView) findViewById(R.id.progressTextView);
         startButton = (Button) findViewById(R.id.button);
 
+        //TEMPORARY ITEMS
+        manualKey = (TextView) findViewById(R.id.manualKey);
+        manualButton = (Button) findViewById(R.id.manualButton);
+
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,12 +94,14 @@ public class NoNFC extends ActionBarActivity {
 
                     try {
                         // Hack to check if proper number
-                        //TODO: Replace with contact list dropdown or something else that is pretty
+                        //TODO: Replace text field with contact list dropdown or something else that is pretty
 
                         Long.parseLong(contactNumText.getText().toString());
+                        progressBar.setProgress(0);
                         currentSession = new DiffieHellmanKeySession();
                         currentNumber = contactNumText.getText().toString();
                         currentlyWorking = true;
+                        progressTextView.append("g^a%p generated");
                         handleMessage.send(currentNumber,
                                 currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                                 getApplicationContext(), true);
@@ -97,11 +110,29 @@ public class NoNFC extends ActionBarActivity {
                                 currentSession.packKey(currentSession.getPublicKey().getEncoded()));
 
                         progressTextView.append("Awaiting reply...\n");
+                        progressBar.setProgress(50);
                     } catch (Exception e) {e.printStackTrace();}
 
                 }
             }
         });
+
+        manualButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dbHelper helper = new dbHelper(getApplicationContext());
+                String key = manualKey.getText().toString();
+                String hash =  DiffieHellmanKeySession.toHexString(
+                        DiffieHellmanKeySession.getHash(
+                                DiffieHellmanKeySession.hexStringToByteArray(key)));
+                helper.addKey(contactNumText.getText().toString(), key, hash);
+                helper.close();
+            }
+        });
+
+
+        currentlyWorking = false;
+        currentSession = null;
         registerReceiver();
     }
 

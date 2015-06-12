@@ -15,4 +15,5 @@ Created by traci.kamp on 12/1/2014.
     android:layout_margin="5dip"
     android:paddingLeft="10dip"
     android:paddingRight="10dip"
-    android:textColor="#FFFFFF" />
+    android:textColor="#FFFFFF"
+    android:background="@color/GreenYellow" />

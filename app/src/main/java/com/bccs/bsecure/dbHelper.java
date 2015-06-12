@@ -33,6 +33,12 @@ import java.util.ArrayList;
  * retrieving messages. Should messages be encrypted
  * when stored?
  *
+ * Modified by lucas.burdell 6/11/2015.
+ * Added new table that tracks diffie-hellman pairs.
+ *
+ * Modified by lucas.burdell 6/12/2015.
+ * Added new collumn to messages table to track whether a message was encrypted or not.
+ * This is mainly for the conversation UI.
  *
  *
  */
@@ -45,16 +51,19 @@ public class dbHelper extends SQLiteOpenHelper {
     public static final String COLUMN_BODY = "msg_body"; // body of the message
     public static final String COLUMN_SENT = "sent"; // whether it was sent or received
     public static final String COLUMN_TIME = "msg_time"; // time message sent / received
+    public static final String COLUMN_ENC = "msg_encrypted";
     //Database Info
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "Msgs.db";
 
     //Temporary Diffie-Hellman key storage
-    //TODO: Pull this out of here and put it in Dr Coogan's contact list database
+    //TODO: Pull this out of here and use Dr Coogan's contact list database
     public static final String TABLE_CONTACTS = "contacts";
-    public static final String COLUMN_NUM = "contact_num";
-    public static final String COLUMN_KEY = "contact_key";
-    public static final String COLUMN_CONTACT_ID = "contact_id";
+    //Table info
+    public static final String COLUMN_NUM = "contact_num"; //contact's number
+    public static final String COLUMN_KEY = "contact_key"; //secret key
+    public static final String COLUMN_HASH = "contact_keyhash"; //hash of secret for IV
+    public static final String COLUMN_CONTACT_ID = "contact_id"; //row ID
 
     public dbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -66,11 +75,11 @@ public class dbHelper extends SQLiteOpenHelper {
         String CREATE_MESSAGES_TABLE = "CREATE TABLE " + TABLE_MESSAGES +
                 "(" + COLUMN_ID + " INTEGER PRIMARY KEY," +
                 COLUMN_SEND_TO_NUM + " TEXT," + COLUMN_BODY + " TEXT," + COLUMN_SENT + " INTEGER," +
-                COLUMN_TIME + " INTEGER" + ")";
+                COLUMN_TIME + " INTEGER," + COLUMN_ENC + " INTEGER" + ")";
         db.execSQL(CREATE_MESSAGES_TABLE);
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_CONTACTS + "(" +
                 COLUMN_CONTACT_ID + " INTEGER PRIMARY KEY," + COLUMN_NUM +
-                " TEXT," + COLUMN_KEY  + " TEXT" + ")";
+                " TEXT," + COLUMN_KEY  + " TEXT," + COLUMN_HASH + " TEXT" +  ")";
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
@@ -81,6 +90,8 @@ public class dbHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+
+
     //adds single record
     public void addRecord(myMessage msg) {
         SQLiteDatabase dbase = this.getWritableDatabase();
@@ -90,36 +101,71 @@ public class dbHelper extends SQLiteOpenHelper {
         vals.put(COLUMN_BODY, msg.getBody());
         vals.put(COLUMN_SENT, msg.getSent() ? 1 : 0);
         vals.put(COLUMN_TIME, msg.get_time());
+        vals.put(COLUMN_ENC, msg.is_encrypted() ? 1 : 0);
         // Insert
         dbase.insert(TABLE_MESSAGES, null, vals);
         Log.i("Adding record: ", msg.get_name() + " " + msg.get_number());
         dbase.close();
     }
 
-    public void addKey(String number, String key) {
+    public void addKey(String number, String key, String hash) {
+
+        int id = checkIfKeyPresent(number);
         SQLiteDatabase dbase = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
-        vals.put(COLUMN_NUM, number);
-        vals.put(COLUMN_KEY, key);
-        dbase.insert(TABLE_CONTACTS, null, vals);
+        if (id <= 0) {
+            vals.put(COLUMN_NUM, number);
+            vals.put(COLUMN_KEY, key);
+            vals.put(COLUMN_HASH, hash);
+            vals.put(COLUMN_CONTACT_ID, getKeyCount() + 1);
+            dbase.insert(TABLE_CONTACTS, null, vals);
+        } else {
+            vals.put(COLUMN_KEY, key);
+            vals.put(COLUMN_HASH, hash);
+            dbase.update(TABLE_CONTACTS, vals, COLUMN_CONTACT_ID + " =" + Integer.toString(id), null);
+        }
         Log.i("Adding key: ", number + " " + key);
         dbase.close();
     }
 
-    public String getKey(String number) {
+    /**
+     * Returns the key associated with the number (or null)
+     * @param number
+     * @return String key
+     */
+    public String[] getKey(String number) {
+        String[] output = new String[2];
         String select = "SELECT * FROM " + TABLE_CONTACTS + " WHERE " + COLUMN_NUM + " = " + number;
         SQLiteDatabase dbase = this.getReadableDatabase();
         Cursor c = dbase.rawQuery(select, null);
         if (c != null) {
             c.moveToFirst();
-            return c.getString(2);
+            output[0] = c.getString(2);
+            output[1] = c.getString(3);
+            return output;
         } else {
             return null;
         }
     }
 
-    //need to find a way to search through and retrieve unique information from msg items
-    //these methods go here
+
+    /**
+     * Checks if a key is already in the database. Returns the ID of row for key or -1.
+     * @param number Number to search for
+     * @return int row ID or -1
+     */
+    public int checkIfKeyPresent(String number) {
+        String select = "SELECT * FROM " + TABLE_CONTACTS + " WHERE " + COLUMN_NUM + " = " + number;
+        SQLiteDatabase dbase = this.getReadableDatabase();
+        Cursor c = dbase.rawQuery(select, null);
+        int ret = -1;
+        if (c != null) {
+            c.moveToFirst();
+            ret = c.getPosition();
+        }
+        dbase.close();
+        return ret;
+    }
 
     //get single message
     public myMessage getSingleMessage(int id) {
@@ -134,6 +180,7 @@ public class dbHelper extends SQLiteOpenHelper {
         myMessage retObj = new myMessage(c.getString(1), c.getString(2), c.getInt(3) == 1);
         retObj.setId(Integer.parseInt(c.getString(0)));
         retObj.set_time(c.getInt(4));
+        retObj.set_encrypted(c.getInt(5) == 1);
         c.close();
         dbase.close();
         return retObj;
@@ -183,6 +230,16 @@ public class dbHelper extends SQLiteOpenHelper {
             }
         }
         return ret;
+    }
+
+    public int getKeyCount() {
+        String countQuery = "SELECT * FROM " + TABLE_CONTACTS;
+        SQLiteDatabase dbase = this.getReadableDatabase();
+        Cursor cursor = dbase.rawQuery(countQuery, null);
+
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
     }
 
     //gets a count of records stored in DB
