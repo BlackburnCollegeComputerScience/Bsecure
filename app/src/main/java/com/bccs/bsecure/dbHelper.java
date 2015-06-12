@@ -33,6 +33,8 @@ import java.util.ArrayList;
  * retrieving messages. Should messages be encrypted
  * when stored?
  *
+ *
+ *
  */
 
 public class dbHelper extends SQLiteOpenHelper {
@@ -47,6 +49,13 @@ public class dbHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "Msgs.db";
 
+    //Temporary Diffie-Hellman key storage
+    //TODO: Pull this out of here and put it in Dr Coogan's contact list database
+    public static final String TABLE_CONTACTS = "contacts";
+    public static final String COLUMN_NUM = "contact_num";
+    public static final String COLUMN_KEY = "contact_key";
+    public static final String COLUMN_CONTACT_ID = "contact_id";
+
     public dbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -59,6 +68,10 @@ public class dbHelper extends SQLiteOpenHelper {
                 COLUMN_SEND_TO_NUM + " TEXT," + COLUMN_BODY + " TEXT," + COLUMN_SENT + " INTEGER," +
                 COLUMN_TIME + " INTEGER" + ")";
         db.execSQL(CREATE_MESSAGES_TABLE);
+        String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_CONTACTS + "(" +
+                COLUMN_CONTACT_ID + " INTEGER PRIMARY KEY," + COLUMN_NUM +
+                " TEXT," + COLUMN_KEY  + " TEXT" + ")";
+        db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
     //database version upgrade... destroys old and recreates
@@ -81,6 +94,28 @@ public class dbHelper extends SQLiteOpenHelper {
         dbase.insert(TABLE_MESSAGES, null, vals);
         Log.i("Adding record: ", msg.get_name() + " " + msg.get_number());
         dbase.close();
+    }
+
+    public void addKey(String number, String key) {
+        SQLiteDatabase dbase = this.getWritableDatabase();
+        ContentValues vals = new ContentValues();
+        vals.put(COLUMN_NUM, number);
+        vals.put(COLUMN_KEY, key);
+        dbase.insert(TABLE_CONTACTS, null, vals);
+        Log.i("Adding key: ", number + " " + key);
+        dbase.close();
+    }
+
+    public String getKey(String number) {
+        String select = "SELECT * FROM " + TABLE_CONTACTS + " WHERE " + COLUMN_NUM + " = " + number;
+        SQLiteDatabase dbase = this.getReadableDatabase();
+        Cursor c = dbase.rawQuery(select, null);
+        if (c != null) {
+            c.moveToFirst();
+            return c.getString(2);
+        } else {
+            return null;
+        }
     }
 
     //need to find a way to search through and retrieve unique information from msg items

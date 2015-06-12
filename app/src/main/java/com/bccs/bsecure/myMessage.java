@@ -24,6 +24,7 @@ public class myMessage {
     private String _body;
     private boolean _sent = true;
     private int _time;
+    private boolean isDHKey = false;
 
     // Empty constructor
     public myMessage() {
@@ -78,5 +79,13 @@ public class myMessage {
 
     public void set_time(int _time) {
         this._time = _time;
+    }
+
+    public boolean isDHKey() {
+        return isDHKey;
+    }
+
+    public void setIsDHKey(boolean isDHKey) {
+        this.isDHKey = isDHKey;
     }
 }

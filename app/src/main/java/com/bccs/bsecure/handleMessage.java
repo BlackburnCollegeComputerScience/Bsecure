@@ -27,6 +27,7 @@ public class handleMessage {
 
 
     private static final String prepend = "-&*&-"; // current message header
+    private static final String prependDH = "*-&-*"; // header for DH key exchanges
 
     /**
      * send method for sending messages to a number
@@ -35,36 +36,86 @@ public class handleMessage {
      * @return myMessage object to be used by UI
      */
     public static myMessage send(String number, String msg, Context context) {
-        System.out.println("Creating message object: ");
-        SmsManager sms = SmsManager.getDefault();
+        return send(number, msg, context, false);
+    }
 
-        myMessage msgObj = new myMessage(number, msg, true);
-        System.out.println(msgObj.toString());
-
-//        msg = messageCipher.encrypt(msg, key1, key2);
-//        String newMsg = getPrepend() + msg;
-
-        //new multipart text messages
-        ArrayList<String> messages = sms.divideMessage(msg);
-        int numberOfParts = messages.size();
-        System.out.println(numberOfParts);
-
-        ArrayList<PendingIntent> sentIntents = new ArrayList<PendingIntent>();
-        ArrayList<PendingIntent> deliveryIntents = new ArrayList<PendingIntent>();
-
-        Intent mSendIntent = new Intent("CTS_SMS_SEND_ACTION");
-        Intent mDeliveryIntent = new Intent("CTS_SMS_DELIVERY_ACTION");
-
-        for (int i = 0; i < numberOfParts; i++) {
-            sentIntents.add(PendingIntent.getBroadcast(context, 0, mSendIntent, 0));
-            deliveryIntents.add(PendingIntent.getBroadcast(context, 0, mDeliveryIntent, 0));
+    public static ArrayList<String> safeDivide(String msg) {
+        ArrayList<String> list = new ArrayList<>();
+        if (msg.length() + prepend.length() < 160) {
+            list.add(msg);
+            return list;
+        } else {
+            System.out.println("dividing message:");
+            System.out.println(msg.length());
+            int total = msg.length() + (((int) ((msg.length() / 160.) + 0.5)) * prepend.length());
+            int msgTotal = msg.length();
+            int timesToDivide = (int) ((total / 160.) + 0.5);
+            System.out.println("Total: " + total);
+            System.out.println("Division time: " + timesToDivide);
+            String msgToCut = msg;
+            for (int i = 0; i < timesToDivide; i++) {
+                if (msgTotal + prepend.length()> 160) {
+                    list.add(prepend + msg.substring(0, 160 - prepend.length()));
+                    msgToCut = msgToCut.substring(160 - prepend.length() + 1);
+                    total = total - 160;
+                    msgTotal = msgTotal - (160 - prepend.length());
+                } else {
+                    list.add(prepend + msgToCut);
+                    return list;
+                }
+            }
+            return list; //this should never be reached
         }
+    }
 
-        sms.sendMultipartTextMessage(number, null, messages, sentIntents, deliveryIntents);
+    public static myMessage send(String number, String msg, Context context, boolean isDH) {
+        if (!isDH) {
+            System.out.println("Creating message object: ");
+            SmsManager sms = SmsManager.getDefault();
+
+            myMessage msgObj = new myMessage(number, msg, true);
+            System.out.println(msgObj.toString());
+
+            //        msg = messageCipher.encrypt(msg, key1, key2);
+            //        String newMsg = getPrepend() + msg;
+
+            //new multipart text messages
+            ArrayList<String> messages = sms.divideMessage(msg);
+            int numberOfParts = messages.size();
+            System.out.println(numberOfParts);
+
+            ArrayList<PendingIntent> sentIntents = new ArrayList<PendingIntent>();
+            ArrayList<PendingIntent> deliveryIntents = new ArrayList<PendingIntent>();
+
+            Intent mSendIntent = new Intent("CTS_SMS_SEND_ACTION");
+            Intent mDeliveryIntent = new Intent("CTS_SMS_DELIVERY_ACTION");
+
+            for (int i = 0; i < numberOfParts; i++) {
+                sentIntents.add(PendingIntent.getBroadcast(context, 0, mSendIntent, 0));
+                deliveryIntents.add(PendingIntent.getBroadcast(context, 0, mDeliveryIntent, 0));
+            }
+
+            sms.sendMultipartTextMessage(number, null, messages, sentIntents, deliveryIntents);
 
 
-        System.out.println("Message sent: " + msg);
-        return msgObj;
+            System.out.println("Message sent: " + msg);
+            return msgObj;
+        } else {
+            System.out.println("Creating message object: ");
+            SmsManager sms = SmsManager.getDefault();
+            ArrayList<String> messages = safeDivide(msg);
+            int numberOfParts = messages.size();
+            System.out.println(numberOfParts);
+            for (String s : messages) {
+                System.out.println(s.length());
+            }
+            System.out.printf("Total: " + msg.length());
+            myMessage msgObj = new myMessage(number, msg, true);
+            msgObj.setIsDHKey(true);
+            sms.sendMultipartTextMessage(number, null, messages, null, null);
+            System.out.println("Message sent: " + msg);
+            return msgObj;
+        }
     }
 
 
@@ -96,16 +147,22 @@ public class handleMessage {
             String fixed = null;
             if (message.contains(getPrepend())) {
                 fixed = "";
-                for (int j = 5; j < message.length(); j++) {
+                for (int j = getPrepend().length(); j < message.length(); j++) {
                     fixed += message.charAt(j);
                 }
                 fixed = messageCipher.decrypt(fixed, key1, key2);
-            } else {
-                fixed = message;
-            }
+            } else if (message.contains(prependDH)) {
+                fixed = "";
+                for (int j = prependDH.length(); j < message.length(); j++) {
+                    fixed += message.charAt(j);
+                }
+            } else { fixed = message; }
 
             //Return the Message
             myMessage msgObj = new myMessage(sender, fixed, false);
+            if (message.contains(prependDH)) {
+                msgObj.setIsDHKey(true);
+            }
             return msgObj;
             //Uncommenting the line below will prevent other receivers from getting this message.
             //abortBroadcast()

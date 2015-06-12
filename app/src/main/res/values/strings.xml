@@ -31,7 +31,7 @@
         tortor.
     </string>
     <string name="noNFCmessage">Unfortunately you\'re device does not support near field
-        communication. However we can still perform key exchanges through MMS messaging\n</string>
+        communication. However we can still perform key exchanges through SMS messaging\n</string>
 
     <string name="action_share">Share</string>
     <string name="action_reply">Reply</string>

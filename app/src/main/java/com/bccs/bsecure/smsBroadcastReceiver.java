@@ -54,13 +54,21 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
     public void handleIncomingMessage(Intent intent, Context context) {
 
         myMessage msg = handleMessage.handleIncomingMessage(intent);
-        addReceivedMessageToDatabase(msg, context);
-        Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
-        receivedMSG.putExtra("number", msg.get_number());
-        recentNumber = msg.get_number();
-        messageReceivedNotification.cancel(context); //cancel old message
-        messageReceivedNotification.notify(context, msg.get_number(), msg.getBody());
-        LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
+        if (!msg.isDHKey()) {
+            addReceivedMessageToDatabase(msg, context);
+            Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
+            receivedMSG.putExtra("number", msg.get_number());
+            recentNumber = msg.get_number();
+            messageReceivedNotification.cancel(context); //cancel old message
+            messageReceivedNotification.notify(context, msg.get_number(), msg.getBody());
+            LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
+        } else {
+            Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived_DH");
+            receivedMSG.putExtra("body", msg.getBody());
+            receivedMSG.putExtra("number", msg.get_number());
+            LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
+        }
+
     }
 
 }
