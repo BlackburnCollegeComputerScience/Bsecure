@@ -75,7 +75,7 @@ public class dbHelper extends SQLiteOpenHelper {
         String CREATE_MESSAGES_TABLE = "CREATE TABLE " + TABLE_MESSAGES +
                 "(" + COLUMN_ID + " INTEGER PRIMARY KEY," +
                 COLUMN_SEND_TO_NUM + " TEXT," + COLUMN_BODY + " TEXT," + COLUMN_SENT + " INTEGER," +
-                COLUMN_TIME + " INTEGER," + COLUMN_ENC + " INTEGER" + ")";
+                COLUMN_TIME + " TEXT," + COLUMN_ENC + " INTEGER" + ")";
         db.execSQL(CREATE_MESSAGES_TABLE);
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_CONTACTS + "(" +
                 COLUMN_CONTACT_ID + " INTEGER PRIMARY KEY," + COLUMN_NUM +
@@ -100,7 +100,7 @@ public class dbHelper extends SQLiteOpenHelper {
         vals.put(COLUMN_SEND_TO_NUM, msg.get_number());
         vals.put(COLUMN_BODY, msg.getBody());
         vals.put(COLUMN_SENT, msg.getSent() ? 1 : 0);
-        vals.put(COLUMN_TIME, msg.get_time());
+        vals.put(COLUMN_TIME, ((Long) msg.get_time()).toString());
         vals.put(COLUMN_ENC, msg.is_encrypted() ? 1 : 0);
         // Insert
         dbase.insert(TABLE_MESSAGES, null, vals);
@@ -139,10 +139,15 @@ public class dbHelper extends SQLiteOpenHelper {
         SQLiteDatabase dbase = this.getReadableDatabase();
         Cursor c = dbase.rawQuery(select, null);
         if (c != null) {
-            c.moveToFirst();
-            output[0] = c.getString(2);
-            output[1] = c.getString(3);
-            return output;
+            try {
+                c.moveToFirst();
+                output[0] = c.getString(2);
+                output[1] = c.getString(3);
+                System.out.println(output[0] + "\n" + output[1]);
+                return output;
+            } catch (Exception e) {
+                return null;
+            }
         } else {
             return null;
         }
@@ -179,7 +184,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
         myMessage retObj = new myMessage(c.getString(1), c.getString(2), c.getInt(3) == 1);
         retObj.setId(Integer.parseInt(c.getString(0)));
-        retObj.set_time(c.getInt(4));
+        retObj.set_time(Long.parseLong(c.getString(4)));
         retObj.set_encrypted(c.getInt(5) == 1);
         c.close();
         dbase.close();
@@ -200,10 +205,7 @@ public class dbHelper extends SQLiteOpenHelper {
             if (!activeInfo.contains(pNum)) {
                 activeInfo.add(pNum);
                 //names.add(cName);
-            } else {
-
             }
-
             //if(!names.contains(cName)) names.add(cName);
         }
         //activeInfo[0] = nums;
@@ -236,7 +238,6 @@ public class dbHelper extends SQLiteOpenHelper {
         String countQuery = "SELECT * FROM " + TABLE_CONTACTS;
         SQLiteDatabase dbase = this.getReadableDatabase();
         Cursor cursor = dbase.rawQuery(countQuery, null);
-
         int count = cursor.getCount();
         cursor.close();
         return count;

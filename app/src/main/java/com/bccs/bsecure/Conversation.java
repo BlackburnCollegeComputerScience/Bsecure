@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.DataSetObserver;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
@@ -16,11 +18,14 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 /** Created by lucas.burdell 6/4/2015.
@@ -125,18 +130,14 @@ public class Conversation extends ActionBarActivity {
 
     /**
      * This method updates the chat with new messages and will filter out duplicates.
-     * TODO: Fix filtering out similar messages that aren't necessarily duplicates
-     * (for example if someone says "ok" in the same conversation the second "ok" will never
-     * appear no matter the difference in time or sequence it appeared).
      */
     private void updateConvo() {
         System.out.println("Updating conversation " + currentNumber);
 
-        //Not sure whether this snippet runs on the UI thread or an event thread
         dbHelper helper = new dbHelper(this);
         ArrayList<myMessage> checkConversation = helper.getConversationMessages(currentNumber);
         helper.close();
-        ArrayList<String> oldConversation = chatAdapter.getChatArray();
+        ArrayList<myMessage> oldConversation = chatAdapter.getChatArray();
         ArrayList<myMessage> oldMessages = new ArrayList<>();
         for (int i = 0; i < oldConversation.size(); i++) {
             oldMessages.add(checkConversation.get(i));
@@ -148,38 +149,21 @@ public class Conversation extends ActionBarActivity {
 
 
         for (myMessage m : checkConversation) {
-            chatAdapter.addItem(m.getBody(), m.getSent(), m.is_encrypted());
+            chatAdapter.addItem(m, m.getSent(), m.is_encrypted());
         }
-
-        /*
-        final ArrayList<myMessage> newConversation = checkConversation;
-        runOnUiThread(new Runnable() {
-            public void run() {
-                for (myMessage m : newConversation) {
-                    chatAdapter.addItem(m.getBody(), m.getSent());
-                }
-            }
-        });
-
-        */
     }
 
     protected void onStart() {
         System.out.println("Sender onStart");
-
         if (!receiversRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
-            //registerReceiver(onNewMsg, onNewMsgFilter);
-//            registerReceiver(onNewMsgSend, new IntentFilter("onNewMsgSend"));
             receiversRegistered = true;
         }
-        //open database here
         super.onStart();
     }
 
     protected void onResume() {
         System.out.println("Sender onResume");
-
         if (!receiversRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
             receiversRegistered = true;
@@ -189,7 +173,6 @@ public class Conversation extends ActionBarActivity {
 
     protected void onPause() {
         System.out.println("Sender onPause");
-
         if (receiversRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
             receiversRegistered = false;
@@ -220,8 +203,6 @@ public class Conversation extends ActionBarActivity {
 
 
     // Custom Adapter to display the differing layouts for chat.
-    // TODO: Come back and rewrite code. It is messy.
-
     private class chatAdapter extends BaseAdapter {
 
         //Possibility to add more types
@@ -231,7 +212,7 @@ public class Conversation extends ActionBarActivity {
         private static final int RECEIVED_NOENC = 3;
         private static final int MAX_TYPES = 4;
 
-        private ArrayList<String> chatArray = new ArrayList<>();
+        private ArrayList<myMessage> chatArray = new ArrayList<>();
         private LayoutInflater inflater;
         private ArrayList<Integer> typeArray = new ArrayList<>();
 
@@ -240,9 +221,9 @@ public class Conversation extends ActionBarActivity {
             inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         }
 
-        public void addItem(String text, boolean isSent, boolean isEncrypted) {
-            chatArray.add(text);
-            int type = RECEIVED;
+        public void addItem(myMessage message, boolean isSent, boolean isEncrypted) {
+            chatArray.add(message);
+            int type;
             if (!isEncrypted) {
                 type = isSent ? SENT_NOENC : RECEIVED_NOENC;
             } else {
@@ -253,10 +234,10 @@ public class Conversation extends ActionBarActivity {
         }
 
 
-        public ArrayList<String> getChatArray() {
-            ArrayList<String> newChat = new ArrayList<>();
-            for (String s : chatArray) {
-                newChat.add(s);
+        public ArrayList<myMessage> getChatArray() {
+            ArrayList<myMessage> newChat = new ArrayList<>();
+            for (myMessage m : chatArray) {
+                newChat.add(m);
             }
             return newChat;
         }
@@ -278,7 +259,7 @@ public class Conversation extends ActionBarActivity {
         }
 
         @Override
-        public String getItem(int position) {
+        public myMessage getItem(int position) {
             return chatArray.get(position);
         }
 
@@ -288,32 +269,37 @@ public class Conversation extends ActionBarActivity {
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
-            TextView holder = null;
+            FrameLayout holder = null;
             int type = getItemViewType(position);
             if (convertView == null) {
                 switch (type) {
-                    //Possibility to add more types
                     case SENT:
                         convertView = inflater.inflate(R.layout.sentmessage, null);
-                        holder = (TextView) ((LinearLayout) convertView).getChildAt(0);
+                        holder = (FrameLayout) ((LinearLayout) convertView).getChildAt(0);
                         break;
                     case RECEIVED:
                         convertView = inflater.inflate(R.layout.receivedmessage, null);
-                        holder = (TextView) ((LinearLayout) convertView).getChildAt(0);
+                        holder = (FrameLayout) ((LinearLayout) convertView).getChildAt(0);
                         break;
                     case SENT_NOENC:
                         convertView = inflater.inflate(R.layout.sentmessagenoenc, null);
-                        holder = (TextView) ((LinearLayout) convertView).getChildAt(0);
+                        holder = (FrameLayout) ((LinearLayout) convertView).getChildAt(0);
                         break;
                     case RECEIVED_NOENC:
                         convertView = inflater.inflate(R.layout.receivedmessagenoenc, null);
-                        holder = (TextView) ((LinearLayout) convertView).getChildAt(0);
+                        holder = (FrameLayout) ((LinearLayout) convertView).getChildAt(0);
                         break;
                 }
             } else {
-                holder = (TextView) ((LinearLayout) convertView).getChildAt(0);
+                holder = (FrameLayout) ((LinearLayout) convertView).getChildAt(0);
             }
-            holder.setText(chatArray.get(position));
+            myMessage msg = getItem(position);
+            TextView text =(TextView) ((LinearLayout) holder.getChildAt(0)).getChildAt(0);
+            TextView date = (TextView) holder.getChildAt(1);
+            String dateText = (new SimpleDateFormat("h:mm a, EEE, MMM d, ''yy")).format(
+                    new Date((long) msg.get_time()));
+            text.setText(msg.getBody());
+            date.setText(dateText);
             return convertView;
         }
     }
@@ -322,7 +308,8 @@ public class Conversation extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_conversation, menu);
+        //getMenuInflater().inflate(R.menu.menu_conversation, menu);
+        getMenuInflater().inflate(R.menu.menu_conservative, menu);
         return true;
     }
 
@@ -331,7 +318,74 @@ public class Conversation extends ActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        onBackPressed();
-        return true;
+        int id = item.getItemId();
+
+        switch(id){
+            case R.id.action_new:
+                openNewMessage();
+                return true;
+            case R.id.action_contacts:
+                openContacts();
+                return true;
+            case R.id.action_nfc:
+                //Checks if the device supports NFC. If not opens the NoNFC activity to communicate
+                //through test messaging.
+                NfcManager nfcManager = (NfcManager) getApplicationContext().getSystemService(Context.NFC_SERVICE);
+                NfcAdapter nfcAdapter = nfcManager.getDefaultAdapter();
+                if (nfcAdapter != null && nfcAdapter.isEnabled()) {
+                    openNFC();
+                } else {
+                    openNoNFC();
+                }
+                return true;
+            case R.id.action_settings:
+                openSettings();
+                return true;
+            case R.id.action_bugReport:
+                openBugReport();
+                return true;
+            case R.id.action_about:
+                openAbout();
+                return true;
+            default:
+                openMain();
+                return true;
+        }
     }
+
+    public void openMain() {
+        Intent intent = new Intent(this, Main.class);
+        startActivity(intent);
+    }
+
+    public void openNewMessage(){
+        Intent intent = new Intent(this, CreateMessage.class);
+        startActivity(intent);
+    }
+    public void openContacts(){
+        Intent intent = new Intent(this, Contacts.class);
+        startActivity(intent);
+    }
+    public void openNFC(){
+        Intent intent = new Intent(this, NFC.class);
+        startActivity(intent);
+    }
+
+    public void openNoNFC() {
+        Intent intent = new Intent(this, NoNFC.class);
+        startActivity(intent);
+    }
+    public void openSettings(){
+        Intent intent = new Intent(this, Settings.class);
+        startActivity(intent);
+    }
+    public void openBugReport(){
+        Intent intent = new Intent(this, BugReport.class);
+        startActivity(intent);
+    }
+    public void openAbout(){
+        Intent intent = new Intent(this, About.class);
+        startActivity(intent);
+    }
+
 }

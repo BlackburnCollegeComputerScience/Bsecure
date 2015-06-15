@@ -28,7 +28,6 @@ import java.util.ArrayList;
  */
 public class handleMessage {
 
-    // TODO: Replace temporary keys with key pair associated with each contact
     //These temp keys were generated with Diffie-Hellman key exchange. The second key (the IV for the cipher)
     //Is a SHA-256 hash of the key1, a Diffie-Hellman generated key.
     private static final String key1 = "524F0D82AFA4779CB7A55358798117A88A90549730659C0778CEBE5BAD7FDD77";
@@ -64,11 +63,11 @@ public class handleMessage {
             helper.close();
             if (keys != null) {
                 msg = messageCipher.encrypt(msg, keys[0], keys[1]);
+                msg = getPrepend() + msg;
             }
-            String newMsg = getPrepend() + msg;
 
             //new multipart text messages
-            ArrayList<String> messages = sms.divideMessage(newMsg);
+            ArrayList<String> messages = sms.divideMessage(msg);
             int numberOfParts = messages.size();
             System.out.println(numberOfParts);
 
@@ -84,7 +83,7 @@ public class handleMessage {
             }
 
             sms.sendMultipartTextMessage(number, null, messages, sentIntents, deliveryIntents);
-            msgObj.set_encrypted(true);
+            msgObj.set_encrypted(keys != null);
 
             System.out.println("Message sent: " + msg);
             return msgObj;
@@ -204,7 +203,7 @@ public class handleMessage {
             }
             return msgObj;
             //Uncommenting the line below will prevent other receivers from getting this message.
-            //abortBroadcast()
+            //abortBroadcast();
 
         }
         return null;

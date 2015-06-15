@@ -43,7 +43,7 @@
 
             <!-- Declare intent filter and up my app's priority (max) for the broadcast -->
 
-            <intent-filter android:priority="1000" >
+            <intent-filter android:priority="9999999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="android.provider.Telephony.SMS_SENT" />
             </intent-filter>

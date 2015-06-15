@@ -1,21 +1,25 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools" tools:context="com.bccs.bsecure.CreateMessage">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- New Text Message Button -->
+    <item android:id="@+id/action_new"
+        android:title="@string/action_new"
+        android:icon="@drawable/ic_add_black_48dp"
+        app:showAsAction="never" />
     <!-- Contacts Button -->
     <item android:id="@+id/action_contacts"
         android:title="@string/action_contacts"
         android:icon="@drawable/ic_contacts_black_48dp"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
     <!-- NFC Button -->
     <item android:id="@+id/action_nfc"
         android:title="@string/action_nfc"
         android:icon="@drawable/ic_phonelink_ring_black_48dp"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
     <!-- Settings Button -->
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:icon="@drawable/ic_settings_black_48dp"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
     <!-- Bug Report -->
     <item android:id="@+id/action_bugReport"
         android:title="@string/action_bugReport"

@@ -20,6 +20,28 @@ import javax.crypto.spec.DHParameterSpec;
  * Created by shane.nalezyty on 6/5/2015.
  */
 public class DiffieHellmanKeySession {
+
+    /*
+
+    Example usage:
+
+        //Alice
+        DiffieHellmanKeySession alice = new DiffieHellmanKeySession(); //generate keypair
+        String alicePub = alice.packKey(); //returns alice's public key in base64
+
+        //Send to Bob
+        DiffieHellmanKeySession bob = new DiffieHellmanKeySession(alicePub); //passing alicePub as constructor to get public params alice used
+        String bobPub = bob.packKey(); //returns bob's public key in base64
+        String bobSecret = bob.packSecret(alicePub); //returns private shared key in base64
+
+        //Send to Alice
+        String aliceSecret = alice.packSecret(bobPub); //returns private shared key in base64
+
+
+     */
+
+
+
     //Large Prime P
     //RFC 3526-3 http://tools.ietf.org/html/rfc3526#page-4
     //This prime is: 2^2048 - 2^1984 - 1 + 2^64 * { [2^1918 pi] + 124476 }
@@ -33,8 +55,6 @@ public class DiffieHellmanKeySession {
             "866583291642136218231078990999448652468262416972035911852507045361090559");
     //Generator g
     private final BigInteger g = BigInteger.valueOf(2);
-
-    //private final int l = 256;
 
     private KeyAgreement keyAgreement;
     private KeyPair pair;
@@ -51,16 +71,6 @@ public class DiffieHellmanKeySession {
         this.keyAgreement.init(pair.getPrivate());
     }
 
-    // Most likely not safe but let's try it
-    public static byte[] truncateKey(byte[] key) {
-        //get 128 bit key
-        byte[] truncate = new byte[128];
-        for (int i = 0; i < 128; i++) {
-            truncate[i] = key[i];
-        }
-        return truncate;
-    }
-
     public DiffieHellmanKeySession(byte[] encodedKey) throws Exception {
         KeyFactory keyFac = KeyFactory.getInstance("DH");
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(encodedKey);
@@ -75,8 +85,8 @@ public class DiffieHellmanKeySession {
     }
 
     public DiffieHellmanKeySession(String key) throws Exception {
-        this(hexStringToByteArray(key));
-        //this(Base64.decode(key, 0));
+        //this(hexStringToByteArray(key));
+        this(fromBase64String(key));
     }
 
     public PublicKey getPublicKey() {
@@ -84,16 +94,18 @@ public class DiffieHellmanKeySession {
     }
 
     public String packKey() {
-        return toHexString(this.getPublicKey().getEncoded());
-        //return Base64.encodeToString(this.getPublicKey().getEncoded(), 0);
+        //return toHexString(this.getPublicKey().getEncoded());
+        return toBase64String(this.getPublicKey().getEncoded());
     }
 
     public String packKey(byte[] encodedKey) {
+        /*
         String s = toHexString(encodedKey);
         System.out.println("public key byte size: " + encodedKey.length);
         System.out.println("public key char length: " + s.length());
         return s;
-        //return Base64.getEncoder().encodeToString(encodedKey);
+        */
+        return toBase64String(encodedKey);
     }
 
     public byte[] unpackKey(String key) {
@@ -113,98 +125,21 @@ public class DiffieHellmanKeySession {
         return secret;
     }
 
-    public SecretKey getSecret() {
-        return secret;
-    }
-
     public String hashSecret() throws Exception {
         if (hashOfSecret == null) {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] DHOut = secret.getEncoded();
             md.update(DHOut);
             byte[] digest = md.digest();
-            hashOfSecret = toHexString(DHOut);
+            hashOfSecret = toBase64String(digest);
         }
         return hashOfSecret;
     }
     public String packSecret(String otherPublicKey) throws Exception {
         this.generateSecret(otherPublicKey);
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
         byte[] DHOut = secret.getEncoded();
-        String hexDHOut = toHexString(DHOut);
-/*        System.out.println("Old key: ");
-        System.out.println(hexDHOut);
-        System.out.println("Of length: " + hexDHOut.length());
-        System.out.println("With byte size " + DHOut.length);*/
-        md.update(DHOut);
-        byte[] digest = md.digest();
-        String secretKey = toHexString(digest);
-/*        System.out.println("New key: ");
-        System.out.println(secretKey);
-        System.out.println("Of length: " + secretKey.length());
-        System.out.println("With byte size " + digest.length);*/
-        return secretKey;
+        return toBase64String(DHOut);
     }
-
-
-
-    /*
-
-    public KeyPair getKeyPair() {
-        KeyPair newPair = null;
-        DHParameterSpec dhGenParameterSpec = new DHParameterSpec(p, g);
-        KeyPairGenerator keyPairGenerator;
-        try {
-            keyPairGenerator = KeyPairGenerator.getInstance("DH");
-            keyPairGenerator.initialize(dhGenParameterSpec);
-
-            newPair = keyPairGenerator.genKeyPair();
-        } catch (NoSuchAlgorithmException e) {
-        } catch (InvalidAlgorithmParameterException e) {
-        }
-        try {
-            KeyAgreement keyAgreement = KeyAgreement.getInstance("DH");
-            keyAgreement.init(newPair.getPrivate());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        }
-
-        return newPair;
-    }
-
-    */
-
-
-    /*
-
-    public KeyPair getKeyPair() {
-        KeyPair newPair = null;
-        DHParameterSpec dhGenParameterSpec = new DHParameterSpec(p, g);
-        KeyPairGenerator keyPairGenerator;
-        try {
-            keyPairGenerator = KeyPairGenerator.getInstance("DH");
-            keyPairGenerator.initialize(dhGenParameterSpec);
-
-            newPair = keyPairGenerator.genKeyPair();
-        } catch (NoSuchAlgorithmException e) {
-        } catch (InvalidAlgorithmParameterException e) {
-        }
-        try {
-            KeyAgreement keyAgreement = KeyAgreement.getInstance("DH");
-            keyAgreement.init(newPair.getPrivate());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        }
-
-        return newPair;
-    }
-
-    */
-
 
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
@@ -240,7 +175,6 @@ public class DiffieHellmanKeySession {
         return Base64.decode(s, 0);
     }
     public static String toBase64String(byte[] block) {
-        //return Base64.getEncoder().encodeToString(encodedKey) //This is for vanilla Java Base64 lib
         return Base64.encodeToString(block, 0); //This is for Android's version
     }
 

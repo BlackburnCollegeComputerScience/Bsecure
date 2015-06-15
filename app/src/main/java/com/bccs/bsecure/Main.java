@@ -17,16 +17,10 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-/* Note -
-
-
- */
 public class Main extends AppCompatActivity {
 
     //Global class variables
 
-    //The SQLite DB helper - traverses outbox
-    //The adapter to use when displaying to the screen.
     private ArrayAdapter<String> activeInfoAdapter;
     //The list view that contains the on-screen info being displayed
     private ListView userListView;
@@ -116,9 +110,11 @@ public class Main extends AppCompatActivity {
                 openAbout();
                 return true;
             default:
+                onBackPressed();
                 return true;
         }
     }
+
     public void openNewMessage(){
         Intent intent = new Intent(this, CreateMessage.class);
         startActivity(intent);
@@ -148,6 +144,8 @@ public class Main extends AppCompatActivity {
         Intent intent = new Intent(this, About.class);
         startActivity(intent);
     }
+
+
     protected void onStart() {
         System.out.println("Convo view onStart");
         if (!receiverRegistered) {
@@ -184,6 +182,7 @@ public class Main extends AppCompatActivity {
         appHelper.close();
         activeInfoAdapter.notifyDataSetChanged();
     }
+
     protected void onResume() {
         System.out.println("Convo view onResume");
         if (!receiverRegistered) {
@@ -211,7 +210,6 @@ public class Main extends AppCompatActivity {
         }
         super.onStop();
     }
-
 
     protected void onDestroy() {
         System.out.println("Convo view onDestroy");

@@ -2,20 +2,47 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="fill_parent"
-    android:padding="10sp">
+    android:padding="10sp"
+    android:minHeight="50sp">
 
-    <TextView
+    <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:id="@+id/textView"
-        android:layout_weight="0"
-        android:layout_gravity="right"
-        android:textColor="#000000"
+        android:layout_height="match_parent"
         android:background="#ffe8aaff"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:minWidth="200dp"
-        android:textSize="20sp"
-        android:text="Hello, world!" />
+        android:layout_gravity="right"
+        android:minHeight="50sp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView8"
+                android:layout_gravity="left"
+                android:textColor="#000000"
+                android:minWidth="200dp"
+                android:textSize="20sp"
+                android:text="Hello, world!" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageView4"
+                android:src="@mipmap/message_unsecure" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView9"
+            android:layout_gravity="left|bottom"
+            android:textColor="#000000"
+            android:minWidth="200dp"
+            android:textSize="15sp"
+            android:text="Received 6/15/2015 3:00 PM" />
+
+    </FrameLayout>
 </LinearLayout>

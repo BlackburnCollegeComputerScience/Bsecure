@@ -66,9 +66,10 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
     }
 
     public void handleIncomingMessage(Intent intent, Context context) {
-
+        abortBroadcast();
         myMessage msg = handleMessage.handleIncomingMessage(intent, context);
         if (msg != null) {
+            if (msg.is_encrypted() || msg.isDHKey()) abortBroadcast();
             if (!msg.isDHKey()) {
                 addReceivedMessageToDatabase(msg, context);
                 Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
