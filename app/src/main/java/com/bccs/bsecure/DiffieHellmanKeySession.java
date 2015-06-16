@@ -99,12 +99,6 @@ public class DiffieHellmanKeySession {
     }
 
     public String packKey(byte[] encodedKey) {
-        /*
-        String s = toHexString(encodedKey);
-        System.out.println("public key byte size: " + encodedKey.length);
-        System.out.println("public key char length: " + s.length());
-        return s;
-        */
         return toBase64String(encodedKey);
     }
 

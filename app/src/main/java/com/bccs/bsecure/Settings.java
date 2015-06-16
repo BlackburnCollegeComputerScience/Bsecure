@@ -85,7 +85,7 @@ public class Settings extends ActionBarActivity {
     }
 
     public void openNoNFC() {
-        Intent intent = new Intent(this, NoNFC.class);
+        Intent intent = new Intent(this, SMSExchange.class);
         startActivity(intent);
     }
     public void openSettings(){

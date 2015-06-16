@@ -14,9 +14,13 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * Modified by lucas.burdell on 6/12/2015
  * Added code to shrink our initialization vector down to 16 bytes (128 bits) to be used with
- * the cipher. For now it truncates to the first 16 bits of the key.
+ * the cipher. For now it truncates to the first 16 bytes of the key.
  * Edited encryption and decryption methods to convert the keys from hexadecimal to bytes rather than
  * taking the ASCII value bytes.
+ *
+ * Modified by lucas.burdell on 6/16/2015
+ * Switched from hexadecimal encoding and decoding of bytes to base64.
+ *
  */
 public class messageCipher {
 
@@ -35,10 +39,10 @@ public class messageCipher {
     public static String encrypt(String value, String key1, String key2) {
 
         try {
-            byte[] iv1 = cutIV(hexStringToByteArray(key2));
+            byte[] iv1 = cutIV(fromBase64String(key2));
             IvParameterSpec iv = new IvParameterSpec(iv1);
 
-            SecretKeySpec skeySpec = new SecretKeySpec(hexStringToByteArray(key1),
+            SecretKeySpec skeySpec = new SecretKeySpec(fromBase64String(key1),
                     "AES");
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
@@ -46,7 +50,7 @@ public class messageCipher {
 
 //            System.out.println("encrypted string:"
 //                    + Base64.encodeToString(encrypted, 0)           );
-            return Base64.encodeToString(encrypted, 0);
+            return toBase64String(encrypted);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -58,15 +62,15 @@ public class messageCipher {
 
     public static String decrypt(String encrypted, String key1, String key2) {
         try {
-            byte[] iv1 = cutIV(hexStringToByteArray(key2));
+            byte[] iv1 = cutIV(fromBase64String(key2));
             IvParameterSpec iv = new IvParameterSpec(iv1);
 
-            SecretKeySpec skeySpec = new SecretKeySpec(hexStringToByteArray(key1),
+            SecretKeySpec skeySpec = new SecretKeySpec(fromBase64String(key1),
                     "AES");
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
             //byte[] original = cipher.doFinal(Base64.decodeBase64(encrypted));
-            byte[] original = cipher.doFinal(Base64.decode(encrypted, 0));
+            byte[] original = cipher.doFinal(fromBase64String(encrypted));
 
 
             return new String(original);
@@ -76,13 +80,12 @@ public class messageCipher {
         return null;
     }
 
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
+    public static byte[] fromBase64String(String s) {
+        return Base64.decode(s, 0);
     }
+
+    public static String toBase64String(byte[] block) {
+        return Base64.encodeToString(block, 0);
+    }
+
 }

@@ -8,12 +8,19 @@ import android.nfc.NfcManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -27,6 +34,16 @@ public class Main extends AppCompatActivity {
     //ArrayList storing names and numbers in outbox
     private ArrayList<String> activeNums = new ArrayList<>();
     private boolean receiverRegistered = false;
+
+    private Button.OnClickListener contactButtonClick = new Button.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            LinearLayout parent = (LinearLayout) v.getParent();
+            TextView contactView = (TextView) parent.getChildAt(0);
+
+
+        }
+    };
 
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
@@ -129,7 +146,7 @@ public class Main extends AppCompatActivity {
     }
 
     public void openNoNFC() {
-        Intent intent = new Intent(this, NoNFC.class);
+        Intent intent = new Intent(this, SMSExchange.class);
         startActivity(intent);
     }
     public void openSettings(){
@@ -181,6 +198,81 @@ public class Main extends AppCompatActivity {
         }
         appHelper.close();
         activeInfoAdapter.notifyDataSetChanged();
+    }
+
+
+    // Custom Adapter to display the differing layouts for chat.
+    private class contactsAdapter extends BaseAdapter {
+
+        //Possibility to add more types
+        private static final int SENT = 0;
+        private static final int MAX_TYPES = 1;
+
+        private ArrayList<myMessage> contactsArray = new ArrayList<>();
+        private LayoutInflater inflater;
+
+        public contactsAdapter() {
+            //create inflater that will hold the chat boxes
+            inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        }
+
+        public void addItem(myMessage message, boolean isSent, boolean isEncrypted) {
+            contactsArray.add(message);
+            notifyDataSetChanged();
+        }
+
+
+        public ArrayList<myMessage> getContactsArray() {
+            ArrayList<myMessage> newChat = new ArrayList<>();
+            for (myMessage m : contactsArray) {
+                newChat.add(m);
+            }
+            return newChat;
+        }
+
+
+        @Override
+        public int getItemViewType(int position) {
+            return 0;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return MAX_TYPES;
+        }
+
+        @Override
+        public int getCount() {
+            return contactsArray.size();
+        }
+
+        @Override
+        public myMessage getItem(int position) {
+            return contactsArray.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            FrameLayout holder = null;
+            int type = getItemViewType(position);
+            if (convertView == null) {
+                switch (type) {
+                    case SENT:
+                        convertView = inflater.inflate(R.layout.sentmessage, null);
+                        holder = (FrameLayout) ((LinearLayout) convertView).getChildAt(0);
+                        break;
+                }
+            } else {
+                holder = (FrameLayout) ((LinearLayout) convertView).getChildAt(0);
+                //holder.setOnClickListener();
+            }
+
+            return convertView;
+        }
     }
 
     protected void onResume() {

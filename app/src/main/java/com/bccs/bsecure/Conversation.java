@@ -297,7 +297,7 @@ public class Conversation extends ActionBarActivity {
             TextView text =(TextView) ((LinearLayout) holder.getChildAt(0)).getChildAt(0);
             TextView date = (TextView) holder.getChildAt(1);
             String dateText = (new SimpleDateFormat("h:mm a, EEE, MMM d, ''yy")).format(
-                    new Date((long) msg.get_time()));
+                    new Date(msg.get_time()));
             text.setText(msg.getBody());
             date.setText(dateText);
             return convertView;
@@ -372,7 +372,7 @@ public class Conversation extends ActionBarActivity {
     }
 
     public void openNoNFC() {
-        Intent intent = new Intent(this, NoNFC.class);
+        Intent intent = new Intent(this, SMSExchange.class);
         startActivity(intent);
     }
     public void openSettings(){

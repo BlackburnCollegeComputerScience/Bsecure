@@ -30,9 +30,8 @@ public class handleMessage {
 
     //These temp keys were generated with Diffie-Hellman key exchange. The second key (the IV for the cipher)
     //Is a SHA-256 hash of the key1, a Diffie-Hellman generated key.
-    private static final String key1 = "524F0D82AFA4779CB7A55358798117A88A90549730659C0778CEBE5BAD7FDD77";
-    private static final String key2 = "5155F276EB66C9D56D3335A3B7150E621CA012EF6A660834D90EB67341BA36C6";
-    //old keys were 256-bit (16 chars) (32 bytes)
+    //private static final String key1 = "524F0D82AFA4779CB7A55358798117A88A90549730659C0778CEBE5BAD7FDD77";
+    //private static final String key2 = "5155F276EB66C9D56D3335A3B7150E621CA012EF6A660834D90EB67341BA36C6";
 
 
     private static final String prepend = "-&*&-"; // current message header
@@ -71,8 +70,8 @@ public class handleMessage {
             int numberOfParts = messages.size();
             System.out.println(numberOfParts);
 
-            ArrayList<PendingIntent> sentIntents = new ArrayList<PendingIntent>();
-            ArrayList<PendingIntent> deliveryIntents = new ArrayList<PendingIntent>();
+            ArrayList<PendingIntent> sentIntents = new ArrayList<>();
+            ArrayList<PendingIntent> deliveryIntents = new ArrayList<>();
 
             Intent mSendIntent = new Intent("CTS_SMS_SEND_ACTION");
             Intent mDeliveryIntent = new Intent("CTS_SMS_DELIVERY_ACTION");
@@ -99,18 +98,6 @@ public class handleMessage {
             System.out.printf("Total: " + msg.length());
             myMessage msgObj = new myMessage(number, msg, true);
             msgObj.setIsDHKey(true);
-
-            ArrayList<PendingIntent> sentIntents = new ArrayList<PendingIntent>();
-            ArrayList<PendingIntent> deliveryIntents = new ArrayList<PendingIntent>();
-
-            Intent mSendIntent = new Intent("CTS_SMS_SEND_ACTION");
-            Intent mDeliveryIntent = new Intent("CTS_SMS_DELIVERY_ACTION");
-
-            for (int i = 0; i < numberOfParts; i++) {
-                sentIntents.add(PendingIntent.getBroadcast(context, 0, mSendIntent, 0));
-                deliveryIntents.add(PendingIntent.getBroadcast(context, 0, mDeliveryIntent, 0));
-            }
-
             sms.sendMultipartTextMessage(number, null, messages, null, null);
             System.out.println("Message sent: " + msg);
             return msgObj;
@@ -137,7 +124,7 @@ public class handleMessage {
             System.out.println(pdus.length);
             for (int i = 0; i < pdus.length; i++) {
                 smsMessages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                stringBuilder.append(smsMessages[i].getMessageBody().toString());
+                stringBuilder.append(smsMessages[i].getMessageBody());
             }
             String sender = smsMessages[0].getOriginatingAddress();
             String message = stringBuilder.toString();

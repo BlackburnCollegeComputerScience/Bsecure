@@ -82,7 +82,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".NoNFC"
+            android:name=".SMSExchange"
             android:label="@string/title_activity_no_nfc">
         </activity>
     </application>

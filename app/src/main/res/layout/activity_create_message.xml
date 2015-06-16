@@ -34,10 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Add Recipient"
-            android:id="@+id/addRecipientButton"
-            android:layout_alignBottom="@+id/editText3"
-            android:layout_alignRight="@+id/sendButton"
-            android:layout_alignEnd="@+id/sendButton" />
+            android:id="@+id/addRecipientButton" />
 
     </LinearLayout>
 
@@ -56,21 +53,13 @@
             android:inputType="textMultiLine"
             android:ems="10"
             android:id="@+id/messageEditText"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@+id/sendButton"
-            android:layout_toStartOf="@+id/sendButton"
             android:layout_weight="1" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Send"
-            android:id="@+id/sendButton"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:id="@+id/sendButton" />
     </LinearLayout>
 
 </RelativeLayout>

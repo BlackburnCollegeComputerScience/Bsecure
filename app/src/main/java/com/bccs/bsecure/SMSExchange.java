@@ -17,7 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
-public class NoNFC extends ActionBarActivity {
+public class SMSExchange extends ActionBarActivity {
 
     String currentNumber = "";
     boolean currentlyWorking = false;
@@ -60,6 +60,7 @@ public class NoNFC extends ActionBarActivity {
                     currentNumber = intent.getStringExtra("number");
                     currentSession = new DiffieHellmanKeySession(intent.getStringExtra("body"));
                     currentlyWorking = true;
+                    contactNumText.setText(currentNumber);
                     progressTextView.append("Received g^a%p from " + currentNumber);
                     handleMessage.send(currentNumber,
                             currentSession.packKey(currentSession.getPublicKey().getEncoded()),
@@ -259,7 +260,7 @@ public class NoNFC extends ActionBarActivity {
     }
 
     public void openNoNFC() {
-        Intent intent = new Intent(this, NoNFC.class);
+        Intent intent = new Intent(this, SMSExchange.class);
         startActivity(intent);
     }
 

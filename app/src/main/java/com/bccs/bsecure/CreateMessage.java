@@ -33,6 +33,43 @@ public class CreateMessage extends ActionBarActivity {
     //TextFields
     EditText addContactText;
     EditText messageText;
+    /**
+     * This method will send the typed message to all members of the RecipientList
+     */
+    private Button.OnClickListener sendMessageListener = new Button.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            for (String number : recipientStrings) {
+                dbHelper database = new dbHelper(getApplicationContext());
+                database.addRecord(handleMessage.send(number, messageText.getText().toString(), getApplicationContext()));
+                database.close();
+            }
+            Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
+            conversationIntent.putExtra("name", recipientStrings.get(0));
+            conversationIntent.putExtra("number", recipientStrings.get(0));
+            startActivity(conversationIntent);
+        }
+    };
+    /**
+     * This Method will remove a contact that has been clicked on the recipientList
+     */
+    private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
+            recipientStrings.remove(pos);
+            adapter.notifyDataSetChanged();
+        }
+    };
+    /**
+     * This Method will take the Recipient the user entered and add it to the contact list
+     */
+    private Button.OnClickListener addRecipientToList = new Button.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            recipientStrings.add(addContactText.getText().toString());
+            adapter.notifyDataSetChanged();
+            addContactText.setText("");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,24 +89,6 @@ public class CreateMessage extends ActionBarActivity {
     }
 
     /**
-     * This method will send the typed message to all members of the RecipientList
-     */
-    private Button.OnClickListener sendMessageListener = new Button.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            for (String number : recipientStrings) {
-                dbHelper database = new dbHelper(getApplicationContext());
-                database.addRecord(handleMessage.send(number, messageText.getText().toString(), getApplicationContext()));
-                database.close();
-            }
-            Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
-            conversationIntent.putExtra("name", recipientStrings.get(0));
-            conversationIntent.putExtra("number", recipientStrings.get(0));
-            startActivity(conversationIntent);
-        }
-    };
-
-    /**
      * This will apply all necessary settings to the recipientList
      */
     private void setupRecipientList() {
@@ -82,28 +101,6 @@ public class CreateMessage extends ActionBarActivity {
                 recipientStrings);
         recipientList.setAdapter(adapter);
     }
-
-    /**
-     * This Method will remove a contact that has been clicked on the recipientList
-     */
-    private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
-            recipientStrings.remove(pos);
-            adapter.notifyDataSetChanged();
-        }
-    };
-
-    /**
-     * This Method will take the Recipient the user entered and add it to the contact list
-     */
-    private Button.OnClickListener addRecipientToList = new Button.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            recipientStrings.add(addContactText.getText().toString());
-            adapter.notifyDataSetChanged();
-            addContactText.setText("");
-        }
-    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -119,7 +116,7 @@ public class CreateMessage extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        switch(id){
+        switch (id) {
             case R.id.action_new:
                 openNewMessage();
                 return true;
@@ -128,7 +125,7 @@ public class CreateMessage extends ActionBarActivity {
                 return true;
             case R.id.action_nfc:
                 //Checks if the device supports NFC. If not opens the NoNFC activity to communicate
-                //through test messaging.
+                //through text messaging.
                 NfcManager nfcManager = (NfcManager) getApplicationContext().getSystemService(Context.NFC_SERVICE);
                 NfcAdapter nfcAdapter = nfcManager.getDefaultAdapter();
                 if (nfcAdapter != null && nfcAdapter.isEnabled()) {
@@ -157,32 +154,37 @@ public class CreateMessage extends ActionBarActivity {
         startActivity(intent);
     }
 
-    public void openNewMessage(){
+    public void openNewMessage() {
         Intent intent = new Intent(this, CreateMessage.class);
         startActivity(intent);
     }
-    public void openContacts(){
+
+    public void openContacts() {
         Intent intent = new Intent(this, Contacts.class);
         startActivity(intent);
     }
-    public void openNFC(){
+
+    public void openNFC() {
         Intent intent = new Intent(this, NFC.class);
         startActivity(intent);
     }
 
     public void openNoNFC() {
-        Intent intent = new Intent(this, NoNFC.class);
+        Intent intent = new Intent(this, SMSExchange.class);
         startActivity(intent);
     }
-    public void openSettings(){
+
+    public void openSettings() {
         Intent intent = new Intent(this, Settings.class);
         startActivity(intent);
     }
-    public void openBugReport(){
+
+    public void openBugReport() {
         Intent intent = new Intent(this, BugReport.class);
         startActivity(intent);
     }
-    public void openAbout(){
+
+    public void openAbout() {
         Intent intent = new Intent(this, About.class);
         startActivity(intent);
     }
