@@ -1,0 +1,272 @@
+package com.bccs.bsecure;
+
+import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.UUID;
+
+
+public class Bluetooth extends ActionBarActivity {
+
+    //This applications randomly generated UUID
+    private static final UUID APP_UUID = UUID.fromString("e3bf2079-3842-4f71-a915-fecbb52bb8ca");
+
+    //Request codes for onActivityResult calls
+    private int REQUEST_ENABLE_BT = 1000;
+    private int REQUEST_ENABLE_BT_DIS = 2000;
+
+    //Layout objects
+    private TextView btStatus;
+    private Button showBTPairsBtn;
+    private Button scanBtn;
+
+    //Dialog to show when scanning
+    private ProgressDialog progressDlg;
+
+    //ArrayList of devices
+    private ArrayList<BluetoothDevice> deviceList = new ArrayList<>();
+
+    //The bluetooth adapter
+    private BluetoothAdapter bluetoothAdapter;
+
+    //The bluetooth service for managing the connection
+    private BluetoothService bluetoothService;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        //Activity Setup
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_bluetooth);
+
+        //Get objects from layout
+        btStatus = (TextView) findViewById(R.id.tv_status);
+        showBTPairsBtn = (Button) findViewById(R.id.btn_view_paired);
+        scanBtn = (Button) findViewById(R.id.btn_scan);
+
+        //Initialize the bluetooth adapter
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        //TODO
+        //Initialize the progress dialog.
+        progressDlg = new ProgressDialog(this);
+        progressDlg.setMessage("Scanning...");
+        //Remove the default cancel button in favor of our own (Default won't stop discovery)
+        progressDlg.setCancelable(false);
+        progressDlg.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //Remove the dialog
+                dialog.dismiss();
+                //Stop discovery
+                bluetoothAdapter.cancelDiscovery();
+            }
+        });
+
+        showBTPairsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Get devices paired to the bluetooth adapter
+                Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+
+                //If no devices are found send a toast displaying such
+                if (pairedDevices == null || pairedDevices.size() == 0) {
+                    showToast("No Paired Devices Found");
+                } else {
+                    //Else create a array list of all the devices (You can't pass sets in an Intent)
+                    ArrayList<BluetoothDevice> list = new ArrayList<>();
+                    list.addAll(pairedDevices);
+                    //Initialize and start the Intent to open a list of the device pairs
+                    startDeviceList(list);
+                }
+            }
+        });
+
+        scanBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                //If the user is to fast to click scan right after turing bluetooth on we
+                //have to wait for it to finish turing on, or things get messy
+                while (bluetoothAdapter.getState() == BluetoothAdapter.STATE_TURNING_ON) {
+                }
+                //If the bluetooth adapter is not set to be discoverable by other devices
+                if (bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+                    //Initialize the popup intent to ask the user to make the device discoverable
+                    //for 300 seconds
+                    Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                    discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+                    //Start the activity and call onActivityResult() with the request code
+                    //REQUEST_ENABLE_BT_DIS when finished
+                    startActivityForResult(discoverableIntent, REQUEST_ENABLE_BT_DIS);
+                } else {
+                    //If it is already on just start discovery
+                    bluetoothAdapter.startDiscovery();
+                }
+            }
+        });
+
+        //If the bluetooth adapter is not enabled
+        if (!bluetoothAdapter.isEnabled()) {
+            //Initialize the popup intent to ask the user to turn bluetooth on.
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            //Start the activity and call onActivityResult() with the request code
+            //REQUEST_ENABLE_BT when finished
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        } else {
+            //else bluetooth is enabled and we can enabled the buttons and change the status
+            showEnabled();
+        }
+
+        //Initialize a intent filter for some important actions
+        IntentFilter filter = new IntentFilter();
+        //The state of the adapter has changed ( On / Off )
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        //Discovery has found a device
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        //Discovery is started and looking for unpaired devices
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        //Discovery has finished
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
+        //Set our register our receiver to respond on these events.
+        registerReceiver(receiver, filter);
+
+    }
+
+    @Override
+    public void onPause() {
+        if (bluetoothAdapter != null) {
+            if (bluetoothAdapter.isDiscovering()) {
+                //Cancel discovery if it is running
+                bluetoothAdapter.cancelDiscovery();
+            }
+        }
+
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        //Unregister our receiver before the user leaves the activity
+        //Makes sure the activity does not open when a action happens out of context
+        unregisterReceiver(receiver);
+        super.onDestroy();
+    }
+
+    private void showEnabled() {
+        btStatus.setText("Bluetooth is On");
+        btStatus.setTextColor(Color.BLUE);
+        //Enable buttons
+        showBTPairsBtn.setEnabled(true);
+        scanBtn.setEnabled(true);
+    }
+
+    private void showDisabled() {
+        btStatus.setText("Bluetooth is Off");
+        btStatus.setTextColor(Color.RED);
+        //Disable buttons
+        showBTPairsBtn.setEnabled(false);
+        scanBtn.setEnabled(false);
+    }
+
+    private void showToast(String message) {
+        //Shortcut method to display a toast
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //onActivityResult is called when a intent finished and comes back to this activity.
+        if (requestCode == REQUEST_ENABLE_BT) {
+            //If we requested the user turn bluetooth on
+            if (resultCode == RESULT_CANCELED) {
+                //If they canceled the request disable the functionality buttons
+                showDisabled();
+            } else {
+                //If they did enable allow them to use the functionality buttons
+                showEnabled();
+            }
+        } else if (requestCode == REQUEST_ENABLE_BT_DIS) {
+            //If we requested the user turn discoverability on
+            if (resultCode != RESULT_CANCELED) {
+                //If the user turned on discoverability start looking for devices
+                bluetoothAdapter.startDiscovery();
+            }
+        }
+    }
+
+    private void startDeviceList(ArrayList<BluetoothDevice> list) {
+        //Initialize and start the Intent to open a list of the device pairs
+        Intent intent = new Intent(Bluetooth.this, DeviceListActivity.class);
+        intent.putParcelableArrayListExtra("device.list", list);
+        //Also pass in the UUID just in case the user chooses to connect to a device
+        intent.putExtra("Uuid", APP_UUID.toString());
+        startActivity(intent);
+    }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            //Get the action that resulted in the receiver activation
+            String action = intent.getAction();
+
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                //If the Bluetooth adapters state changed
+                //Get the state
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+
+                if (state == BluetoothAdapter.STATE_ON) {
+                    //If turned on make sure functionality buttons are enabled
+                    showEnabled();
+                } else if (state == BluetoothAdapter.STATE_OFF) {
+                    //If the user turned bluetooth off display a toast and disable functionality buttons
+                    showToast("Bluetooth disabled");
+                    showDisabled();
+                }
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                //If we have started to look for devices
+                //re-initialize our device list
+                deviceList = new ArrayList<>();
+                //Show the progress dialog so the user knows we are looking
+                progressDlg.show();
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                //If discovery has finished looking for devices
+                //Remove the progress dialog
+                progressDlg.dismiss();
+                //Initialise a new intent to list the devices
+                startDeviceList(deviceList);
+            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                //If we have found a device
+                //Get the device from the intent and add it to the list
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                deviceList.add(device);
+                //Inform the user with a toast
+                showToast("Found device " + device.getName());
+            }
+        }
+    };
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so
+        // as you specify a parent activity in AndroidManifest.xml.
+        onBackPressed();
+        return true;
+    }
+}

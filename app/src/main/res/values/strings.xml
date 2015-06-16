@@ -36,4 +36,22 @@
     <string name="action_share">Share</string>
     <string name="action_reply">Reply</string>
     <string name="title_activity_no_nfc">NoNFC</string>
+    <string name="title_activity_blue_tooth">BlueTooth</string>
+    <string name="title_activity_device_list">DeviceListActivity</string>
+    <string name="title_activity_bluetooth">Bluetooth</string>
+
+    <string name="text_bluetooth_off">Bluetooth is Off</string>
+    <string name="text_bluetooth_on">Bluetooth is On</string>
+
+    <string name="text_view_paired">Paired Devices</string>
+    <string name="text_scan_devices">Scan Devices</string>
+    <string name="text_stop_scan">Scan Devices</string>
+
+    <string name="text_list_paired_devices">Paired Devices</string>
+    <string name="text_list_devices">List of Devices</string>
+
+    <string name="text_pair">Pair</string>
+
+    <string name="text_connect">Connect</string>
+
 </resources>

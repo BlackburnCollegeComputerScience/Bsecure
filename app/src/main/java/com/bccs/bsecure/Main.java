@@ -1,10 +1,9 @@
 package com.bccs.bsecure;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.nfc.NfcAdapter;
-import android.nfc.NfcManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -107,11 +106,10 @@ public class Main extends AppCompatActivity {
                 openContacts();
                 return true;
             case R.id.action_nfc:
-                //Checks if the device supports NFC. If not opens the NoNFC activity to communicate
-                //through test messaging.
-                NfcManager nfcManager = (NfcManager) getApplicationContext().getSystemService(Context.NFC_SERVICE);
-                NfcAdapter nfcAdapter = nfcManager.getDefaultAdapter();
-                if (nfcAdapter != null && nfcAdapter.isEnabled()) {
+                //Checks if the device supports Bluetooth. If not opens the NoNFC activity to communicate
+                //through text messaging.
+                BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                if (bluetoothAdapter != null) {
                     openNFC();
                 } else {
                     openNoNFC();
@@ -141,7 +139,7 @@ public class Main extends AppCompatActivity {
         startActivity(intent);
     }
     public void openNFC(){
-        Intent intent = new Intent(this, NFC.class);
+        Intent intent = new Intent(this, Bluetooth.class);
         startActivity(intent);
     }
 

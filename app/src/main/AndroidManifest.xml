@@ -14,7 +14,9 @@
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <!-- http://stackoverflow.com/questions/642076/how-to-save-sms-to-inbox-in-android -->
     <!-- <uses-permission android:name="android.permission.READ_SMS"/> -->
@@ -82,6 +84,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".SMSExchange"
+            android:label="@string/title_activity_no_nfc"></activity>
+        <activity
+            android:name=".Bluetooth"
+            android:label="@string/title_activity_blue_tooth"></activity>
+        <activity
+            android:name=".DeviceListActivity"
+            android:label="@string/title_activity_device_list">
             android:name=".SMSExchange"
             android:label="@string/title_activity_no_nfc">
         </activity>

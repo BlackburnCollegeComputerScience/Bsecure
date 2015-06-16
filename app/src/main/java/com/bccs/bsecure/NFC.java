@@ -1,5 +1,6 @@
 package com.bccs.bsecure;
 
+import android.content.Context;
 import android.content.Intent;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
@@ -10,15 +11,20 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
+import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.security.KeyPair;
+
 
 public class NFC extends ActionBarActivity implements CreateNdefMessageCallback {
     NfcAdapter nfcAdapter;
     TextView textView;
+    KeyPair keyPairs[] = new KeyPair[1028];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +48,11 @@ public class NFC extends ActionBarActivity implements CreateNdefMessageCallback 
 
     @Override
     public NdefMessage createNdefMessage(NfcEvent event) {
+        //Get the Phone Number of this device
+        TelephonyManager telephonyManager = (TelephonyManager) getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
+        String phoneNumber = telephonyManager.getLine1Number();
+        for (int i = 0; i < keyPairs.length; i++) {
+        }
         String text = ("(Beam test)" +
                 "Beam Time: " + System.currentTimeMillis());
         NdefMessage msg = new NdefMessage(
@@ -50,7 +61,7 @@ public class NFC extends ActionBarActivity implements CreateNdefMessageCallback 
     }
 
     /**
-     * Parses the NDEF Message from the intent and prints to the TextView
+     * Parses the NDEF Message from the intent
      */
     void processIntent(Intent intent) {
         textView = (TextView) findViewById(R.id.textView);
