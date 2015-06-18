@@ -29,6 +29,24 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
+/**
+ * This file is part of Bsecure. A open source, freely available, SMS encryption app.
+ * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
+ * <p/>
+ * Bsecure is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p/>
+ * Bsecure is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU General Public License
+ * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /** Created by lucas.burdell 6/4/2015.
  * Handles conversation between user and another phone. Sent messages are
  * displayed using the "sentmessage.xml" layout and received messages are
@@ -121,7 +139,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
             }
         });
 
-        ((Button) findViewById(R.id.wipeConversation)).setOnClickListener(new Button.OnClickListener() {
+        findViewById(R.id.wipeConversation).setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
                 WipeConversationDialog dialog = new WipeConversationDialog();

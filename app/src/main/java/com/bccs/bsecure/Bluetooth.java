@@ -19,17 +19,26 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.UUID;
 
+/**
+ * This file is part of Bsecure. A open source, freely available, SMS encryption app.
+ * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
+ * <p/>
+ * Bsecure is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p/>
+ * Bsecure is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU General Public License
+ * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 public class Bluetooth extends ActionBarActivity {
-
-    //This applications randomly generated UUID
-    private static final UUID APP_UUID = UUID.fromString("e3bf2079-3842-4f71-a915-fecbb52bb8ca");
-
-    //Request codes for onActivityResult calls
-    private int REQUEST_ENABLE_BT = 1000;
-    private int REQUEST_ENABLE_BT_DIS = 2000;
 
     //Layout objects
     private TextView btStatus;
@@ -44,10 +53,6 @@ public class Bluetooth extends ActionBarActivity {
 
     //The bluetooth adapter
     private BluetoothAdapter bluetoothAdapter;
-
-    //The bluetooth service for managing the connection
-    private BluetoothService bluetoothService;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +107,8 @@ public class Bluetooth extends ActionBarActivity {
             public void onClick(View arg0) {
                 //If the user is to fast to click scan right after turing bluetooth on we
                 //have to wait for it to finish turing on, or things get messy
-                while (bluetoothAdapter.getState() == BluetoothAdapter.STATE_TURNING_ON) {
+                if (bluetoothAdapter.getState() == BluetoothAdapter.STATE_TURNING_ON) {
+                    return;
                 }
                 //If the bluetooth adapter is not set to be discoverable by other devices
                 if (bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
@@ -112,7 +118,7 @@ public class Bluetooth extends ActionBarActivity {
                     discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
                     //Start the activity and call onActivityResult() with the request code
                     //REQUEST_ENABLE_BT_DIS when finished
-                    startActivityForResult(discoverableIntent, REQUEST_ENABLE_BT_DIS);
+                    startActivityForResult(discoverableIntent, Constants.REQUEST_ENABLE_BT_DIS);
                 } else {
                     //If it is already on just start discovery
                     bluetoothAdapter.startDiscovery();
@@ -126,7 +132,7 @@ public class Bluetooth extends ActionBarActivity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             //Start the activity and call onActivityResult() with the request code
             //REQUEST_ENABLE_BT when finished
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_BT);
         } else {
             //else bluetooth is enabled and we can enabled the buttons and change the status
             showEnabled();
@@ -193,7 +199,7 @@ public class Bluetooth extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //onActivityResult is called when a intent finished and comes back to this activity.
-        if (requestCode == REQUEST_ENABLE_BT) {
+        if (requestCode == Constants.REQUEST_ENABLE_BT) {
             //If we requested the user turn bluetooth on
             if (resultCode == RESULT_CANCELED) {
                 //If they canceled the request disable the functionality buttons
@@ -202,7 +208,7 @@ public class Bluetooth extends ActionBarActivity {
                 //If they did enable allow them to use the functionality buttons
                 showEnabled();
             }
-        } else if (requestCode == REQUEST_ENABLE_BT_DIS) {
+        } else if (requestCode == Constants.REQUEST_ENABLE_BT_DIS) {
             //If we requested the user turn discoverability on
             if (resultCode != RESULT_CANCELED) {
                 //If the user turned on discoverability start looking for devices
@@ -215,8 +221,6 @@ public class Bluetooth extends ActionBarActivity {
         //Initialize and start the Intent to open a list of the device pairs
         Intent intent = new Intent(Bluetooth.this, DeviceListActivity.class);
         intent.putParcelableArrayListExtra("device.list", list);
-        //Also pass in the UUID just in case the user chooses to connect to a device
-        intent.putExtra("Uuid", APP_UUID.toString());
         startActivity(intent);
     }
 

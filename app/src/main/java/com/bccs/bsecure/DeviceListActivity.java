@@ -25,6 +25,24 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 
+/**
+ * This file is part of Bsecure. A open source, freely available, SMS encryption app.
+ * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
+ * <p/>
+ * Bsecure is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p/>
+ * Bsecure is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU General Public License
+ * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 public class DeviceListActivity extends Activity {
 
     //Layout Objects
@@ -55,7 +73,7 @@ public class DeviceListActivity extends Activity {
         adapter = new DeviceListAdapter(this);
         adapter.setData(deviceList);
 
-        bluetoothService = new BluetoothService(getApplicationContext(), handler);
+        bluetoothService = new BluetoothService(handler);
         bluetoothService.start();
 
         adapter.setPairListener(new DeviceListAdapter.OnPairButtonClickListener() {
@@ -191,118 +209,129 @@ public class DeviceListActivity extends Activity {
                                         e.printStackTrace();
                                     }
                                 }
-                                //Create an
+                                //Create a array of strings to hold the public (g^a mod p) key encoding
                                 String[] publicEncodes = new String[Constants.KEY_AMOUNT];
                                 for (int i = 0; i < publicEncodes.length; i++) {
                                     publicEncodes[i] = session[i].packKey();
                                 }
+                                //Create an object to send over bluetooth containing the public
+                                //(g^a mod p) encoding and a protocol code to inform the next device
+                                //of what the stage in our exchange we are at
                                 BluetoothPackage btPack = new BluetoothPackage(publicEncodes, Constants.EXCHANGE_FIRST_TRADE);
+                                //Array of bytes to hold the serialized version of the bluetooth package
                                 byte[] toSend = null;
                                 try {
+                                    //Serialize the package into an array of bytes
                                     toSend = serialize(btPack);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
+                                //Write the bytes to the output stream
                                 bluetoothService.write(toSend);
                             }
                             break;
-                        case BluetoothService.STATE_CONNECTING:
-                            break;
-                        case BluetoothService.STATE_LISTEN:
-                        case BluetoothService.STATE_NONE:
-                            break;
                     }
                     break;
-                case Constants.MESSAGE_WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    String writeMessage = new String(writeBuf);
-                    break;
                 case Constants.MESSAGE_READ:
+                    //Grab the array of bytes from the message package
                     byte[] readBuf = (byte[]) msg.obj;
+                    //Create a bluetooth package and initialize it by de-serializing the input buffer
                     BluetoothPackage received = null;
                     try {
-                        statusTv.append("Here is the readBuf size: " + msg.arg1 + "\n");
                         received = deserialize(readBuf);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
+
                     if (bluetoothService.isServer()) {
                         switch (received.getProtocolCode()) {
                             case Constants.EXCHANGE_SECOND_TRADE:
+                                //If this device is the server and the protocol tells us
+                                //that this is the second portion of the key exchange.
                                 String[] keys = new String[Constants.KEY_AMOUNT];
                                 for (int i = 0; i < keys.length; i++) {
                                     try {
+                                        //Use our private and the public keys we received
+                                        //to create all the session keys.
                                         keys[i] = session[i].packSecret(received.getKeys()[i]);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
+
+                                    //Create a bluetooth package to send a confirmation that
+                                    //we received the packet
+                                    String[] holder = new String[1];
+                                    BluetoothPackage firstAck = new BluetoothPackage(holder, Constants.EXCHANGE_FINALIZATION);
+
+                                    //serialize the packet
+                                    byte[] toSend = null;
+                                    try {
+                                        toSend = serialize(firstAck);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    bluetoothService.write(toSend);
                                 }
-                                break;
-                            case Constants.EXCHANGE_FINALIZATION_FIRST_ACK:
-                                break;
-                            case Constants.EXCHANGE_FINALIZATION_SECOND_ACK:
-                                break;
-                            case Constants.EXCHANGE_ERROR:
                                 break;
                         }
                     } else {
                         switch (received.getProtocolCode()) {
                             case Constants.EXCHANGE_FIRST_TRADE:
+                                //If we are the client and the protocol tells us this is the first
+                                //Packet we have received.
+
+                                //Initialize our array of diffie hellman sessions
                                 session = new DiffieHellmanKeySession[Constants.KEY_AMOUNT];
-//                                    statusTv.append("Here are the keys we got: \n");
                                 for (int i = 0; i < session.length; i++) {
                                     try {
+                                        //Initialize every session against the public key we received
+                                        //from the server.
                                         session[i] = new DiffieHellmanKeySession(received.getKeys()[i]);
-//                                            statusTv.append(i + ": " + received.getKeys()[i].hashCode() + "\n");
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
                                 }
+                                //Prepair our public (g^b mod p) key encodings to send to the server.
                                 String[] publicEncodes = new String[Constants.KEY_AMOUNT];
                                 for (int i = 0; i < publicEncodes.length; i++) {
                                     publicEncodes[i] = session[i].packKey();
                                 }
+                                //Create a new bluetooth package with our public keys and
+                                //Label the protocol as the second step of the key exchange
                                 BluetoothPackage btPack = new BluetoothPackage(publicEncodes, Constants.EXCHANGE_SECOND_TRADE);
+                                //byte array to serialize to
                                 byte[] toSend = null;
                                 try {
+                                    //serialize the package
                                     toSend = serialize(btPack);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                System.out.println(toSend.length);
+                                //Send the serialized package
                                 bluetoothService.write(toSend);
 
                                 //Compute the session keys
-
                                 String[] keys = new String[Constants.KEY_AMOUNT];
                                 for (int i = 0; i < keys.length; i++) {
                                     try {
+                                        //Using our private and the public keys we received we compute
+                                        //each key
                                         keys[i] = session[i].packSecret(received.getKeys()[i]);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
                                 }
-                                statusTv.append("Here are the shared secret keys: \n");
-//                                    for (int i = 0; i < keys.length; i++) {
-//                                        statusTv.append(i + " " + keys[i].hashCode() + "\n");
-//                                    }
                                 break;
-                            case Constants.EXCHANGE_FINALIZATION_FIRST_ACK:
-                                break;
-                            case Constants.EXCHANGE_FINALIZATION_SECOND_ACK:
-                                break;
-                            case Constants.EXCHANGE_ERROR:
+                            case Constants.EXCHANGE_FINALIZATION:
+
                                 break;
                         }
                     }
                     break;
-                case Constants.MESSAGE_DEVICE_NAME:
-                    // save the connected device's name
-                    break;
                 case Constants.MESSAGE_TOAST:
+                    showToast(msg.getData().getString("toast"));
                     break;
             }
         }

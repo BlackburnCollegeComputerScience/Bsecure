@@ -7,6 +7,26 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 /**
+ *
+ * This file is part of Bsecure. A open source, freely available, SMS encryption app.
+ * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
+ *
+ * Bsecure is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Bsecure is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+/**
  * Creates a two table database that stores all relevant security contact settings and
  * values for key generation.
  *      "scentry" table stores basic settings, and links to main contacts db by _id
