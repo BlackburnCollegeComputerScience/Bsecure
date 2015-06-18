@@ -62,7 +62,7 @@ public class Bluetooth extends ActionBarActivity {
 
         //Initialize the bluetooth adapter
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        //TODO
+
         //Initialize the progress dialog.
         progressDlg = new ProgressDialog(this);
         progressDlg.setMessage("Scanning...");

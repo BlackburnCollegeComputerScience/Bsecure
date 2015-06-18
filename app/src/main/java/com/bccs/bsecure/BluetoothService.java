@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,6 +29,7 @@ public class BluetoothService {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
+    private Boolean server = false;
 
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
@@ -39,6 +41,10 @@ public class BluetoothService {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
+    }
+
+    public Boolean isServer() {
+        return server;
     }
 
     private synchronized void setState(int state) {
@@ -259,6 +265,7 @@ public class BluetoothService {
                             case STATE_LISTEN:
                             case STATE_CONNECTING:
                                 // Situation normal. Start the connected thread.
+                                server = true;
                                 connected(socket, socket.getRemoteDevice());
                                 break;
                             case STATE_NONE:
@@ -379,18 +386,30 @@ public class BluetoothService {
         }
 
         public void run() {
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[10000];
             int bytes;
 
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
                     // Read from the InputStream
-                    bytes = mmInStream.read(buffer);
+//                    bytes = mmInStream.read(buffer);
+                    ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 
+                    int len;
+                    bytes = 0;
+                    while ((len = mmInStream.read(buffer)) >= 990) {
+                        bytes += len;
+                        byteBuffer.write(buffer, 0, len);
+                    }
+                    bytes += len;
+                    byteBuffer.write(buffer, 0, len);
+
+
+                    byte[] bytesToSend = byteBuffer.toByteArray();
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
-                            .sendToTarget();
+                    mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, bytesToSend).sendToTarget();
+
                 } catch (IOException e) {
                     e.printStackTrace();
                     connectionLost();

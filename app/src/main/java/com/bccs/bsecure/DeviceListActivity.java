@@ -9,12 +9,18 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -29,6 +35,8 @@ public class DeviceListActivity extends Activity {
 
     BluetoothService bluetoothService;
 
+    DiffieHellmanKeySession[] session;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         //Setup Activity
@@ -41,6 +49,7 @@ public class DeviceListActivity extends Activity {
         //Initialise list
         list = (ListView) findViewById(R.id.lv_paired);
         statusTv = (TextView) findViewById(R.id.status);
+        statusTv.setMovementMethod(new ScrollingMovementMethod());
 
         //Initialise the adapter
         adapter = new DeviceListAdapter(this);
@@ -150,6 +159,19 @@ public class DeviceListActivity extends Activity {
         }
     };
 
+    public byte[] serialize(BluetoothPackage bluetoothPackage) throws IOException {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        ObjectOutputStream o = new ObjectOutputStream(b);
+        o.writeObject(bluetoothPackage);
+        return b.toByteArray();
+    }
+
+    public static BluetoothPackage deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+        ObjectInputStream o = new ObjectInputStream(b);
+        return (BluetoothPackage) o.readObject();
+    }
+
     private final Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -157,7 +179,32 @@ public class DeviceListActivity extends Activity {
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
-                            bluetoothService.write("This is a test".getBytes());
+                            if (bluetoothService.isServer()) {
+                                //If this device is the server we will send the first exchange
+                                //Create an array of key sessions for this device
+                                session = new DiffieHellmanKeySession[Constants.KEY_AMOUNT];
+                                //Initialize all the key sessions
+                                for (int i = 0; i < session.length; i++) {
+                                    try {
+                                        session[i] = new DiffieHellmanKeySession();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                //Create an
+                                String[] publicEncodes = new String[Constants.KEY_AMOUNT];
+                                for (int i = 0; i < publicEncodes.length; i++) {
+                                    publicEncodes[i] = session[i].packKey();
+                                }
+                                BluetoothPackage btPack = new BluetoothPackage(publicEncodes, Constants.EXCHANGE_FIRST_TRADE);
+                                byte[] toSend = null;
+                                try {
+                                    toSend = serialize(btPack);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                bluetoothService.write(toSend);
+                            }
                             break;
                         case BluetoothService.STATE_CONNECTING:
                             break;
@@ -173,9 +220,84 @@ public class DeviceListActivity extends Activity {
                     break;
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
-                    // construct a string from the valid bytes in the buffer
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-                    statusTv.setText(readMessage);
+                    BluetoothPackage received = null;
+                    try {
+                        statusTv.append("Here is the readBuf size: " + msg.arg1 + "\n");
+                        received = deserialize(readBuf);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    if (bluetoothService.isServer()) {
+                        switch (received.getProtocolCode()) {
+                            case Constants.EXCHANGE_SECOND_TRADE:
+                                String[] keys = new String[Constants.KEY_AMOUNT];
+                                for (int i = 0; i < keys.length; i++) {
+                                    try {
+                                        keys[i] = session[i].packSecret(received.getKeys()[i]);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                break;
+                            case Constants.EXCHANGE_FINALIZATION_FIRST_ACK:
+                                break;
+                            case Constants.EXCHANGE_FINALIZATION_SECOND_ACK:
+                                break;
+                            case Constants.EXCHANGE_ERROR:
+                                break;
+                        }
+                    } else {
+                        switch (received.getProtocolCode()) {
+                            case Constants.EXCHANGE_FIRST_TRADE:
+                                session = new DiffieHellmanKeySession[Constants.KEY_AMOUNT];
+//                                    statusTv.append("Here are the keys we got: \n");
+                                for (int i = 0; i < session.length; i++) {
+                                    try {
+                                        session[i] = new DiffieHellmanKeySession(received.getKeys()[i]);
+//                                            statusTv.append(i + ": " + received.getKeys()[i].hashCode() + "\n");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                String[] publicEncodes = new String[Constants.KEY_AMOUNT];
+                                for (int i = 0; i < publicEncodes.length; i++) {
+                                    publicEncodes[i] = session[i].packKey();
+                                }
+                                BluetoothPackage btPack = new BluetoothPackage(publicEncodes, Constants.EXCHANGE_SECOND_TRADE);
+                                byte[] toSend = null;
+                                try {
+                                    toSend = serialize(btPack);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                System.out.println(toSend.length);
+                                bluetoothService.write(toSend);
+
+                                //Compute the session keys
+
+                                String[] keys = new String[Constants.KEY_AMOUNT];
+                                for (int i = 0; i < keys.length; i++) {
+                                    try {
+                                        keys[i] = session[i].packSecret(received.getKeys()[i]);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                statusTv.append("Here are the shared secret keys: \n");
+//                                    for (int i = 0; i < keys.length; i++) {
+//                                        statusTv.append(i + " " + keys[i].hashCode() + "\n");
+//                                    }
+                                break;
+                            case Constants.EXCHANGE_FINALIZATION_FIRST_ACK:
+                                break;
+                            case Constants.EXCHANGE_FINALIZATION_SECOND_ACK:
+                                break;
+                            case Constants.EXCHANGE_ERROR:
+                                break;
+                        }
+                    }
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name

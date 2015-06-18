@@ -103,7 +103,7 @@ public class DiffieHellmanKeySession {
     }
 
     public byte[] unpackKey(String key) {
-        return hexStringToByteArray(key);
+        return fromBase64String(key);
     }
 
     public SecretKey generateSecret(byte[] otherPublicKey) throws Exception {
