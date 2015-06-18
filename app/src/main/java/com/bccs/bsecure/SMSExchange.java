@@ -129,7 +129,7 @@ public class SMSExchange extends ActionBarActivity {
                 String key = manualKey.getText().toString();
                 String hash = DiffieHellmanKeySession.toHexString(
                         DiffieHellmanKeySession.getHash(
-                                DiffieHellmanKeySession.hexStringToByteArray(key)));
+                                DiffieHellmanKeySession.fromBase64String(key)));
                 helper.addKey(contactNumText.getText().toString(), key, hash);
                 helper.close();
             }

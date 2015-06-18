@@ -1,12 +1,26 @@
 <resources>
 
     <!-- Base application theme. -->
+    <style name="ActionBarHelper" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="displayOptions">homeAsUp|showHome|showTitle</item>
+        <item name="android:background">@color/SkyBlue</item>
+        <item name="background">@color/SkyBlue</item>
+    </style>
+    <style name="ActionBarOverflow" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="background">@color/SkyBlue</item>
+    </style>
+    <style name="WindowTitleBackground">
+        <item name="android:background">@color/SkyBlue</item>
+        <item name="background">@color/SkyBlue</item>
+        <item name="android:color">@color/SkyBlue</item>
+    </style>
+
     <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="android:actionBarStyle">@style/ActionBarHelper</item>
         <item name="actionBarStyle">@style/ActionBarHelper</item>
+        <item name="android:actionOverflowButtonStyle">@style/ActionBarOverflow</item>
+        <item name="actionOverflowButtonStyle">@style/ActionBarOverflow</item>
         <item name="icon">@drawable/ic_security_black_48dp</item>
-    </style>
-    <style name="ActionBarHelper" parent="Widget.AppCompat.ActionBar">
-        <item name="displayOptions">homeAsUp|showHome|showTitle</item>
+        <item name="android:windowTitleBackgroundStyle">@style/WindowTitleBackground</item>
     </style>
 </resources>

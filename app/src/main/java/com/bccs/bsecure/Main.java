@@ -1,5 +1,6 @@
 package com.bccs.bsecure;
 
+import android.app.DialogFragment;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
@@ -13,40 +14,58 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class Main extends AppCompatActivity {
+public class Main extends AppCompatActivity implements WipeActiveConversationsDialog.WipeActiveConversationsDialogListener {
 
     //Global class variables
 
-    private ArrayAdapter<String> activeInfoAdapter;
+    private contactsAdapter activeInfoAdapter;
     //The list view that contains the on-screen info being displayed
     private ListView userListView;
     //ArrayList storing names and numbers in outbox
     private ArrayList<String> activeNums = new ArrayList<>();
     private boolean receiverRegistered = false;
 
-    private Button.OnClickListener contactButtonClick = new Button.OnClickListener() {
+    private Button.OnClickListener optionsClick = new Button.OnClickListener() {
+
         @Override
         public void onClick(View v) {
-            LinearLayout parent = (LinearLayout) v.getParent();
-            TextView contactView = (TextView) parent.getChildAt(0);
+            WipeActiveConversationsDialog dialog = new WipeActiveConversationsDialog();
+            dialog.show(getFragmentManager(), "active_conversations_options");
 
+        }
+    };
+    private View.OnClickListener itemClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            TextView contactName = (TextView) ((RelativeLayout) v).getChildAt(1);
+            Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
+            conversationIntent.putExtra("name", contactName.getText().toString());
+            conversationIntent.putExtra("number", contactName.getText().toString());
+            startActivity(conversationIntent);
+        }
+    };
 
+    private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
+            Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
+            conversationIntent.putExtra("name", activeNums.get(pos));
+            conversationIntent.putExtra("number", activeNums.get(pos));
+            startActivity(conversationIntent);
         }
     };
 
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            updateActiveNums(intent.getStringExtra("number"));
             updateActiveNums(intent.getStringExtra("number"));
         }
     };
@@ -62,28 +81,26 @@ public class Main extends AppCompatActivity {
 //        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
 //        ActionBar actionBar = getActionBar();
 
+
+
         //initialize global variables
         userListView = (ListView) findViewById(R.id.usersListView);
         //Define Listener method
         userListView.setOnItemClickListener(onListClick);
         //Read outbox for active conversation information
         //Initialize the adapter to hold the names of active contacts
-        activeInfoAdapter = new ArrayAdapter<String>
-                (getApplicationContext(), R.layout.row_layout, activeNums);
+        activeInfoAdapter = new contactsAdapter();
         //Display the names.
-        updateActiveNums();
         userListView.setAdapter(activeInfoAdapter);
+        updateActiveNums();
+
+        ((Button) findViewById(R.id.activeConversationOptionsButton)).setOnClickListener(optionsClick);
+
+
         LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
         receiverRegistered = true;
     }
-    private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
-            Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
-            conversationIntent.putExtra("name", activeNums.get(pos));
-            conversationIntent.putExtra("number", activeNums.get(pos));
-            startActivity(conversationIntent);
-        }
-    };
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -173,37 +190,60 @@ public class Main extends AppCompatActivity {
 
 
     private void updateActiveNums(String newNumber) {
-        dbHelper appHelper = new dbHelper(this);
-        ArrayList<String> newNums = appHelper.getActiveNumbers();
-        if (!activeNums.contains(newNumber)) activeNums.add(newNumber);
-        for (String s : newNums) {
-            if (!activeNums.contains(s)) {
-                activeNums.add(s);
-            }
-        }
-        appHelper.close();
-        activeInfoAdapter.notifyDataSetChanged();
+        updateActiveNums();
     }
 
     private void updateActiveNums() {
+        System.out.println("Updating active nums!");
         dbHelper appHelper = new dbHelper(this); //init DB access
         // TODO: Better method for retrieving active numbers that incorporates contact list names
-        ArrayList<String> newNums = appHelper.getActiveNumbers(); //pull all numbers from DB
-        for (String s : newNums) {
-            if (!activeNums.contains(s)) {
-                activeNums.add(s);
+        ArrayList<myMessage> newNums = appHelper.getActiveNumbersAsMyMessages(); //pull all numbers from DB
+        appHelper.close();
+        for (int i = newNums.size() - 1; i > -1; i--) {
+            myMessage message = newNums.get(i);
+            if (!activeNums.contains(message.get_name())) {
+                activeNums.add(message.get_name());
+                appHelper = new dbHelper(this);
+                ArrayList<myMessage> ms = appHelper.getConversationMessages(message.get_number());
+                appHelper.close();
+                activeInfoAdapter.addItem(ms.get(ms.size() - 1));
+            } else {
+                activeInfoAdapter.updateMessage(message);
             }
         }
-        appHelper.close();
-        activeInfoAdapter.notifyDataSetChanged();
+
+        /*
+        for (myMessage m: newNums) {
+            if (!activeNums.contains(m.get_name())) {
+                activeNums.add(m.get_name());
+                activeInfoAdapter.addItem(m);
+            }
+        }
+        */
+
+        //activeInfoAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onOKPressed(DialogFragment dialog) {
+        dbHelper help = new dbHelper(this);
+        help.clearAllMessages();
+        help.close();
+        dialog.dismiss();
+        activeNums = new ArrayList<>();
+        activeInfoAdapter.clearItems();
+        updateActiveNums();
+    }
+
+    @Override
+    public void onCancelPressed(DialogFragment dialog) {
+        dialog.dismiss();
     }
 
 
     // Custom Adapter to display the differing layouts for chat.
     private class contactsAdapter extends BaseAdapter {
 
-        //Possibility to add more types
-        private static final int SENT = 0;
         private static final int MAX_TYPES = 1;
 
         private ArrayList<myMessage> contactsArray = new ArrayList<>();
@@ -214,9 +254,30 @@ public class Main extends AppCompatActivity {
             inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         }
 
-        public void addItem(myMessage message, boolean isSent, boolean isEncrypted) {
+        public void addItem(myMessage message) {
             contactsArray.add(message);
             notifyDataSetChanged();
+        }
+
+        public void clearItems() {
+            contactsArray = new ArrayList<>();
+            notifyDataSetChanged();
+        }
+        public void updateMessage(myMessage message) {
+            System.out.println("Updating messages!");
+            for (myMessage m : contactsArray) {
+                if (message.get_name().equals(m.get_name())) {
+                    System.out.println(message.getBody() + " " + m.getBody());
+                    System.out.println(message.get_time() + " " + m.get_time());
+                    if (message.get_time() > m.get_time()) {
+                        System.out.println("Message was younger!");
+                        m.setBody(message.getBody());
+                    } else {
+                        System.out.println("Message was not younger!");
+                    }
+                    break;
+                }
+            }
         }
 
 
@@ -255,20 +316,25 @@ public class Main extends AppCompatActivity {
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
-            FrameLayout holder = null;
+            RelativeLayout holder = null;
             int type = getItemViewType(position);
             if (convertView == null) {
                 switch (type) {
-                    case SENT:
-                        convertView = inflater.inflate(R.layout.sentmessage, null);
-                        holder = (FrameLayout) ((LinearLayout) convertView).getChildAt(0);
+                    default:
+                        convertView = inflater.inflate(R.layout.new_row_layout, null);
+                        holder = (RelativeLayout) convertView;
                         break;
                 }
             } else {
-                holder = (FrameLayout) ((LinearLayout) convertView).getChildAt(0);
                 //holder.setOnClickListener();
+                holder = (RelativeLayout) convertView;
             }
-
+            TextView contactName = (TextView) holder.getChildAt(1);
+            TextView lastMessage = (TextView) holder.getChildAt(2);
+            myMessage item = getItem(position);
+            contactName.setText(item.get_name());
+            lastMessage.setText((item.getSent() ? "You: " : item.get_name() + ": ") + item.getBody());
+            holder.setOnClickListener(itemClick);
             return convertView;
         }
     }

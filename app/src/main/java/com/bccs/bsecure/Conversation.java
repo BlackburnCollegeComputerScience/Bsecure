@@ -1,5 +1,6 @@
 package com.bccs.bsecure;
 
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -39,7 +40,7 @@ import java.util.Date;
  * "sentmessagenoenc.xml" and "receivedmessagenoenc.xml" layouts.
  */
 
-public class Conversation extends ActionBarActivity {
+public class Conversation extends ActionBarActivity implements WipeConversationDialog.WipeConversationDialogListener {
     String currentNumber;
     boolean receiversRegistered = false; // track if receivers are registered or not
     ArrayList<String> conversation;
@@ -120,6 +121,14 @@ public class Conversation extends ActionBarActivity {
             }
         });
 
+        ((Button) findViewById(R.id.wipeConversation)).setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                WipeConversationDialog dialog = new WipeConversationDialog();
+                dialog.show(getFragmentManager(), "conversation_option");
+            }
+        });
+
         //Register our receiver in the LocalBroadcastManager.
         //NOTE this is different from calling registerReceiver from the contextWrapper.
         LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
@@ -127,6 +136,16 @@ public class Conversation extends ActionBarActivity {
 
         updateConvo();
     }
+
+
+    /*
+                    dbHelper helper = new dbHelper(Conversation.this);
+                helper.clearMessagesFromNumber(currentNumber);
+                helper.close();
+                Intent intent = new Intent(Conversation.this, Main.class);
+                startActivity(intent);
+     */
+
 
     /**
      * This method updates the chat with new messages and will filter out duplicates.
@@ -199,7 +218,20 @@ public class Conversation extends ActionBarActivity {
         super.onDestroy();
     }
 
+    @Override
+    public void onOKPressed(DialogFragment dialog) {
+        dbHelper helper = new dbHelper(Conversation.this);
+        helper.clearMessagesFromNumber(currentNumber);
+        helper.close();
+        dialog.dismiss();
+        Intent intent = new Intent(Conversation.this, Main.class);
+        startActivity(intent);
+    }
 
+    @Override
+    public void onCancelPressed(DialogFragment dialog) {
+        dialog.dismiss();
+    }
 
 
     // Custom Adapter to display the differing layouts for chat.

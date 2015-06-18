@@ -47,9 +47,6 @@ public class messageCipher {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
             byte[] encrypted = cipher.doFinal(value.getBytes());
-
-//            System.out.println("encrypted string:"
-//                    + Base64.encodeToString(encrypted, 0)           );
             return toBase64String(encrypted);
 
         } catch (Exception ex) {
@@ -69,7 +66,6 @@ public class messageCipher {
                     "AES");
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
-            //byte[] original = cipher.doFinal(Base64.decodeBase64(encrypted));
             byte[] original = cipher.doFinal(fromBase64String(encrypted));
 
 

@@ -214,6 +214,24 @@ public class dbHelper extends SQLiteOpenHelper {
         return activeInfo;
     }
 
+    public ArrayList<myMessage> getActiveNumbersAsMyMessages() {
+        ArrayList<myMessage> activeInfo = new ArrayList<>();
+        ArrayList<String> nums = new ArrayList<String>();
+        int recordCount = this.getRecordCount();
+        System.out.println("Record count: " + recordCount);
+        for (int i = 1; i <= recordCount; i++) {
+            //get phone number out of message object and add it to array list
+            String pNum = this.getSingleMessage(i).get_number();
+            if (!nums.contains(pNum)) {
+                System.out.println(pNum + " added to active numbers list");
+                activeInfo.add(this.getSingleMessage(i));
+                nums.add(pNum);
+            }
+        }
+
+        return activeInfo;
+    }
+
     public ArrayList<String> getConversation(String no) {
         ArrayList<String> ret = new ArrayList<String>();
         for (int i = 1; i <= this.getRecordCount(); i++) {
@@ -232,6 +250,18 @@ public class dbHelper extends SQLiteOpenHelper {
             }
         }
         return ret;
+    }
+
+    public void clearAllMessages() {
+        SQLiteDatabase dbase = this.getWritableDatabase();
+        dbase.delete(TABLE_MESSAGES, null, null);
+        dbase.close();
+    }
+
+    public void clearMessagesFromNumber(String num) {
+        SQLiteDatabase dbase = this.getWritableDatabase();
+        dbase.delete(TABLE_MESSAGES, COLUMN_SEND_TO_NUM + "=" + num, null);
+        dbase.close();
     }
 
     public int getKeyCount() {

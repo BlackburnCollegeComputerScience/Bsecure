@@ -53,5 +53,9 @@
     <string name="text_pair">Pair</string>
 
     <string name="text_connect">Connect</string>
+    <string name="contact_edit_button">Edit</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

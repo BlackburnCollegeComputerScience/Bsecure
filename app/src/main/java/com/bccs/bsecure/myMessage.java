@@ -60,6 +60,10 @@ public class myMessage {
         return _body;
     }
 
+    public void setBody(String body) {
+        this._body = body;
+    }
+
     // General toString method. Prints contact name, number, and message body.
     public String toString() {
         return "Name: " + get_name() + " \nNumber: " + get_number() + " \nMessage: " + getBody();
