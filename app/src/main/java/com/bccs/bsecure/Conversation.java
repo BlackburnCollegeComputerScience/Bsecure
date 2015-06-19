@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.DataSetObserver;
-import android.nfc.NfcAdapter;
-import android.nfc.NfcManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
@@ -377,17 +375,6 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
             case R.id.action_contacts:
                 openContacts();
                 return true;
-            case R.id.action_nfc:
-                //Checks if the device supports NFC. If not opens the NoNFC activity to communicate
-                //through test messaging.
-                NfcManager nfcManager = (NfcManager) getApplicationContext().getSystemService(Context.NFC_SERVICE);
-                NfcAdapter nfcAdapter = nfcManager.getDefaultAdapter();
-                if (nfcAdapter != null && nfcAdapter.isEnabled()) {
-                    openNFC();
-                } else {
-                    openNoNFC();
-                }
-                return true;
             case R.id.action_settings:
                 openSettings();
                 return true;
@@ -414,15 +401,6 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     }
     public void openContacts(){
         Intent intent = new Intent(this, Contacts.class);
-        startActivity(intent);
-    }
-    public void openNFC(){
-        Intent intent = new Intent(this, NFC.class);
-        startActivity(intent);
-    }
-
-    public void openNoNFC() {
-        Intent intent = new Intent(this, SMSExchange.class);
         startActivity(intent);
     }
     public void openSettings(){

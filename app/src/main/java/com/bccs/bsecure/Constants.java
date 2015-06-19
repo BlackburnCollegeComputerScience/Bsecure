@@ -31,7 +31,7 @@ public interface Constants {
     int EXCHANGE_SECOND_TRADE = 2;
     int EXCHANGE_FINALIZATION = 3;
 
-    //Amount of keys to generate
+    //Amount of keys to generate when using bluetooth
     int KEY_AMOUNT = 100;
 
     //Request codes
