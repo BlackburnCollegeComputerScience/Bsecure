@@ -93,7 +93,7 @@ public class dbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_MESSAGES_TABLE = "CREATE TABLE " + TABLE_MESSAGES +
-                "(" + COLUMN_ID + " INTEGER PRIMARY KEY," +
+                "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 COLUMN_SEND_TO_NUM + " TEXT," + COLUMN_BODY + " TEXT," + COLUMN_SENT + " INTEGER," +
                 COLUMN_TIME + " TEXT," + COLUMN_ENC + " INTEGER" + ")";
         db.execSQL(CREATE_MESSAGES_TABLE);

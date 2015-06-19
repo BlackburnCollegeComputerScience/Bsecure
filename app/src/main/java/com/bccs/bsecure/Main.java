@@ -213,40 +213,26 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
 
     private void updateActiveNums() {
         System.out.println("Updating active nums!");
-        dbHelper appHelper = new dbHelper(this); //init DB access
-        // TODO: Better method for retrieving active numbers that incorporates contact list names
-        ArrayList<myMessage> newNums = appHelper.getActiveNumbersAsMyMessages(); //pull all numbers from DB
-        appHelper.close();
-        for (int i = newNums.size() - 1; i > -1; i--) {
-            myMessage message = newNums.get(i);
-            if (!activeNums.contains(message.get_name())) {
-                activeNums.add(message.get_name());
-                appHelper = new dbHelper(this);
-                ArrayList<myMessage> ms = appHelper.getConversationMessages(message.get_number());
-                appHelper.close();
-                activeInfoAdapter.addItem(ms.get(ms.size() - 1));
+        ConversationManager manager = ConversationManager.getManager(this);
+        // TODO: Use contact names instead of numbers
+        ArrayList<String> activeConversations = manager.getActiveConversations();
+        for (String s : activeConversations) {
+            ConversationManager.ConversationHelper helper = ConversationManager.getConversation(manager, s);
+            myMessage message = helper.getLastMessage();
+            if (!activeNums.contains(s)) {
+                activeNums.add(s);
+                activeInfoAdapter.addItem(message);
             } else {
                 activeInfoAdapter.updateMessage(message);
             }
         }
-
-        /*
-        for (myMessage m: newNums) {
-            if (!activeNums.contains(m.get_name())) {
-                activeNums.add(m.get_name());
-                activeInfoAdapter.addItem(m);
-            }
-        }
-        */
-
-        //activeInfoAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onOKPressed(DialogFragment dialog) {
-        dbHelper help = new dbHelper(this);
-        help.clearAllMessages();
-        help.close();
+
+        ConversationManager manager = ConversationManager.getManager(this);
+        manager.clearAllConversations();
         dialog.dismiss();
         activeNums = new ArrayList<>();
         activeInfoAdapter.clearItems();
@@ -296,6 +282,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
                     break;
                 }
             }
+            notifyDataSetChanged();
         }
 
 
@@ -385,12 +372,16 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
         super.onStop();
     }
 
+
+    // onDestroy is called when the entire application is exited
+    // We can close our DB from here.
     protected void onDestroy() {
         System.out.println("Convo view onDestroy");
         if (receiverRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
             receiverRegistered = false;
         }
+        ConversationManager.closeConnection();
         super.onDestroy();
     }
 }

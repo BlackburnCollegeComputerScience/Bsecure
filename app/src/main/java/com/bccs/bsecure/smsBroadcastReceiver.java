@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-//import org.apache.commons.codec.binary.Base64;
-
 /**
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
@@ -71,9 +69,9 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void addReceivedMessageToDatabase(myMessage message, Context context) {
-        dbHelper database = new dbHelper(context);
-        database.addRecord(message);
-        database.close();
+        ConversationManager.ConversationHelper helper =
+                ConversationManager.getConversation(context, message.get_number());
+        helper.addMessage(message);
     }
 
     public void handleOutgoingMessage(Intent intent, Context context) {

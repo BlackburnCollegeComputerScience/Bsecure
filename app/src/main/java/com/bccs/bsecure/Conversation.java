@@ -120,9 +120,9 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
 
                 if (currentNumber.length() > 0 && message.length() > 0) {
                     myMessage msgObj = handleMessage.send(currentNumber, message, getApplicationContext());
-                    dbHelper helper = new dbHelper(getBaseContext());
-                    helper.addRecord(msgObj);
-                    helper.close();
+                    ConversationManager.ConversationHelper helper = ConversationManager.getConversation(Conversation.this,
+                            currentNumber);
+                    helper.addMessage(msgObj);
                     updateConvo();
                 }
             }
@@ -171,19 +171,9 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     private void updateConvo() {
         System.out.println("Updating conversation " + currentNumber);
 
-        dbHelper helper = new dbHelper(this);
-        ArrayList<myMessage> checkConversation = helper.getConversationMessages(currentNumber);
-        helper.close();
-        ArrayList<myMessage> oldConversation = chatAdapter.getChatArray();
-        ArrayList<myMessage> oldMessages = new ArrayList<>();
-        for (int i = 0; i < oldConversation.size(); i++) {
-            oldMessages.add(checkConversation.get(i));
-        }
-
-        for (myMessage m : oldMessages) {
-            checkConversation.remove(m);
-        }
-
+        ConversationManager.ConversationHelper helper = ConversationManager.getConversation(this,
+                currentNumber);
+        ArrayList<myMessage> checkConversation = helper.getMessages(chatAdapter.getCount());
 
         for (myMessage m : checkConversation) {
             chatAdapter.addItem(m, m.getSent(), m.is_encrypted());
@@ -238,9 +228,9 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
 
     @Override
     public void onOKPressed(DialogFragment dialog) {
-        dbHelper helper = new dbHelper(Conversation.this);
-        helper.clearMessagesFromNumber(currentNumber);
-        helper.close();
+        ConversationManager.ConversationHelper helper = ConversationManager.getConversation(this,
+                currentNumber);
+        helper.deleteConversation();
         dialog.dismiss();
         Intent intent = new Intent(Conversation.this, Main.class);
         startActivity(intent);

@@ -57,9 +57,9 @@ public class CreateMessage extends ActionBarActivity {
         @Override
         public void onClick(View v) {
             for (String number : recipientStrings) {
-                dbHelper database = new dbHelper(getApplicationContext());
-                database.addRecord(handleMessage.send(number, messageText.getText().toString(), getApplicationContext()));
-                database.close();
+                ConversationManager.ConversationHelper helper = ConversationManager.getConversation(CreateMessage.this,
+                        number);
+                helper.addMessage(handleMessage.send(number, messageText.getText().toString(), getApplicationContext()));
             }
             Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
             conversationIntent.putExtra("name", recipientStrings.get(0));
