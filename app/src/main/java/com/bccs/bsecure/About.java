@@ -1,13 +1,13 @@
 package com.bccs.bsecure;
 
-import android.content.Context;
 import android.content.Intent;
-import android.nfc.NfcAdapter;
-import android.nfc.NfcManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 /**
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
@@ -33,6 +33,17 @@ public class About extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
+        Button github = (Button) findViewById(R.id.githubButton);
+        github.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri gitPage = Uri.parse("https://github.com/BlackburnCollegeComputerScience/Bsecure");
+                Intent intent = new Intent(Intent.ACTION_VIEW, gitPage);
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
+        });
     }
 
     @Override
@@ -56,17 +67,6 @@ public class About extends ActionBarActivity {
             case R.id.action_contacts:
                 openContacts();
                 return true;
-            case R.id.action_nfc:
-                //Checks if the device supports NFC. If not opens the NoNFC activity to communicate
-                //through test messaging.
-                NfcManager nfcManager = (NfcManager) getApplicationContext().getSystemService(Context.NFC_SERVICE);
-                NfcAdapter nfcAdapter = nfcManager.getDefaultAdapter();
-                if (nfcAdapter != null && nfcAdapter.isEnabled()) {
-                    openNFC();
-                } else {
-                    openNoNFC();
-                }
-                return true;
             case R.id.action_settings:
                 openSettings();
                 return true;
@@ -86,22 +86,12 @@ public class About extends ActionBarActivity {
         Intent intent = new Intent(this, Main.class);
         startActivity(intent);
     }
-
     public void openNewMessage(){
         Intent intent = new Intent(this, CreateMessage.class);
         startActivity(intent);
     }
     public void openContacts(){
         Intent intent = new Intent(this, Contacts.class);
-        startActivity(intent);
-    }
-    public void openNFC(){
-        Intent intent = new Intent(this, NFC.class);
-        startActivity(intent);
-    }
-
-    public void openNoNFC() {
-        Intent intent = new Intent(this, SMSExchange.class);
         startActivity(intent);
     }
     public void openSettings(){

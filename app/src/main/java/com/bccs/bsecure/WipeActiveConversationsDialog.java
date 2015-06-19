@@ -29,8 +29,9 @@ public class WipeActiveConversationsDialog extends DialogFragment {
 
 
     public interface WipeActiveConversationsDialogListener {
-        public void onOKPressed(DialogFragment dialog);
-        public void onCancelPressed(DialogFragment dialog);
+        void onOKPressed(DialogFragment dialog);
+
+        void onCancelPressed(DialogFragment dialog);
     }
 
     // Use this instance of the interface to deliver action events
