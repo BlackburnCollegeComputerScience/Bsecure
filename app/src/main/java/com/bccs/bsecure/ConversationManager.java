@@ -64,7 +64,7 @@ public class ConversationManager extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createMasterTable = "CREATE TABLE IF NOT EXISTS " + TABLE_CONVERSATIONS + "(" + COLUMN_ID +
-                INT_TYPE + " PRIMARY KEY" + COMMA_SEP + COLUMN_NUMBER + TEXT_TYPE + ")";
+                INT_TYPE + " PRIMARY KEY AUTOINCREMENT" + COMMA_SEP + COLUMN_NUMBER + TEXT_TYPE + ")";
         db.execSQL(createMasterTable);
 
     }
@@ -124,13 +124,17 @@ public class ConversationManager extends SQLiteOpenHelper {
         if (getMasterRecordID(number)==-1) {
             try {
                 ContentValues vals = new ContentValues();
-                vals.put(COLUMN_ID, getRecordCount(TABLE_CONVERSATIONS + 1));
                 vals.put(COLUMN_NUMBER, number);
                 sDatabase.insert(TABLE_CONVERSATIONS, null, vals);
-            } catch (Exception ignored) { ignored.printStackTrace();
+                System.out.println(number + " added to record as " + vals.get(COLUMN_ID));
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
+                sDatabase.delete(TABLE_CONVERSATIONS, COLUMN_ID + "=" +
+                        getRecordCount(TABLE_CONVERSATIONS) + 1, null);
             }
             
         } else {
+            System.out.println(number + " found in record with " + getMasterRecordID(number));
         }
     }
 
