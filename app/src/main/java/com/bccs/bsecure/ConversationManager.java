@@ -25,6 +25,10 @@ import java.util.ArrayList;
  * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+    created by lucas.burdell 6/18/2015
+        Class for
+ */
 public class ConversationManager extends SQLiteOpenHelper {
 
 
@@ -85,7 +89,7 @@ public class ConversationManager extends SQLiteOpenHelper {
         return conversationHelper;
     }
 
-    public static ConversationHelper getConversation(ConversationManager cm, String number) {
+    public static ConversationHelper getConversation(String number) {
         sInstance.addMasterRecord(number);
         return new ConversationHelper(sInstance, number);
     }
@@ -218,7 +222,6 @@ public class ConversationManager extends SQLiteOpenHelper {
                     retObj.set_time(time);
                     retObj.set_encrypted(encrypted);
 
-                } catch (NullPointerException npe) {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

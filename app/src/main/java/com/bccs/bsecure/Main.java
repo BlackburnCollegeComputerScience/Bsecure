@@ -217,7 +217,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
         // TODO: Use contact names instead of numbers
         ArrayList<String> activeConversations = manager.getActiveConversations();
         for (String s : activeConversations) {
-            ConversationManager.ConversationHelper helper = ConversationManager.getConversation(manager, s);
+            ConversationManager.ConversationHelper helper = ConversationManager.getConversation(s);
             myMessage message = helper.getLastMessage();
             if (!activeNums.contains(s)) {
                 activeNums.add(s);
