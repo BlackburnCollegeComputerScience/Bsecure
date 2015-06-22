@@ -1,5 +1,8 @@
 package com.bccs.bsecure;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
@@ -22,9 +25,30 @@ import java.io.Serializable;
 
 public class BluetoothPackage implements Serializable {
 
-    private String[] keys = new String[Constants.KEY_AMOUNT];
+    private String[] keys;
     private int protocolCode;
+    private int keyAmount;
+    private int expireCount;
 
+    /**
+     * Constructor for ensuring options are the same.
+     *
+     * @param amount       The amount of keys the devices have agreed to display.
+     * @param expireCount  The agreed upon count of message expiration.
+     * @param protocolCode Stage of the exchange normally "Agreement" with this constructor
+     */
+    public BluetoothPackage(int amount, int expireCount, int protocolCode) {
+        this.keyAmount = amount;
+        this.expireCount = expireCount;
+        this.protocolCode = protocolCode;
+    }
+
+    /**
+     * Constructor for exchanging keys.
+     *
+     * @param keys         Encoded public keys to send.
+     * @param protocolCode Stage of the exchange.
+     */
     public BluetoothPackage(String[] keys, int protocolCode) {
         this.protocolCode = protocolCode;
         this.keys = keys;
@@ -37,4 +61,28 @@ public class BluetoothPackage implements Serializable {
     public String[] getKeys() {
         return keys;
     }
+
+    public byte[] serialize() throws IOException {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        ObjectOutputStream o = new ObjectOutputStream(b);
+        o.writeObject(this);
+        return b.toByteArray();
+    }
+
+    public int getKeyAmount() {
+        return keyAmount;
+    }
+
+    public int getExpireCount() {
+        return expireCount;
+    }
+    /**
+     * De-serialize method
+     *
+     public static BluetoothPackage deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+     ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+     ObjectInputStream o = new ObjectInputStream(b);
+     return (BluetoothPackage) o.readObject();
+     }
+     */
 }

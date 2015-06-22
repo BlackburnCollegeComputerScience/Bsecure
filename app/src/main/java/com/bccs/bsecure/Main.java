@@ -96,9 +96,9 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        Intent intent = new Intent(this, TestActivity.class);
-        startActivity(intent);
-        System.exit(0);
+//        Intent intent = new Intent(this, TestActivity.class);
+//        startActivity(intent);
+//        System.exit(0);
         //Get ActionBar Item
 //        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
 //        ActionBar actionBar = getActionBar();
