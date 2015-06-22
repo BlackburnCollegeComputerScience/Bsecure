@@ -69,6 +69,9 @@
         </receiver>
 
         <activity
+            android:name=".ContactsListActivity"
+            android:label="@string/title_activity_list_contacts"></activity>
+        <activity
             android:name=".Settings"
             android:label="@string/title_activity_settings" >
         </activity>
@@ -98,15 +101,19 @@
         </activity>
         <activity
             android:name=".SMSExchange"
-            android:label="@string/title_activity_no_nfc"></activity>
+            android:label="@string/title_activity_no_nfc" />
         <activity
             android:name=".Bluetooth"
-            android:label="@string/title_activity_blue_tooth"></activity>
+            android:label="@string/title_activity_blue_tooth" />
         <activity
             android:name=".DeviceListActivity"
             android:label="@string/title_activity_device_list">
             android:name=".SMSExchange"
             android:label="@string/title_activity_no_nfc">
+        </activity>
+        <activity
+            android:name=".TestActivity"
+            android:label="@string/title_activity_test">
         </activity>
     </application>
 

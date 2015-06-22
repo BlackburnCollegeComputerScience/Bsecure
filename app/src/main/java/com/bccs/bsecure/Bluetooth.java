@@ -214,6 +214,17 @@ public class Bluetooth extends ActionBarActivity {
                 //If the user turned on discoverability start looking for devices
                 bluetoothAdapter.startDiscovery();
             }
+        } else if (requestCode == Constants.REQUEST_KEYS) {
+            //If we requested a key exchange
+            if (resultCode == RESULT_OK) {
+                //Grab the keys from the data packet
+                String[] keys = data.getExtras().getStringArray("keys");
+                //Pack the keys into a result and send it back to the calling activity
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("keys", keys);
+                setResult(RESULT_OK, returnIntent);
+                finish();
+            }
         }
     }
 
@@ -221,7 +232,7 @@ public class Bluetooth extends ActionBarActivity {
         //Initialize and start the Intent to open a list of the device pairs
         Intent intent = new Intent(Bluetooth.this, DeviceListActivity.class);
         intent.putParcelableArrayListExtra("device.list", list);
-        startActivity(intent);
+        startActivityForResult(intent, Constants.REQUEST_KEYS);
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {

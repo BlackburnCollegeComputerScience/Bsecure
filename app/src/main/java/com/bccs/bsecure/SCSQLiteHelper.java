@@ -2,6 +2,7 @@ package com.bccs.bsecure;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
@@ -60,14 +61,12 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         public static final String TABLE_NAME = "scentry";
         public static final String COLUMN_NAME_CONTACT_ID = "conactid";
         public static final String COLUMN_NAME_CURRENT_SEQ = "currentseq";
-        public static final String COLUMN_NAME_DEGREES = "degrees";
 
         //TODO: DO I NEED TO AUTOINCREMENT PRIMARY KEY???
         public static final String SQL_CREATE_SC_ENTRIES = "CREATE TABLE " + TABLE_NAME + " (" +
                 _ID + " INTEGER PRIMARY KEY," +
                 COLUMN_NAME_CONTACT_ID + INT_TYPE + COMMA_SEP +
-                COLUMN_NAME_CURRENT_SEQ + INT_TYPE + COMMA_SEP +
-                COLUMN_NAME_DEGREES + INT_TYPE +
+                COLUMN_NAME_CURRENT_SEQ + INT_TYPE +
                 " )";
 
         public static final String SQL_DELETE_SC_ENTRIES = "DROP TABLE IF EXISTS " + TABLE_NAME;
@@ -117,6 +116,12 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         super(context, database_NAME, null, database_VERSION);
     }
 
+    public void clearDatabase() {
+        SQLiteDatabase dbase = this.getReadableDatabase();
+        dbase.delete(SCEntry.TABLE_NAME, null, null);
+        dbase.delete(KeyPairEntry.TABLE_NAME, null, null);
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         //create tables
@@ -124,12 +129,32 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         db.execSQL(KeyPairEntry.SQL_CREATE_KEY_PAIR_ENTRIES);
     }
 
+    public String getFromID(int id) {
+        String select = "SELECT * FROM " + SCEntry.TABLE_NAME + " WHERE " + SCEntry.COLUMN_NAME_CONTACT_ID
+                + " = " + id;
+        SQLiteDatabase dbase = this.getReadableDatabase();
+        try {
+            Cursor c = dbase.rawQuery(select, null);
+            if (c != null && c.getCount() > 0) {
+                c.moveToFirst();
+                return c.getString(0) + " " + c.getString(1) + " " + c.getString(2);
+            } else {
+                System.out.println("Cursor was empty or null - LB");
+            }
+            return "Empty";
+        } catch (Exception e) {
+            System.out.println("Table did not exist or was empty");
+            e.printStackTrace();
+        }
+        return "Empty";
+    }
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //original version, no upgrades to handle yet
     }
 
-    public void createSecurityContact(SecurityContact sc) {
+    public void createSecurityContact(SecurityContact sc) throws Exception {
         //get writable db to put new contact in
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -140,12 +165,12 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         //else create from sc info
         values.put(SCEntry.COLUMN_NAME_CONTACT_ID, sc.getID());
         values.put(SCEntry.COLUMN_NAME_CURRENT_SEQ, sc.getSeqNum());
-        values.put(SCEntry.COLUMN_NAME_DEGREES, sc.getDegrees());
         //TODO: Need other settings as they occur
 
         long retVal = db.insert(SCEntry.TABLE_NAME, null, values);
         if(retVal < 0) { // error
             //throw exception??
+            throw new Exception("SQL exception - LB");
         }
         db.close();
     }

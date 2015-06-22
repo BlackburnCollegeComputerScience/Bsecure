@@ -1,6 +1,7 @@
 package com.bccs.bsecure;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -52,6 +53,7 @@ public class DeviceListActivity extends Activity {
     private TextView statusTv;
 
     BluetoothService bluetoothService;
+    private ProgressDialog progressDlg;
 
     DiffieHellmanKeySession[] session;
 
@@ -75,6 +77,12 @@ public class DeviceListActivity extends Activity {
 
         bluetoothService = new BluetoothService(handler);
         bluetoothService.start();
+
+        //Initialize the progress dialog.
+        progressDlg = new ProgressDialog(this);
+        progressDlg.setMessage("Exchanging " + Constants.KEY_AMOUNT + " Keys");
+        //Don't let it cancel so they don't cancel the key exchange
+        progressDlg.setCancelable(false);
 
         adapter.setPairListener(new DeviceListAdapter.OnPairButtonClickListener() {
             @Override
@@ -101,6 +109,7 @@ public class DeviceListActivity extends Activity {
 
                 if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
                     //If this device is paired attempt to connect
+                    progressDlg.show();
                     bluetoothService.connect(device);
                 } else {
                     //Else send a toast to inform the user to pair to the device
@@ -190,14 +199,15 @@ public class DeviceListActivity extends Activity {
         return (BluetoothPackage) o.readObject();
     }
 
-    private final Handler handler = new Handler() {
+    private final Handler handler = new Handler(new Handler.Callback() {
         @Override
-        public void handleMessage(Message msg) {
+        public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
                             if (bluetoothService.isServer()) {
+                                progressDlg.show();
                                 //If this device is the server we will send the first exchange
                                 //Create an array of key sessions for this device
                                 session = new DiffieHellmanKeySession[Constants.KEY_AMOUNT];
@@ -259,6 +269,10 @@ public class DeviceListActivity extends Activity {
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
+                                    //Pack the keys into a result and send it back to the calling activity
+                                    Intent returnIntent = new Intent();
+                                    returnIntent.putExtra("keys", keys);
+                                    setResult(RESULT_OK, returnIntent);
 
                                     //Create a bluetooth package to send a confirmation that
                                     //we received the packet
@@ -272,13 +286,18 @@ public class DeviceListActivity extends Activity {
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
+                                    //Stop the service and return the keys
                                     bluetoothService.write(toSend);
+                                    progressDlg.dismiss();
+                                    bluetoothService.stop();
+                                    finish();
                                 }
                                 break;
                         }
                     } else {
                         switch (received.getProtocolCode()) {
                             case Constants.EXCHANGE_FIRST_TRADE:
+
                                 //If we are the client and the protocol tells us this is the first
                                 //Packet we have received.
 
@@ -322,20 +341,30 @@ public class DeviceListActivity extends Activity {
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
+                                    //Pack the keys into a result and send it back to the calling activity
+                                    Intent returnIntent = new Intent();
+                                    returnIntent.putExtra("keys", keys);
+                                    setResult(RESULT_OK, returnIntent);
                                 }
                                 break;
                             case Constants.EXCHANGE_FINALIZATION:
-
+                                //stop the service and return the keys
+                                progressDlg.dismiss();
+                                bluetoothService.stop();
+                                finish();
                                 break;
                         }
                     }
                     break;
                 case Constants.MESSAGE_TOAST:
-                    showToast(msg.getData().getString("toast"));
+                    if (bluetoothService.getState() != BluetoothService.STATE_NONE) {
+                        showToast(msg.getData().getString("toast"));
+                    }
                     break;
             }
+            return true;
         }
-    };
+    });
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -32,10 +32,11 @@ public interface Constants {
     int EXCHANGE_FINALIZATION = 3;
 
     //Amount of keys to generate when using bluetooth
-    int KEY_AMOUNT = 100;
+    int KEY_AMOUNT = 25;
 
     //Request codes
     int REQUEST_ENABLE_BT = 1;
     int REQUEST_ENABLE_BT_DIS = 2;
+    int REQUEST_KEYS = 3;
 
 }

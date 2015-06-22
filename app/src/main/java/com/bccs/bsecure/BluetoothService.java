@@ -69,6 +69,10 @@ public class BluetoothService {
         handler.obtainMessage(Constants.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
+    public synchronized int getState() {
+        return state;
+    }
+
     /**
      * Start the service. Specifically start AcceptThread to begin a
      * session in listening (server) mode. Called by the Activity onResume()
@@ -101,6 +105,8 @@ public class BluetoothService {
      */
     public synchronized void stop() {
 
+        setState(STATE_NONE);
+
         if (connectThread != null) {
             connectThread.cancel();
             connectThread = null;
@@ -115,7 +121,7 @@ public class BluetoothService {
             acceptThread.cancel();
             acceptThread = null;
         }
-        setState(STATE_NONE);
+
     }
 
     public void write(byte[] out) {
@@ -204,15 +210,18 @@ public class BluetoothService {
      * Indicate that the connection was lost and notify the UI Activity.
      */
     private void connectionLost() {
-        // Send a failure message back to the Activity
-        Message msg = handler.obtainMessage(Constants.MESSAGE_TOAST);
-        Bundle bundle = new Bundle();
-        bundle.putString("toast", "Device connection was lost");
-        msg.setData(bundle);
-        handler.sendMessage(msg);
+        //
+        if (state != STATE_NONE) {
+            // Send a failure message back to the Activity
+            Message msg = handler.obtainMessage(Constants.MESSAGE_TOAST);
+            Bundle bundle = new Bundle();
+            bundle.putString("toast", "Device connection was lost");
+            msg.setData(bundle);
+            handler.sendMessage(msg);
 
-        // Start the service over to restart listening mode
-        BluetoothService.this.start();
+            // Start the service over to restart listening mode
+            BluetoothService.this.start();
+        }
     }
 
     /**

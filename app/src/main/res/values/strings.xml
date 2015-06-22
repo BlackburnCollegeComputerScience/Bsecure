@@ -50,7 +50,7 @@
         tortor.
     </string>
     <string name="licence">
-        This file is part of Bsecure. A open source, freely available, SMS encryption app.\n
+        Bsecure is a open source, freely available, SMS encryption app.\n
         Copyright © 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell\n
         \n
         Bsecure is free software: you can redistribute it and/or modify\n
@@ -93,5 +93,6 @@
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_test">TestActivity</string>
 
 </resources>

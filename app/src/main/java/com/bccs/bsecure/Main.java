@@ -95,6 +95,10 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        Intent intent = new Intent(this, TestActivity.class);
+        startActivity(intent);
+        System.exit(0);
         //Get ActionBar Item
 //        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
 //        ActionBar actionBar = getActionBar();
@@ -175,11 +179,11 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     }
     public void openNFC(){
         Intent intent = new Intent(this, Bluetooth.class);
-        startActivity(intent);
+        startActivityForResult(intent, Constants.REQUEST_KEYS);
     }
 
     public void openNoNFC() {
-        Intent intent = new Intent(this, SMSExchange.class);
+        Intent intent = new Intent(this, ContactsListActivity.class);
         startActivity(intent);
     }
     public void openSettings(){
