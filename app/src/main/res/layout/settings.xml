@@ -41,52 +41,6 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true">
 
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/layout_border"
-                android:weightSum="1">
-
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Lucas Burdell"
-                    android:id="@+id/nameTv"
-                    android:layout_weight="1"
-                    android:padding="2dp"
-                    android:textSize="20dp" />
-
-                <Button
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="58dp"
-                    android:layout_height="30dp"
-                    android:text="Edit"
-                    android:id="@+id/editNameBtn"
-                    android:layout_weight="0.04" />
-
-            </LinearLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="5dp" />
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/layout_border">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Android Id: 135856913"
-                    android:id="@+id/androidIdTv"
-                    android:padding="3dp"
-                    android:gravity="center"
-                    android:textSize="10dp" />
-            </LinearLayout>
-
             <ProgressBar
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="fill_parent"
@@ -106,7 +60,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Encrytion Information"
+                    android:text="Key Experation"
                     android:id="@+id/textView13"
                     android:padding="3dp"
                     android:gravity="center"
@@ -124,105 +78,102 @@
                 android:layout_gravity="center_horizontal" />
 
             <LinearLayout
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/layout_border"
-                android:weightSum="1">
+                android:layout_height="match_parent"
+                android:background="@drawable/layout_border">
 
                 <TextView
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Sequance Number: 21252886"
-                    android:id="@+id/sequanceNumberTv"
-                    android:layout_weight="1"
-                    android:padding="2dp" />
+                    android:text="Minimum Key Uses ( 1 - 2000 )"
+                    android:id="@+id/textView21"
+                    android:padding="3dp"
+                    android:gravity="center"
+                    android:textSize="15dp" />
 
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="10"
+                        android:id="@+id/MinimumEt"
+                        android:layout_weight="1" />
+
+                    <Button
+                        android:layout_width="70dp"
+                        android:layout_height="40dp"
+                        android:text="25"
+                        android:id="@+id/MinimumDisplayBtn"
+                        android:clickable="false"
+                        android:enabled="false" />
+                </LinearLayout>
             </LinearLayout>
 
             <Space
-                android:layout_width="match_parent"
-                android:layout_height="5dp" />
+                android:layout_width="fill_parent"
+                android:layout_height="20px" />
 
             <LinearLayout
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/layout_border"
-                android:weightSum="1">
+                android:layout_height="match_parent"
+                android:background="@drawable/layout_border">
 
                 <TextView
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Time till key experation: 685 Text Messages"
-                    android:id="@+id/experationTv"
-                    android:layout_weight="1"
-                    android:padding="2dp" />
+                    android:text="Maximum Key Uses ( 1 - 2000 )"
+                    android:id="@+id/textView22"
+                    android:padding="3dp"
+                    android:gravity="center"
+                    android:textSize="15dp" />
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="10"
+                        android:id="@+id/MaximumEt"
+                        android:layout_weight="1" />
+
+                    <Button
+                        android:layout_width="70dp"
+                        android:layout_height="40dp"
+                        android:text="100"
+                        android:id="@+id/MaximumDisplayBtn"
+                        android:clickable="false"
+                        android:enabled="false" />
+                </LinearLayout>
             </LinearLayout>
 
             <Space
-                android:layout_width="match_parent"
-                android:layout_height="5dp" />
+                android:layout_width="fill_parent"
+                android:layout_height="20px" />
 
             <LinearLayout
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/layout_border"
-                android:weightSum="1">
-
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Remaining keys: 564"
-                    android:id="@+id/remainingKeysTv"
-                    android:layout_weight="1"
-                    android:padding="2dp" />
-            </LinearLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="5dp" />
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/layout_border"
-                android:weightSum="1">
+                android:layout_height="match_parent"
+                android:background="@drawable/layout_border">
 
                 <Button
-                    style="?android:attr/buttonStyleSmall"
                     android:layout_width="fill_parent"
-                    android:layout_height="35dp"
-                    android:text="Exchange Keys With Lucas Burdell"
-                    android:id="@+id/exchangeBtn"
-                    android:layout_weight="0.04" />
+                    android:layout_height="40dp"
+                    android:text="Save"
+                    android:id="@+id/SaveBtn" />
             </LinearLayout>
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="5dp" />
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/layout_border"
-                android:weightSum="1">
-
-                <Button
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="fill_parent"
-                    android:layout_height="35dp"
-                    android:text="Force Key Expiration"
-                    android:id="@+id/forceExpBtn"
-                    android:layout_weight="0.04" />
-            </LinearLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="5dp" />
         </LinearLayout>
     </ScrollView>
 

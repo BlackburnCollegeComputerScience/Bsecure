@@ -113,10 +113,13 @@
         </activity>
         <activity
             android:name=".TestActivity"
-            android:label="@string/title_activity_test"></activity>
+            android:label="@string/title_activity_test" />
         <activity
             android:name=".ExchangeOptions"
-            android:label="@string/title_activity_exchange_options">
+            android:label="@string/title_activity_exchange_options"></activity>
+        <activity
+            android:name=".ContactSettings"
+            android:label="@string/title_activity_contact_settings">
         </activity>
     </application>
 

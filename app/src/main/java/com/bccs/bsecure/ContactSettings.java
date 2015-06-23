@@ -5,73 +5,82 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TextView;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 /**
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
- *
+ * <p/>
  * Bsecure is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p/>
  * Bsecure is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p/>
  * You should have received a copy of the GNU General Public License
  * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Settings extends ActionBarActivity {
+public class ContactSettings extends ActionBarActivity {
 
-    EditText minimumEt;
-    EditText maximumEt;
+    SecurityContact contact;
 
-    Button minimumDisplayBtn;
-    Button maximumDisplayBtn;
-    Button saveBtn;
-
-    SCSQLiteHelper database;
+    //Layout Objects
+    TextView nameTv = (TextView) findViewById(R.id.nameTv);
+    TextView androidIdTv = (TextView) findViewById(R.id.androidIdTv);
+    TextView sequenceNumberTv = (TextView) findViewById(R.id.sequanceNumberTv);
+    TextView expirationTv = (TextView) findViewById(R.id.experationTv);
+    TextView remainingKeysTv = (TextView) findViewById(R.id.remainingKeysTv);
+    Button exchangeBtn = (Button) findViewById(R.id.exchangeBtn);
+    Button forceExpirationBtn = (Button) findViewById(R.id.forceExpBtn);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings);
 
-        minimumEt = (EditText) findViewById(R.id.MinimumEt);
-        maximumEt = (EditText) findViewById(R.id.MinimumEt);
+        //Grab the security contact from the bundle
+        byte[] serializedContact = savedInstanceState.getByteArray("contact");
+        try {
+            //De-serialized contact object
+            contact = deserialize(serializedContact);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
-        minimumDisplayBtn = (Button) findViewById(R.id.MinimumDisplayBtn);
-        maximumDisplayBtn = (Button) findViewById(R.id.MaximumDisplayBtn);
-        saveBtn = (Button) findViewById(R.id.SaveBtn);
+        //Set up settings display
+        nameTv.setText(contact.getName());
+        androidIdTv.setText(contact.getID());
+        sequenceNumberTv.setText(contact.getSeqNum());
+        expirationTv.setText(getKeyExpiration());
+        remainingKeysTv.setText(getRemainingKeys());
+    }
 
-        database = new SCSQLiteHelper(this);
+    private String getRemainingKeys() {
+        //TODO
+        return "";
+    }
 
-        int[] settings = database.getGeneralSettings();
-        minimumDisplayBtn.setText(settings[0]);
-        maximumDisplayBtn.setText(settings[1]);
+    private String getKeyExpiration() {
+        //TODO: Calculate key expiration
+        return "";
+    }
 
-        saveBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int min = Integer.parseInt(minimumEt.getText().toString());
-                int max = Integer.parseInt(maximumEt.getText().toString());
-                if (min > max) {
-                    min = max;
-                    minimumEt.setText(min);
-                }
-                minimumDisplayBtn.setText(min);
-                maximumDisplayBtn.setText(max);
-                database.setGeneralSettings(min, max);
-            }
-        });
-
-
+    public static SecurityContact deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+        ObjectInputStream o = new ObjectInputStream(b);
+        return (SecurityContact) o.readObject();
     }
 
     @Override
@@ -88,7 +97,7 @@ public class Settings extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        switch(id){
+        switch (id) {
             case R.id.action_new:
                 openNewMessage();
                 return true;
@@ -116,23 +125,27 @@ public class Settings extends ActionBarActivity {
     }
 
 
-    public void openNewMessage(){
+    public void openNewMessage() {
         Intent intent = new Intent(this, CreateMessage.class);
         startActivity(intent);
     }
-    public void openContacts(){
+
+    public void openContacts() {
         Intent intent = new Intent(this, Contacts.class);
         startActivity(intent);
     }
-    public void openSettings(){
+
+    public void openSettings() {
         Intent intent = new Intent(this, Settings.class);
         startActivity(intent);
     }
-    public void openBugReport(){
+
+    public void openBugReport() {
         Intent intent = new Intent(this, BugReport.class);
         startActivity(intent);
     }
-    public void openAbout(){
+
+    public void openAbout() {
         Intent intent = new Intent(this, About.class);
         startActivity(intent);
     }

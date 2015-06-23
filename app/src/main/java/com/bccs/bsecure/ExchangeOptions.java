@@ -110,119 +110,71 @@ public class ExchangeOptions extends Activity {
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
-                            int keyAmount = Integer.parseInt(keyNumberEt.getText().toString());
-                            int expireCount = Integer.parseInt(expireTimeEt.getText().toString());
-                            BluetoothPackage bluetoothPackage = new BluetoothPackage(keyAmount, expireCount, Constants.EXCHANGE_AGREEMENT);
-                            byte[] toSend;
-                            try {
-                                toSend = bluetoothPackage.serialize();
-                                bluetoothService.write(toSend);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            sendCommunicationParameters();
                             break;
                     }
                     break;
                 case Constants.MESSAGE_READ:
-                    //Grab the array of bytes from the message package
-                    byte[] readBuf = (byte[]) msg.obj;
-                    //Create a bluetooth package and initialize it by de-serializing the input buffer
-                    BluetoothPackage received = null;
-                    try {
-                        received = deserialize(readBuf);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-
+                    BluetoothPackage received = getBluetoothPackage(msg);
                     int keyAmount = Integer.parseInt(keyNumberEt.getText().toString());
 
                     if (received.getProtocolCode() == Constants.EXCHANGE_AGREEMENT) {
+                        //How many text messages should a key last for.
                         int expireCount = Integer.parseInt(expireTimeEt.getText().toString());
 
                         if (received.getKeyAmount() == keyAmount && received.getExpireCount() == expireCount) {
                             if (bluetoothService.isServer()) {
                                 //If this device is the server we will send the first exchange
-                                //Create an array of key sessions for this device
-                                session = new DiffieHellmanKeySession[keyAmount];
-                                //Initialize all the key sessions
-                                for (int i = 0; i < session.length; i++) {
-                                    try {
-                                        session[i] = new DiffieHellmanKeySession();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
+
+                                //Initialize our session array with our created parameters
+                                initializeDiffieHellmanSessions(keyAmount);
+
                                 //Create a array of strings to hold the public (g^a mod p) key encoding
-                                String[] publicEncodes = new String[keyAmount];
-                                for (int i = 0; i < publicEncodes.length; i++) {
-                                    publicEncodes[i] = session[i].packKey();
-                                }
+                                String[] publicEncodes = getPublicEncodings(keyAmount);
+
                                 //Create an object to send over bluetooth containing the public
                                 //(g^a mod p) encoding and a protocol code to inform the next device
                                 //of what the stage in our exchange we are at
                                 BluetoothPackage btPack = new BluetoothPackage(publicEncodes, Constants.EXCHANGE_FIRST_TRADE);
-                                //Array of bytes to hold the serialized version of the bluetooth package
-                                byte[] toSend = null;
-                                try {
-                                    //Serialize the package into an array of bytes
-                                    toSend = btPack.serialize();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+
+                                //Serialize the bluetooth package to send over the stream
+                                byte[] toSend = getSerializedBytes(btPack);
                                 //Write the bytes to the output stream
                                 bluetoothService.write(toSend);
-
+                                return true;
                             }
                         } else {
+                            //If settings are not the same display an error saying so.
                             statusTv.setText("Error: Settings are not the same!");
-                            bluetoothService.stop();
-                            bluetoothService = new BluetoothService(handler);
-                            bluetoothService.start();
+                            restartBluetoothService();
                             return false;
                         }
 
                     }
-
 
                     if (bluetoothService.isServer()) {
                         switch (received.getProtocolCode()) {
                             case Constants.EXCHANGE_SECOND_TRADE:
                                 //If this device is the server and the protocol tells us
                                 //that this is the second portion of the key exchange.
-                                String[] keys = new String[keyAmount];
-                                for (int i = 0; i < keys.length; i++) {
-                                    try {
-                                        //Use our private and the public keys we received
-                                        //to create all the session keys.
-                                        keys[i] = session[i].packSecret(received.getKeys()[i]);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    //Pack the keys into a result and send it back to the calling activity
-                                    Intent returnIntent = new Intent();
-                                    returnIntent.putExtra("keys", keys);
-                                    setResult(RESULT_OK, returnIntent);
+                                String[] keys = getSecretKeys(keyAmount, received.getKeys());
+                                //Pack the keys into a result and send it back to the calling activity
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra("keys", keys);
+                                setResult(RESULT_OK, returnIntent);
 
-                                    statusTv.setText(keys[0]);
-                                    //Create a bluetooth package to send a confirmation that
-                                    //we received the packet
-                                    String[] holder = new String[1];
-                                    BluetoothPackage firstAck = new BluetoothPackage(holder, Constants.EXCHANGE_FINALIZATION);
+                                statusTv.setText(keys[0]);
+                                //Create a bluetooth package to send a confirmation that
+                                //we received the packet
+                                String[] holder = new String[1];
+                                BluetoothPackage firstAck = new BluetoothPackage(holder, Constants.EXCHANGE_FINALIZATION);
 
-                                    //serialize the packet
-                                    byte[] toSend = null;
-                                    try {
-                                        toSend = firstAck.serialize();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                    //Stop the service and return the keys
-                                    bluetoothService.write(toSend);
-                                    bluetoothService.stop();
-                                    finish();
-                                }
+                                //serialize the packet
+                                byte[] toSend = getSerializedBytes(firstAck);
+                                //Stop the service and return the keys
+                                bluetoothService.write(toSend);
+                                bluetoothService.stop();
+                                finish();
                                 break;
                         }
                     } else {
@@ -233,53 +185,27 @@ public class ExchangeOptions extends Activity {
                                 //Packet we have received.
 
                                 //Initialize our array of diffie hellman sessions
-                                session = new DiffieHellmanKeySession[keyAmount];
-                                for (int i = 0; i < session.length; i++) {
-                                    try {
-                                        //Initialize every session against the public key we received
-                                        //from the server.
-                                        session[i] = new DiffieHellmanKeySession(received.getKeys()[i]);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
+                                String[] receivedKeys = received.getKeys();
+                                initializeDiffieHellmanSessionsFromKeys(keyAmount, receivedKeys);
+
                                 //Prepair our public (g^b mod p) key encodings to send to the server.
-                                String[] publicEncodes = new String[keyAmount];
-                                for (int i = 0; i < publicEncodes.length; i++) {
-                                    publicEncodes[i] = session[i].packKey();
-                                }
+                                String[] publicEncodes = getPublicEncodings(keyAmount);
                                 //Create a new bluetooth package with our public keys and
                                 //Label the protocol as the second step of the key exchange
                                 BluetoothPackage btPack = new BluetoothPackage(publicEncodes, Constants.EXCHANGE_SECOND_TRADE);
-                                //byte array to serialize to
-                                byte[] toSend = null;
-                                try {
-                                    //serialize the package
-                                    toSend = btPack.serialize();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+
+                                //Serialized Bytes
+                                byte[] toSend = getSerializedBytes(btPack);
                                 //Send the serialized package
                                 bluetoothService.write(toSend);
 
                                 //Compute the session keys
-                                String[] keys = new String[keyAmount];
-                                for (int i = 0; i < keys.length; i++) {
-                                    try {
-                                        //Using our private and the public keys we received we compute
-                                        //each key
-                                        keys[i] = session[i].packSecret(received.getKeys()[i]);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
+                                String[] keys = getSecretKeys(keyAmount, receivedKeys);
 
-                                    statusTv.setText(keys[0]);
-
-                                    //Pack the keys into a result and send it back to the calling activity
-                                    Intent returnIntent = new Intent();
-                                    returnIntent.putExtra("keys", keys);
-                                    setResult(RESULT_OK, returnIntent);
-                                }
+                                //Pack the keys into a result and send it back to the calling activity
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra("keys", keys);
+                                setResult(RESULT_OK, returnIntent);
                                 break;
                             case Constants.EXCHANGE_FINALIZATION:
                                 //stop the service and return the keys
@@ -298,5 +224,99 @@ public class ExchangeOptions extends Activity {
             return true;
         }
     });
+
+    private String[] getSecretKeys(int keyAmount, String[] receivedKeys) {
+        String[] keys = new String[keyAmount];
+        for (int i = 0; i < keys.length; i++) {
+            try {
+                //Using our private and the public keys we received we compute
+                //each key
+                keys[i] = session[i].packSecret(receivedKeys[i]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return keys;
+    }
+
+    private void restartBluetoothService() {
+        bluetoothService.stop();
+        bluetoothService = new BluetoothService(handler);
+        bluetoothService.start();
+    }
+
+    private byte[] getSerializedBytes(BluetoothPackage bluetoothPackage) {
+        //Array of bytes to hold the serialized version of the bluetooth package
+        byte[] toSend = null;
+        try {
+            //Serialize the package into an array of bytes
+            toSend = bluetoothPackage.serialize();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return toSend;
+    }
+
+    private String[] getPublicEncodings(int keyAmount) {
+        String[] publicEncodes = new String[keyAmount];
+        for (int i = 0; i < publicEncodes.length; i++) {
+            publicEncodes[i] = session[i].packKey();
+        }
+        return publicEncodes;
+    }
+
+    private void initializeDiffieHellmanSessionsFromKeys(int keyAmount, String[] receivedKeys) {
+        session = new DiffieHellmanKeySession[keyAmount];
+        for (int i = 0; i < session.length; i++) {
+            try {
+                //Initialize every session against the public key we received
+                //from the server.
+                session[i] = new DiffieHellmanKeySession(receivedKeys[i]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void initializeDiffieHellmanSessions(int keyAmount) {
+        //Create an array of key sessions for this device
+        session = new DiffieHellmanKeySession[keyAmount];
+        //Initialize all the key sessions
+        for (int i = 0; i < session.length; i++) {
+            try {
+                session[i] = new DiffieHellmanKeySession();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private BluetoothPackage getBluetoothPackage(Message msg) {
+        //Grab the array of bytes from the message package
+        byte[] readBuf = (byte[]) msg.obj;
+        //Create a bluetooth package and initialize it by de-serializing the input buffer
+        BluetoothPackage received = null;
+        try {
+            received = deserialize(readBuf);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return received;
+    }
+
+    private void sendCommunicationParameters() {
+        int keyAmount = Integer.parseInt(keyNumberEt.getText().toString());
+        int expireCount = Integer.parseInt(expireTimeEt.getText().toString());
+        BluetoothPackage bluetoothPackage = new BluetoothPackage(keyAmount, expireCount, Constants.EXCHANGE_AGREEMENT);
+        byte[] toSend;
+        try {
+            toSend = bluetoothPackage.serialize();
+            bluetoothService.write(toSend);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

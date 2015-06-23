@@ -45,6 +45,18 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
     private static final String INT_TYPE = " INTEGER";
     private static final String COMMA_SEP = ",";
 
+    public static abstract class GeneralSettings implements BaseColumns {
+        public static final String TABLE_NAME = "generalSetting";
+        public static final String COLUMN_NAME_MINIMUM_EXPIRE_COUNT = "min";
+        public static final String COLUMN_NAME_MAXIMUM_EXPIRE_COUNT = "max";
+
+        public static final String SQL_CREATE_GENERAL_SETTINGS = "CREATE TABLE " + TABLE_NAME
+                + " (" + _ID + " INTEGER PRIMARY KEY,"
+                + COLUMN_NAME_MINIMUM_EXPIRE_COUNT + INT_TYPE
+                + COMMA_SEP + COLUMN_NAME_MAXIMUM_EXPIRE_COUNT + INT_TYPE + ") ";
+
+    }
+
     /*
         "scentry" table stores basic security settings for contact. Should be one entry per
                 secure contact. Contacts from main android db that are not initialized into
@@ -130,6 +142,12 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         //create tables
         db.execSQL(SCEntry.SQL_CREATE_SC_ENTRIES);
         db.execSQL(KeyPairEntry.SQL_CREATE_KEY_PAIR_ENTRIES);
+        db.execSQL(GeneralSettings.SQL_CREATE_GENERAL_SETTINGS);
+
+        ContentValues vals = new ContentValues();
+        vals.put(GeneralSettings.COLUMN_NAME_MINIMUM_EXPIRE_COUNT, 25);
+        vals.put(GeneralSettings.COLUMN_NAME_MAXIMUM_EXPIRE_COUNT, 100);
+        db.insert(GeneralSettings.TABLE_NAME, null, vals);
     }
 
     public int getCollumnFromIdAsInt(String tableName, String collumn, int id) {
@@ -222,8 +240,40 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         return 0;
     }
 
+
     public int getContactSeqNum(int id) {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CURRENT_SEQ, id);
+    }
+
+    public int[] getGeneralSettings() {
+        String select = "SELECT * FROM " + GeneralSettings.TABLE_NAME;
+        SQLiteDatabase dbase = this.getReadableDatabase();
+        int min = 0;
+        int max = 0;
+        try {
+            Cursor c = dbase.rawQuery(select, null);
+            if (c != null && c.getCount() > 0) {
+                c.moveToFirst();
+                min = c.getInt(c.getColumnIndex(GeneralSettings.COLUMN_NAME_MINIMUM_EXPIRE_COUNT));
+                max = c.getInt(c.getColumnIndex(GeneralSettings.COLUMN_NAME_MAXIMUM_EXPIRE_COUNT));
+                return new int[]{min, max};
+            } else {
+                System.out.println("Cursor was empty or null - LB");
+            }
+            return new int[]{0, 0};
+        } catch (Exception e) {
+            System.out.println("Table did not exist or was empty - LB");
+            e.printStackTrace();
+        }
+        return new int[]{0, 0};
+    }
+
+    public void setGeneralSettings(int min, int max) {
+        SQLiteDatabase dbase = this.getWritableDatabase();
+        ContentValues vals = new ContentValues();
+        vals.put(GeneralSettings.COLUMN_NAME_MINIMUM_EXPIRE_COUNT, min);
+        vals.put(GeneralSettings.COLUMN_NAME_MAXIMUM_EXPIRE_COUNT, max);
+        dbase.update(GeneralSettings.TABLE_NAME, vals, null, null);
     }
 
     public int getNextSequence(int id) {
