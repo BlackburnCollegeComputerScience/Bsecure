@@ -28,19 +28,19 @@ import android.os.Bundle;
 public class WipeConversationDialog extends DialogFragment {
 
 
-    public interface WipeConversationDialogListener {
-        public void onOKPressed(DialogFragment dialog);
-        public void onCancelPressed(DialogFragment dialog);
+    interface WipeConversationDialogListener {
+        void onOKPressed(DialogFragment dialog);
+        void onCancelPressed(DialogFragment dialog);
     }
 
     // Use this instance of the interface to deliver action events
-    WipeConversationDialogListener mListener;
+    WipeConversationDialogListener listener;
 
     // Override the Fragment.onAttach() method to instantiate the Listener
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mListener = (WipeConversationDialogListener) activity;
+        listener = (WipeConversationDialogListener) activity;
     }
 
     @Override
@@ -52,12 +52,12 @@ public class WipeConversationDialog extends DialogFragment {
                         " this conversation?")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.onOKPressed(WipeConversationDialog.this);
+                        listener.onOKPressed(WipeConversationDialog.this);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.onCancelPressed(WipeConversationDialog.this);
+                        listener.onCancelPressed(WipeConversationDialog.this);
                     }
                 });
 

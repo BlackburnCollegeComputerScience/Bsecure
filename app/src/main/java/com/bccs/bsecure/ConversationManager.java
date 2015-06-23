@@ -27,7 +27,6 @@ import java.util.ArrayList;
 
 /*
     created by lucas.burdell 6/18/2015
-        Class for
  */
 public class ConversationManager extends SQLiteOpenHelper {
 
@@ -255,6 +254,8 @@ public class ConversationManager extends SQLiteOpenHelper {
         if (sInstance !=null && sDatabase != null) {
             sInstance.close();
             sDatabase.close();
+            sInstance = null;
+            sDatabase = null;
         }
     }
 
@@ -280,6 +281,6 @@ public class ConversationManager extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //TODO
+        //TODO write onUpgrade
     }
 }

@@ -64,6 +64,7 @@ public class messageCipher {
 
             SecretKeySpec skeySpec = new SecretKeySpec(fromBase64String(key1),
                     "AES");
+            System.out.println(fromBase64String(key1).length + " " + iv1.length);
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
             byte[] encrypted = cipher.doFinal(value.getBytes());
@@ -84,6 +85,7 @@ public class messageCipher {
 
             SecretKeySpec skeySpec = new SecretKeySpec(fromBase64String(key1),
                     "AES");
+            System.out.println(fromBase64String(key1).length + " " + iv1.length);
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
             byte[] original = cipher.doFinal(fromBase64String(encrypted));

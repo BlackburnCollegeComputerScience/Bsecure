@@ -1,5 +1,11 @@
 package com.bccs.bsecure;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.ContactsContract;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -36,7 +42,7 @@ public class SecurityContact implements Serializable {
 
     public SecurityContact() {
     }
-
+/*
     public SecurityContact(int id, String name, String number) {
         this.name = name;
         this.number = number;
@@ -45,21 +51,30 @@ public class SecurityContact implements Serializable {
 
 
     }
+*/
 
-    public SecurityContact(int id) {
+    public SecurityContact(Context context, int id) {
         this.id = id;
 
+
         //Lookup in android db with id, if not there throw exception
-        this.name = "Name";
+//        this.name = name;
+//        this.number = number;
+
+        getFromAndroidDB(context);
 
         //Lookup in SC db.scentry table using id
         //if exists, BSecure contact exists, use db values
         //else, BSecure contact does not exist, create with default values
-        this.seqNum = 0;
+
+        SCSQLiteHelper database = new SCSQLiteHelper(context);
+        this.seqNum = database.getContactSeqNum(id);
+        database.close();
 
         //Lookup in SC db.keypairentry table using id and seqnum
         //if does not exist, no more key pairs available. Throw exception??
-        this.currKey = "0123ABC";
+        //this.currKey = "0123ABC";
+        this.currKey = getSessionKey();
     }
 
     public int getID() {
@@ -70,6 +85,45 @@ public class SecurityContact implements Serializable {
         return name;
     }
 
+    private void getFromAndroidDB(Context context) {
+        Uri CONTENT_URI = ContactsContract.Contacts.CONTENT_URI;
+        String _ID = ContactsContract.Contacts._ID;
+        String DISPLAY_NAME = ContactsContract.Contacts.DISPLAY_NAME;
+        String HAS_PHONE_NUMBER = ContactsContract.Contacts.HAS_PHONE_NUMBER;
+        String[] contact_projection = {
+                _ID,
+                DISPLAY_NAME,
+                HAS_PHONE_NUMBER
+        };
+
+        Uri PhoneCONTENT_URI = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        String Phone_CONTACT_ID = ContactsContract.CommonDataKinds.Phone.CONTACT_ID;
+        String NUMBER = ContactsContract.CommonDataKinds.Phone.NUMBER;
+
+        String[] phone_projection = {
+                Phone_CONTACT_ID,
+                NUMBER
+        };
+
+        ContentResolver contentResolver = context.getContentResolver();
+        Cursor cursor = contentResolver.query(CONTENT_URI, contact_projection, _ID + "=" + this.id, null, null);
+
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            this.name = cursor.getString(cursor.getColumnIndex(DISPLAY_NAME));
+            int hasPhoneNumber = Integer.parseInt(cursor.getString(cursor.getColumnIndex(HAS_PHONE_NUMBER)));
+
+            if (hasPhoneNumber > 0) {
+                Cursor phoneCursor = contentResolver.query(PhoneCONTENT_URI, null, Phone_CONTACT_ID + " = ?", new String[]{Integer.toString(this.id)}, null);
+                phoneCursor.moveToFirst();
+                this.number = phoneCursor.getString(phoneCursor.getColumnIndex(NUMBER));
+                phoneCursor.close();
+            }
+        }
+        cursor.close();
+    }
+
+
     public String getSessionKey() {
         if (keyExpired()) {
             currKey = getNextKey();      //lookup in SC db.keypairentry using id and seqnum
@@ -78,9 +132,11 @@ public class SecurityContact implements Serializable {
         return currKey;
     }
 
+
     public int getSeqNum() {
         return seqNum;
     }
+
 
     private boolean keyExpired() {
         //TODO: Need expiration setting to implement
@@ -91,6 +147,7 @@ public class SecurityContact implements Serializable {
         //TODO: lookup key at location seqnum + 1
         // must handle overflow to 0!
         // if no more keys, prompt user to use old key or abort (maybe throw exception here)
+
         return "Next";
     }
 
@@ -99,6 +156,10 @@ public class SecurityContact implements Serializable {
         ObjectOutputStream o = new ObjectOutputStream(b);
         o.writeObject(this);
         return b.toByteArray();
+    }
+
+    public void addKeys(String[] keys) {
+
     }
 
     /**
