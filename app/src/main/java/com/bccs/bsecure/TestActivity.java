@@ -1,9 +1,11 @@
 package com.bccs.bsecure;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 
 /*
@@ -26,33 +28,60 @@ import android.view.MenuItem;
 
 public class TestActivity extends ActionBarActivity {
 
+    TextView status;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        SecurityContact lucas = new SecurityContact(100, "Lucas", "15555215554");
-        SecurityContact shane = new SecurityContact(101, "Shane", "15555215556");
-        SecurityContact kevin = new SecurityContact(102, "Kevin", "15555215558");
-        SCSQLiteHelper dbase = new SCSQLiteHelper(this);
-        try {
-            dbase.createSecurityContact(lucas);
-            dbase.createSecurityContact(shane);
-            dbase.createSecurityContact(kevin);
-        } catch (Exception e) {
-            e.printStackTrace();
+//        SecurityContact lucas = new SecurityContact(100, "Lucas", "15555215554");
+//        SecurityContact shane = new SecurityContact(101, "Shane", "15555215556");
+//        SecurityContact kevin = new SecurityContact(102, "Kevin", "15555215558");
+//        SCSQLiteHelper dbase = new SCSQLiteHelper(this);
+//        try {
+//            dbase.createSecurityContact(lucas);
+//            dbase.createSecurityContact(shane);
+//            dbase.createSecurityContact(kevin);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        int id = lucas.getID();
+//        String fromID = dbase.getFromID(id);
+//        System.out.println(dbase.getFromID(shane.getID()));
+//        System.out.println(dbase.getFromID(kevin.getID()));
+//
+//        dbase.clearDatabase();
+//
+//        System.out.println(fromID);
+//        System.out.println(dbase.getFromID(shane.getID()));
+//        System.out.println(dbase.getFromID(kevin.getID()));
+//        dbase.close();
+
+        status = (TextView) findViewById(R.id.result);
+        Intent intent = new Intent(this, Bluetooth.class);
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //onActivityResult is called when a intent finished and comes back to this activity.
+        if (requestCode == 1) {
+            //If we requested a key exchange
+            if (resultCode == RESULT_OK) {
+                //Grab the keys from the data packet
+                String[] keys = data.getExtras().getStringArray("keys");
+                int expireCount = data.getExtras().getInt("expireCount");
+
+                status.append("Here is how long a key will last: " + expireCount + "\n\n");
+                status.append("Here are all the key hash codes:\n");
+
+                for (int i = 0; i < keys.length; i++) {
+                    status.append(keys[i].hashCode() + "\n");
+                }
+            }
         }
-
-        int id = lucas.getID();
-        String fromID = dbase.getFromID(id);
-        System.out.println(dbase.getFromID(shane.getID()));
-        System.out.println(dbase.getFromID(kevin.getID()));
-
-        dbase.clearDatabase();
-
-        System.out.println(fromID);
-        System.out.println(dbase.getFromID(shane.getID()));
-        System.out.println(dbase.getFromID(kevin.getID()));
-        dbase.close();
     }
 
     @Override

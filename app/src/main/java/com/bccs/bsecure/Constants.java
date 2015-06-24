@@ -31,10 +31,15 @@ public interface Constants {
     int EXCHANGE_SECOND_TRADE = 2;
     int EXCHANGE_FINALIZATION = 3;
     int EXCHANGE_AGREEMENT = 4;
+    int EXCHANGE_AGREEMENT_ALLOW = 5;
+    int EXCHANGE_AGREEMENT_DENY = 6;
 
     //Request codes
     int REQUEST_ENABLE_BT = 1;
     int REQUEST_ENABLE_BT_DIS = 2;
     int REQUEST_KEYS = 3;
+
+    //Amount of keys to exchange
+    int KEY_AMOUNT = 100;
 
 }

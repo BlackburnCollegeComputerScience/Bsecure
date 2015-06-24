@@ -27,19 +27,26 @@ public class BluetoothPackage implements Serializable {
 
     private String[] keys;
     private int protocolCode;
-    private int keyAmount;
-    private int expireCount;
+    private int minExpire;
+    private int maxExpire;
 
     /**
-     * Constructor for ensuring options are the same.
-     *
-     * @param amount       The amount of keys the devices have agreed to display.
-     * @param expireCount  The agreed upon count of message expiration.
-     * @param protocolCode Stage of the exchange normally "Agreement" with this constructor
+     * Constructor for just exchanging agreement codes.
+     * @param protocolCode
      */
-    public BluetoothPackage(int amount, int expireCount, int protocolCode) {
-        this.keyAmount = amount;
-        this.expireCount = expireCount;
+    public BluetoothPackage(int protocolCode) {
+        this.protocolCode = protocolCode;
+    }
+
+    /**
+     * Constructor for exchanging options
+     * @param minExpire minimum message count
+     * @param maxExpire maximum message count
+     * @param protocolCode Stage of the exchange
+     */
+    public BluetoothPackage(int minExpire, int maxExpire, int protocolCode) {
+        this.minExpire = minExpire;
+        this.maxExpire = maxExpire;
         this.protocolCode = protocolCode;
     }
 
@@ -69,12 +76,12 @@ public class BluetoothPackage implements Serializable {
         return b.toByteArray();
     }
 
-    public int getKeyAmount() {
-        return keyAmount;
+    public int getMinExpire() {
+        return minExpire;
     }
 
-    public int getExpireCount() {
-        return expireCount;
+    public int getMaxExpire() {
+        return maxExpire;
     }
     /**
      * De-serialize method

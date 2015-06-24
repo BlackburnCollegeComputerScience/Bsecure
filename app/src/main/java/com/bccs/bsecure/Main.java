@@ -178,8 +178,10 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
         startActivity(intent);
     }
     public void openNFC(){
-        Intent intent = new Intent(this, Bluetooth.class);
-        startActivityForResult(intent, Constants.REQUEST_KEYS);
+        Intent intent = new Intent(this, TestActivity.class);
+        startActivity(intent);
+//        Intent intent = new Intent(this, Bluetooth.class);
+//        startActivityForResult(intent, Constants.REQUEST_KEYS);
     }
 
     public void openNoNFC() {

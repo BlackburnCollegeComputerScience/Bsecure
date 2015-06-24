@@ -44,7 +44,7 @@ public class Settings extends ActionBarActivity {
         setContentView(R.layout.settings);
 
         minimumEt = (EditText) findViewById(R.id.MinimumEt);
-        maximumEt = (EditText) findViewById(R.id.MinimumEt);
+        maximumEt = (EditText) findViewById(R.id.MaximumEt);
 
         minimumDisplayBtn = (Button) findViewById(R.id.MinimumDisplayBtn);
         maximumDisplayBtn = (Button) findViewById(R.id.MaximumDisplayBtn);
@@ -53,8 +53,8 @@ public class Settings extends ActionBarActivity {
         database = new SCSQLiteHelper(this);
 
         int[] settings = database.getGeneralSettings();
-        minimumDisplayBtn.setText(settings[0]);
-        maximumDisplayBtn.setText(settings[1]);
+        minimumDisplayBtn.setText(String.valueOf(settings[0]));
+        maximumDisplayBtn.setText(String.valueOf(settings[1]));
 
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,13 +65,19 @@ public class Settings extends ActionBarActivity {
                     min = max;
                     minimumEt.setText(min);
                 }
-                minimumDisplayBtn.setText(min);
-                maximumDisplayBtn.setText(max);
+                minimumDisplayBtn.setText(String.valueOf(min));
+                maximumDisplayBtn.setText(String.valueOf(max));
                 database.setGeneralSettings(min, max);
             }
         });
 
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        database.close();
+        super.onDestroy();
     }
 
     @Override

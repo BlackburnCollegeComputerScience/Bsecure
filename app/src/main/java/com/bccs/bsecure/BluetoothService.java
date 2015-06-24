@@ -8,9 +8,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
@@ -399,46 +399,22 @@ public class BluetoothService {
         public void run() {
             byte[] buffer = new byte[1024];
             int bytes;
+            int length;
 
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
-                    // Read from the InputStream
-                    //Create a byte buffer to append read byte arrays into a single message
-                    ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-                    //Length of the byte of array read
-                    int len;
-                    //Total length of the byte buffer
-                    bytes = 0;
-                    //InStream.read loads a amount of bytes into the "buffer" array
-                    //Max amount of bytes read in a cycle is 990, so if we read that amount there is
-                    //more to read.
-                    while ((len = inputStream.read(buffer)) >= 990) {
-                        //Add the bytes read to the total
-                        bytes += len;
-                        //Add all bytes in the byte array into the bytebuffer
-                        //pram buffer = the byte array
-                        // 0 = the first location in the array to start loading into the buffer
-                        // len = the last location in the array to load into the buffer ->
-                        //Prevents loading in empty bytes into the buffer
-                        byteBuffer.write(buffer, 0, len);
-                    }
-                    //We need to load one more time because the while loop will exit without
-                    //loading the last bytes
-                    bytes += len;
-                    byteBuffer.write(buffer, 0, len);
-
-                    //Convert the byte buffer to a byte array
-                    byte[] bytesToSend = byteBuffer.toByteArray();
-                    // Send the obtained bytes, length of the bytes, and the protocol code to the UI Activity
-                    handler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, bytesToSend).sendToTarget();
-
+                    ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+                    BluetoothPackage bluetoothPackage = (BluetoothPackage) objectInputStream.readObject();
+                    handler.obtainMessage(Constants.MESSAGE_READ, 0, -1, bluetoothPackage).sendToTarget();
                 } catch (IOException e) {
                     e.printStackTrace();
                     connectionLost();
                     // Start the service over to restart listening mode
                     BluetoothService.this.start();
                     break;
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
                 }
             }
         }
