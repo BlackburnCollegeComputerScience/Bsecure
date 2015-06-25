@@ -1,7 +1,6 @@
 package com.bccs.bsecure;
 
 import android.app.DialogFragment;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -144,16 +143,6 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
             case R.id.action_contacts:
                 openContacts();
                 return true;
-            case R.id.action_nfc:
-                //Checks if the device supports Bluetooth. If not opens the NoNFC activity to communicate
-                //through text messaging.
-                BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                if (bluetoothAdapter != null) {
-                    openNFC();
-                } else {
-                    openNoNFC();
-                }
-                return true;
             case R.id.action_settings:
                 openSettings();
                 return true;
@@ -175,17 +164,6 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     }
     public void openContacts(){
         Intent intent = new Intent(this, Contacts.class);
-        startActivity(intent);
-    }
-    public void openNFC(){
-        Intent intent = new Intent(this, TestActivity.class);
-        startActivity(intent);
-//        Intent intent = new Intent(this, Bluetooth.class);
-//        startActivityForResult(intent, Constants.REQUEST_KEYS);
-    }
-
-    public void openNoNFC() {
-        Intent intent = new Intent(this, ContactsListActivity.class);
         startActivity(intent);
     }
     public void openSettings(){

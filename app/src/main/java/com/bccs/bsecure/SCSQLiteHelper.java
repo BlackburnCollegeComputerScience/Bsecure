@@ -242,25 +242,6 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CONTACT_ID, id) != -1;
     }
 
-    public int getContactIdFromName(String name) {
-        String select = "SELECT * FROM " + SCEntry.TABLE_NAME + " WHERE " + SCEntry.COLUMN_NAME_NAME
-                + " = " + name;
-        SQLiteDatabase dbase = this.getReadableDatabase();
-        try {
-            Cursor c = dbase.rawQuery(select, null);
-            if (c != null && c.getCount() > 0) {
-                c.moveToFirst();
-                return c.getInt(c.getColumnIndex(SCEntry.COLUMN_NAME_CONTACT_ID));
-            } else {
-                System.out.println("Cursor was empty or null - LB");
-            }
-            return 0;
-        } catch (Exception e) {
-            System.out.println("Table did not exist or was empty");
-            e.printStackTrace();
-        }
-        return 0;
-    }
 
 
     public int getContactSeqNum(int id) {

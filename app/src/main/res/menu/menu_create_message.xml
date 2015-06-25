@@ -17,30 +17,6 @@
 * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
 *
 -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
+<menu
 xmlns:tools="http://schemas.android.com/tools" tools:context="com.bccs.bsecure.CreateMessage">
-    <!-- Contacts Button -->
-    <item android:id="@+id/action_contacts"
-        android:title="@string/action_contacts"
-        android:icon="@drawable/ic_contacts_black_48dp"
-        app:showAsAction="ifRoom" />
-    <!-- NFC Button -->
-    <item android:id="@+id/action_nfc"
-        android:title="@string/action_nfc"
-        android:icon="@drawable/ic_phonelink_ring_black_48dp"
-        app:showAsAction="ifRoom" />
-    <!-- Settings Button -->
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:icon="@drawable/ic_settings_black_48dp"
-        app:showAsAction="ifRoom" />
-    <!-- Bug Report -->
-    <item android:id="@+id/action_bugReport"
-        android:title="@string/action_bugReport"
-        app:showAsAction="never" />
-    <!-- About Button -->
-    <item android:id="@+id/action_about"
-        android:title="@string/action_about"
-        app:showAsAction="never" />
 </menu>

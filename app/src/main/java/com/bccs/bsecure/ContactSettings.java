@@ -1,10 +1,12 @@
 package com.bccs.bsecure;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -46,10 +48,10 @@ public class ContactSettings extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(R.layout.activity_contact_settings);
 
         //Grab the security contact from the bundle
-        byte[] serializedContact = savedInstanceState.getByteArray("contact");
+        byte[] serializedContact = getIntent().getExtras().getByteArray("contact");
         try {
             //De-serialized contact object
             contact = deserialize(serializedContact);
@@ -61,10 +63,48 @@ public class ContactSettings extends ActionBarActivity {
 
         //Set up settings display
         nameTv.setText(contact.getName());
-        androidIdTv.setText(contact.getID());
-        sequenceNumberTv.setText(contact.getSeqNum());
-        expirationTv.setText(getKeyExpiration());
-        remainingKeysTv.setText(getRemainingKeys());
+        androidIdTv.setText("Android ID: " + contact.getId());
+        sequenceNumberTv.setText("Sequence Number: " + contact.getSeqNum());
+        expirationTv.setText("Messages Till Key Expiration" + getKeyExpiration());
+        remainingKeysTv.setText("Remaining Keys: " + getRemainingKeys());
+
+        exchangeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                if (bluetoothAdapter != null) {
+                    Intent intent = new Intent(ContactSettings.this, Bluetooth.class);
+                    startActivityForResult(intent, Constants.REQUEST_KEYS);
+                } else {
+                    Intent intent = new Intent(ContactSettings.this, smsBroadcastReceiver.class);
+                    startActivity(intent);
+                }
+
+            }
+        });
+
+        forceExpirationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Create a protocol for informing other party of key expiration
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //onActivityResult is called when a intent finished and comes back to this activity.
+        if (requestCode == Constants.REQUEST_KEYS) {
+            //If we requested a key exchange
+            if (resultCode == RESULT_OK) {
+                //Grab the keys from the data packet
+                String[] keys = data.getExtras().getStringArray("keys");
+                int expireCount = data.getExtras().getInt("expireCount");
+                contact.addKeys(keys);
+                contact.setUses(expireCount);
+            }
+        }
     }
 
     private String getRemainingKeys() {
@@ -73,8 +113,7 @@ public class ContactSettings extends ActionBarActivity {
     }
 
     private String getKeyExpiration() {
-        //TODO: Calculate key expiration
-        return "";
+        return contact.getUsesLeft() + "";
     }
 
     public static SecurityContact deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
@@ -95,59 +134,7 @@ public class ContactSettings extends ActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.action_new:
-                openNewMessage();
-                return true;
-            case R.id.action_contacts:
-                openContacts();
-                return true;
-            case R.id.action_settings:
-                openSettings();
-                return true;
-            case R.id.action_bugReport:
-                openBugReport();
-                return true;
-            case R.id.action_about:
-                openAbout();
-                return true;
-            default:
-                openMain();
-                return true;
-        }
+        onBackPressed();
+        return true;
     }
-
-    public void openMain() {
-        Intent intent = new Intent(this, Main.class);
-        startActivity(intent);
-    }
-
-
-    public void openNewMessage() {
-        Intent intent = new Intent(this, CreateMessage.class);
-        startActivity(intent);
-    }
-
-    public void openContacts() {
-        Intent intent = new Intent(this, Contacts.class);
-        startActivity(intent);
-    }
-
-    public void openSettings() {
-        Intent intent = new Intent(this, Settings.class);
-        startActivity(intent);
-    }
-
-    public void openBugReport() {
-        Intent intent = new Intent(this, BugReport.class);
-        startActivity(intent);
-    }
-
-    public void openAbout() {
-        Intent intent = new Intent(this, About.class);
-        startActivity(intent);
-    }
-
 }

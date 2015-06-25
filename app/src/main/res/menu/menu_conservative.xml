@@ -29,11 +29,6 @@
         android:title="@string/action_contacts"
         android:icon="@drawable/ic_contacts_black_48dp"
         app:showAsAction="never" />
-    <!-- NFC Button -->
-    <item android:id="@+id/action_nfc"
-        android:title="@string/action_nfc"
-        android:icon="@drawable/ic_phonelink_ring_black_48dp"
-        app:showAsAction="never" />
     <!-- Settings Button -->
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
