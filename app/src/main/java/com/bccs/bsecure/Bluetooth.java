@@ -219,10 +219,16 @@ public class Bluetooth extends ActionBarActivity {
             if (resultCode == RESULT_OK) {
                 //Grab the keys from the data packet
                 String[] keys = data.getExtras().getStringArray("keys");
+                int expireCount = data.getExtras().getInt("expireCount");
                 //Pack the keys into a result and send it back to the calling activity
                 Intent returnIntent = new Intent();
                 returnIntent.putExtra("keys", keys);
+                returnIntent.putExtra("expireCount", expireCount);
                 setResult(RESULT_OK, returnIntent);
+                showToast("Exchange complete! 100 keys added to contact.");
+                finish();
+            } else {
+                setResult(RESULT_CANCELED);
                 finish();
             }
         }

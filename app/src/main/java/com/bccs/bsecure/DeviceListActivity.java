@@ -88,7 +88,7 @@ public class DeviceListActivity extends Activity {
                 BluetoothDevice device = deviceList.get(position);
 
                 if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
-                    Intent options = new Intent(getApplicationContext(), ExchangeOptions.class);
+                    Intent options = new Intent(DeviceListActivity.this, Exchange.class);
                     options.putExtra("device", device);
                     startActivityForResult(options, Constants.REQUEST_KEYS);
                 } else {
@@ -196,12 +196,15 @@ public class DeviceListActivity extends Activity {
             if (resultCode == RESULT_OK) {
                 //Grab the keys from the data packet
                 String[] keys = data.getExtras().getStringArray("keys");
-                int expireTime = data.getExtras().getInt("expireTime");
+                int expireTime = data.getExtras().getInt("expireCount");
                 //Pack the keys into a result and send it back to the calling activity
                 Intent returnIntent = new Intent();
                 returnIntent.putExtra("keys", keys);
-                returnIntent.putExtra("expireTime", expireTime);
+                returnIntent.putExtra("expireCount", expireTime);
                 setResult(RESULT_OK, returnIntent);
+                finish();
+            } else {
+                setResult(RESULT_CANCELED);
                 finish();
             }
         }
