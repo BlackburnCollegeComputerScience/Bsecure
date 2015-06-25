@@ -15,24 +15,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:textSize="20sp"
-        android:text="Exchange Settings" />
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="15dp"
-        android:layout_below="@+id/tv_status"
-        android:id="@+id/space" />
-
-    <TextView
-        android:id="@+id/textView16"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="12dp"
-        android:text="Settings on each phone must match to start exchange"
-        android:layout_below="@+id/space"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:text="Key Exchange" />
 
     <ProgressBar
         style="?android:attr/progressBarStyleHorizontal"
@@ -41,79 +24,12 @@
         android:id="@+id/progressBar4" />
 
     <TextView
-        android:id="@+id/statusTv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="12dp"
-        android:layout_below="@+id/space"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:textColor="#ff0000" />
-
-    <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/progressBar5" />
-
-    <TextView
-        android:id="@+id/textView17"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="12dp"
-        android:text="After how many text messages should a key expire?"
-        android:layout_below="@+id/space"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="7dp"
-        android:layout_below="@+id/tv_status"
-        android:id="@+id/space2" />
-
-    <EditText
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:id="@+id/expirationCountEt"
-        android:gravity="center" />
-
-    <TextView
-        android:id="@+id/textView18"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="12dp"
-        android:text="How many keys should we exchange? ( 0 - 1000 )"
-        android:layout_below="@+id/space"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="7dp"
-        android:layout_below="@+id/tv_status"
-        android:id="@+id/space3" />
-
-    <EditText
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:id="@+id/keyAmountEt"
-        android:gravity="center" />
-
-    <TextView
         android:id="@+id/textView19"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:textSize="12dp"
-        android:text="Warning: Key exchange takes aprox 90 seconds per 100 keys. Large key exchanges may appear to freeze the app. If &quot;Besecure is not responding&quot; appears please click &quot;wait&quot;."
+        android:text="Note: Key exchange is relatively quick, but older phones may take a while to gather entropy. Please be patient."
         android:layout_below="@+id/space"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
@@ -121,7 +37,7 @@
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Exchange Keys"
+        android:text="Start Key Exchange"
         android:id="@+id/exchangeButton" />
 
 </LinearLayout>

@@ -29,10 +29,10 @@ public interface Constants {
     //Codes for use in our bluetooth diffie hellman exchange protocol
     int EXCHANGE_FIRST_TRADE = 1;
     int EXCHANGE_SECOND_TRADE = 2;
-    int EXCHANGE_FINALIZATION = 3;
-    int EXCHANGE_AGREEMENT = 4;
-    int EXCHANGE_AGREEMENT_ALLOW = 5;
-    int EXCHANGE_AGREEMENT_DENY = 6;
+    int EXCHANGE_AGREEMENT = 3;
+    int EXCHANGE_AGREEMENT_ALLOW = 4;
+    int EXCHANGE_AGREEMENT_DENY = 5;
+    int EXCHANGE_AGREEMENT_FINAL_SELECTION = 6;
 
     //Request codes
     int REQUEST_ENABLE_BT = 1;

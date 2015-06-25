@@ -225,6 +225,7 @@ public class Bluetooth extends ActionBarActivity {
                 returnIntent.putExtra("keys", keys);
                 returnIntent.putExtra("expireCount", expireCount);
                 setResult(RESULT_OK, returnIntent);
+                showToast("Exchange complete! 100 keys added to contact.");
                 finish();
             } else {
                 setResult(RESULT_CANCELED);

@@ -2,7 +2,7 @@ package com.bccs.bsecure;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +13,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -26,25 +28,23 @@ public class Exchange extends Activity {
 
     private BluetoothDevice device;
 
-    private ProgressDialog progressDlg;
-
     private Button exchangeBtn;
 
     private SCSQLiteHelper database;
+
+    private int minSeek;
+    private int maxSeek;
+    private TextView amountTv;
+    private SeekBar selectionBar;
+    AlertDialog dialog;
+    Dialog expireDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exchange);
 
-        //Initialize the progress dialog.
-        progressDlg = new ProgressDialog(this);
-        progressDlg.setMessage("Exchanging " + Constants.KEY_AMOUNT + " Keys");
-        //Don't let it cancel so they don't cancel the key exchange
-        progressDlg.setCancelable(false);
-
         //Get the selected Device
-//        device = savedInstanceState.getParcelable("device");
         device = getIntent().getExtras().getParcelable("device");
 
         bluetoothService = new BluetoothService(handler);
@@ -107,6 +107,8 @@ public class Exchange extends Activity {
                     break;
                 case Constants.MESSAGE_READ:
                     BluetoothPackage received = (BluetoothPackage) msg.obj;
+                    String keys[];
+                    Intent returnIntent;
 
                     switch (received.getProtocolCode()) {
                         case Constants.EXCHANGE_AGREEMENT:
@@ -121,36 +123,9 @@ public class Exchange extends Activity {
                                     expireCount = receivedMin;
                                     startExchange();
                                 } else {
-                                    expireCount = receivedMin;
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(Exchange.this);
-                                    builder.setMessage("User has key expiration set outside " +
-                                            "your range! Continuing will set key expiration for this " +
-                                            "contact at " + expireCount + " text messages. Do you agree to this change?");
-                                    builder.setTitle("Warning!");
-                                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            BluetoothPackage btPack = new BluetoothPackage(Constants.EXCHANGE_AGREEMENT_ALLOW);
-                                            byte[] toSend = getSerializedBytes(btPack);
-                                            bluetoothService.write(toSend);
-                                            startExchange();
-                                        }
-                                    });
-                                    builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            BluetoothPackage btPack = new BluetoothPackage(Constants.EXCHANGE_AGREEMENT_DENY);
-                                            byte[] toSend = getSerializedBytes(btPack);
-                                            bluetoothService.write(toSend);
-                                            bluetoothService.stop();
-                                            setResult(RESULT_CANCELED);
-                                            finish();
-                                            onDestroy();
-                                            return;
-                                        }
-                                    });
-                                    AlertDialog dialog = builder.create();
-                                    dialog.show();
+                                    minSeek = max;
+                                    maxSeek = receivedMin;
+                                    showOutOfRangeWarning();
                                     return true;
                                 }
                             } else {
@@ -168,84 +143,148 @@ public class Exchange extends Activity {
                             startExchange();
                             break;
                         case Constants.EXCHANGE_AGREEMENT_DENY:
+                            dialog = showDialog("User has denied you're less secure key expiration parameters. They are selecting new parameters now.");
+                            return true;
+                        case Constants.EXCHANGE_AGREEMENT_FINAL_SELECTION:
+                            dialog.dismiss();
+                            expireCount = received.getMinExpire();
+                            startExchange();
+                            return true;
+                        case Constants.EXCHANGE_FIRST_TRADE:
+                            //If we are the client and the protocol tells us this is the first
+                            //half of the exchange
+
+                            //Initialize our array of diffie hellman sessions
+                            String[] receivedKeys = received.getKeys();
+                            initializeDiffieHellmanSessionsFromKeys(Constants.KEY_AMOUNT, receivedKeys);
+
+                            //Prepair our public (g^b mod p) key encodings to send to the server.
+                            String[] publicEncodes = getPublicEncodings(Constants.KEY_AMOUNT);
+                            //Create a new bluetooth package with our public keys and
+                            //Label the protocol as the second step of the key exchange
+                            BluetoothPackage btPack = new BluetoothPackage(publicEncodes, Constants.EXCHANGE_SECOND_TRADE);
+
+                            //Serialized Bytes
+                            byte[] toSend = getSerializedBytes(btPack);
+                            //Send the serialized package
+                            bluetoothService.write(toSend);
+
+                            //Compute the session keys
+                            keys = getSecretKeys(Constants.KEY_AMOUNT, receivedKeys);
+
+                            //Pack the keys into a result and send it back to the calling activity
+                            returnIntent = new Intent();
+                            returnIntent.putExtra("keys", keys);
+                            returnIntent.putExtra("expireCount", expireCount);
+                            setResult(RESULT_OK, returnIntent);
                             bluetoothService.stop();
-                            setResult(RESULT_CANCELED);
                             finish();
-                            onDestroy();
+                            return true;
+                        case Constants.EXCHANGE_SECOND_TRADE:
+                            //If this device is the server and the protocol tells us
+                            //that this is the second portion of the key exchange.
+                            keys = getSecretKeys(Constants.KEY_AMOUNT, received.getKeys());
+
+                            //Pack the keys into a result and send it back to the calling activity
+                            returnIntent = new Intent();
+                            returnIntent.putExtra("keys", keys);
+                            returnIntent.putExtra("expireCount", expireCount);
+                            setResult(RESULT_OK, returnIntent);
+                            bluetoothService.stop();
+                            finish();
                             return true;
                     }
-
-
-                    if (bluetoothService.isServer()) {
-                        switch (received.getProtocolCode()) {
-                            case Constants.EXCHANGE_SECOND_TRADE:
-                                //If this device is the server and the protocol tells us
-                                //that this is the second portion of the key exchange.
-                                String[] keys = getSecretKeys(Constants.KEY_AMOUNT, received.getKeys());
-                                progressDlg.dismiss();
-
-                                //Pack the keys into a result and send it back to the calling activity
-                                Intent returnIntent = new Intent();
-                                returnIntent.putExtra("keys", keys);
-                                returnIntent.putExtra("expireCount", expireCount);
-                                setResult(RESULT_OK, returnIntent);
-                                bluetoothService.stop();
-                                finish();
-                                onDestroy();
-                                return true;
-                        }
-                    } else {
-                        switch (received.getProtocolCode()) {
-                            case Constants.EXCHANGE_FIRST_TRADE:
-                                //If we are the client and the protocol tells us this is the first
-                                //half of the exchange
-
-                                //Initialize our array of diffie hellman sessions
-                                String[] receivedKeys = received.getKeys();
-                                initializeDiffieHellmanSessionsFromKeys(Constants.KEY_AMOUNT, receivedKeys);
-
-                                //Prepair our public (g^b mod p) key encodings to send to the server.
-                                String[] publicEncodes = getPublicEncodings(Constants.KEY_AMOUNT);
-                                //Create a new bluetooth package with our public keys and
-                                //Label the protocol as the second step of the key exchange
-                                BluetoothPackage btPack = new BluetoothPackage(publicEncodes, Constants.EXCHANGE_SECOND_TRADE);
-
-                                //Serialized Bytes
-                                byte[] toSend = getSerializedBytes(btPack);
-                                //Send the serialized package
-                                bluetoothService.write(toSend);
-
-                                //Compute the session keys
-                                String[] keys = getSecretKeys(Constants.KEY_AMOUNT, receivedKeys);
-
-                                progressDlg.dismiss();
-
-                                //Pack the keys into a result and send it back to the calling activity
-                                Intent returnIntent = new Intent();
-                                returnIntent.putExtra("keys", keys);
-                                returnIntent.putExtra("expireCount", expireCount);
-                                setResult(RESULT_OK, returnIntent);
-                                bluetoothService.stop();
-                                finish();
-                                onDestroy();
-                                return true;
-                        }
-                    }
-                    break;
                 case Constants.MESSAGE_TOAST:
                     if (bluetoothService.getState() != BluetoothService.STATE_NONE) {
                         showToast(msg.getData().getString("toast"));
                     }
-                    break;
+                    return true;
             }
             return true;
         }
     });
 
+    private void pickExpireDialog() {
+        expireDialog = new Dialog(Exchange.this);
+        expireDialog.setCancelable(false);
+        expireDialog.setTitle("Pick an acceptable key expiration:");
+        expireDialog.setContentView(R.layout.expire_pick_layout);
+        amountTv = (TextView) expireDialog.findViewById(R.id.countTv);
+        selectionBar = (SeekBar) expireDialog.findViewById(R.id.selectionBarSkbr);
+        selectionBar.setMax(maxSeek);
+        selectionBar.setProgress(minSeek);
+        amountTv.setText(Integer.toString(minSeek));
+        Button startBtn = (Button) expireDialog.findViewById(R.id.okaybtn);
+
+        selectionBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (progress < minSeek) {
+                    seekBar.setProgress(minSeek);
+                    amountTv.setText(Integer.toString(minSeek));
+                } else {
+                    amountTv.setText(Integer.toString(progress));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+        startBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                expireCount = selectionBar.getProgress();
+                expireDialog.dismiss();
+                continueExchange();
+            }
+        });
+        expireDialog.show();
+    }
+
+    private void continueExchange() {
+        BluetoothPackage btPack = new BluetoothPackage(expireCount, expireCount, Constants.EXCHANGE_AGREEMENT_FINAL_SELECTION);
+        byte[] toSend = getSerializedBytes(btPack);
+        bluetoothService.write(toSend);
+        startExchange();
+    }
+
+    private void showOutOfRangeWarning() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(Exchange.this);
+        builder.setMessage("User has key expiration set outside " +
+                "your range! Continuing will set key expiration for this " +
+                "contact at " + maxSeek + " text messages. Do you agree to this change?");
+        builder.setTitle("Warning!");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                BluetoothPackage btPack = new BluetoothPackage(Constants.EXCHANGE_AGREEMENT_ALLOW);
+                byte[] toSend = getSerializedBytes(btPack);
+                bluetoothService.write(toSend);
+                expireCount = maxSeek;
+                startExchange();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                BluetoothPackage btPack = new BluetoothPackage(Constants.EXCHANGE_AGREEMENT_DENY);
+                byte[] toSend = getSerializedBytes(btPack);
+                bluetoothService.write(toSend);
+                pickExpireDialog();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     private void startExchange() {
-//        if(!isFinishing()){
-        progressDlg.show();
-//        }
+        dialog = showDialog("Exchanging " + Constants.KEY_AMOUNT + " keys");
         if (bluetoothService.isServer()) {
             //If this device is the server we will send the first exchange
 
@@ -331,20 +370,14 @@ public class Exchange extends Activity {
         }
     }
 
-//    private BluetoothPackage getBluetoothPackage(Message msg) {
-//        //Grab the array of bytes from the message package
-//        byte[] readBuf = (byte[]) msg.obj;
-//        //Create a bluetooth package and initialize it by de-serializing the input buffer
-//        BluetoothPackage received = null;
-//        try {
-//            received = deserialize(readBuf);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        return received;
-//    }
+    private AlertDialog showDialog(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(Exchange.this);
+        builder.setCancelable(false);
+        builder.setMessage(message);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        return dialog;
+    }
 
     private void sendCommunicationParameters() {
         int[] settings = database.getGeneralSettings();

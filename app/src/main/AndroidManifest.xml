@@ -116,7 +116,7 @@
             android:label="@string/title_activity_test" />
         <activity
             android:name=".Exchange"
-            android:label="@string/title_activity_exchange_options"></activity>
+            android:label="@string/title_activity_exchange"></activity>
         <activity
             android:name=".ContactSettings"
             android:label="@string/title_activity_contact_settings">
