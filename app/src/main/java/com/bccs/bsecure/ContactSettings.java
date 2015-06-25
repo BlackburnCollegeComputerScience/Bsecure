@@ -46,7 +46,7 @@ public class ContactSettings extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings);
+        setContentView(R.layout.activity_settings);
 
         //Grab the security contact from the bundle
         byte[] serializedContact = savedInstanceState.getByteArray("contact");

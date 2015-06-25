@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 /**
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
@@ -41,7 +42,7 @@ public class Settings extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings);
+        setContentView(R.layout.activity_settings);
 
         minimumEt = (EditText) findViewById(R.id.MinimumEt);
         maximumEt = (EditText) findViewById(R.id.MaximumEt);
@@ -59,8 +60,16 @@ public class Settings extends ActionBarActivity {
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int min = Integer.parseInt(minimumEt.getText().toString());
-                int max = Integer.parseInt(maximumEt.getText().toString());
+                String minString = minimumEt.getText().toString();
+                String maxString = maximumEt.getText().toString();
+                int min = minString.equals("") ? Integer.parseInt(minString) : 0;
+                int max = maxString.equals("") ? Integer.parseInt(maxString) : 0;
+                int[] settings = database.getGeneralSettings();
+                if (min == 0 || min > 2000) {
+                    min = settings[0];
+                } else if (max == 0 || max > 2000) {
+                    max = settings[0];
+                }
                 if (min > max) {
                     min = max;
                     minimumEt.setText(min);
@@ -68,10 +77,16 @@ public class Settings extends ActionBarActivity {
                 minimumDisplayBtn.setText(String.valueOf(min));
                 maximumDisplayBtn.setText(String.valueOf(max));
                 database.setGeneralSettings(min, max);
+                showToast("Settings Saved");
             }
         });
 
 
+    }
+
+    private void showToast(String message) {
+        //Shortcut method to display a toast
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
     @Override
