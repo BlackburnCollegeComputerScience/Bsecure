@@ -155,19 +155,18 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
     }
 
     public int getCollumnFromIdAsInt(String tableName, String collumn, int id) {
-        String select = "SELECT * FROM " + tableName + " WHERE " + collumn + " = " + id;
+        String select = "SELECT * FROM " + tableName + " WHERE ?=?";
         SQLiteDatabase dbase = this.getReadableDatabase();
         try {
-            Cursor c = dbase.rawQuery(select, null);
+            Cursor c = dbase.rawQuery(select, new String[]{collumn, "" + id});
             if (c != null && c.getCount() > 0) {
                 c.moveToFirst();
                 return c.getInt(c.getColumnIndex(collumn));
             } else {
-                System.out.println("Cursor was empty or null - LB");
+
             }
             return -1;
         } catch (Exception e) {
-            System.out.println("Table did not exist or was empty - LB");
             e.printStackTrace();
         }
         return -1;
@@ -188,19 +187,17 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
     }
 
     public String getCollumnFromId(String tableName, String collumn, int id) {
-        String select = "SELECT * FROM " + tableName + " WHERE " + collumn + " = " + id;
+        String select = "SELECT * FROM " + tableName + " WHERE ?=?";
         SQLiteDatabase dbase = this.getReadableDatabase();
         try {
-            Cursor c = dbase.rawQuery(select, null);
+            Cursor c = dbase.rawQuery(select, new String[]{collumn, id + ""});
             if (c != null && c.getCount() > 0) {
                 c.moveToFirst();
                 return c.getString(c.getColumnIndex(collumn));
             } else {
-                System.out.println("Cursor was empty or null - LB");
             }
             return null;
         } catch (Exception e) {
-            System.out.println("Table did not exist or was empty - LB");
             e.printStackTrace();
         }
         return null;
@@ -261,11 +258,9 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
                 max = c.getInt(c.getColumnIndex(GeneralSettings.COLUMN_NAME_MAXIMUM_EXPIRE_COUNT));
                 return new int[]{min, max};
             } else {
-                System.out.println("Cursor was empty or null - LB");
             }
             return new int[]{0, 0};
         } catch (Exception e) {
-            System.out.println("Table did not exist or was empty - LB");
             e.printStackTrace();
         }
         return new int[]{0, 0};
@@ -312,10 +307,8 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
                     if (seq>newSeq) newSeq = seq;
                 }
             } else {
-                System.out.println("Cursor was empty or null - LB");
             }
         } catch (Exception e) {
-            System.out.println("Table did not exist or was empty - LB");
             e.printStackTrace();
         }
         return newSeq;
@@ -392,11 +385,10 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
                 c.close();
                 return key;
             } else {
-                System.out.println("Cursor was empty or null - LB");
+
             }
             return null;
         } catch (Exception e) {
-            System.out.println("Table did not exist or was empty");
             e.printStackTrace();
         }
         return null;

@@ -89,7 +89,7 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
             if (!msg.isDHKey()) {
                 addReceivedMessageToDatabase(msg, context);
                 Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
-                receivedMSG.putExtra("number", msg.get_number());
+                receivedMSG.putExtra("contactid", msg.getId());
                 recentNumber = msg.get_number();
                 recentID = msg.getId();
                 messageReceivedNotification.cancel(context); //cancel old message

@@ -19,11 +19,12 @@ public class Contact {
     public Contact() { };
 
     public Contact(int id) {
-        this.setId(id);
+        this(baseContext, id);
     }
 
     public Contact(Context context, int id) {
         this.setId(id);
+
         if (baseContext == null) baseContext = context.getApplicationContext();
         loadFromAndroidDB();
     }
@@ -50,7 +51,7 @@ public class Contact {
 
         ContentResolver contentResolver = baseContext.getContentResolver();
         Cursor cursor = contentResolver.query(CONTENT_URI, contact_projection, _ID + "=" + this.getId(), null, null);
-        System.out.println("Loading data for " + this.getId());
+
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             this.setName(cursor.getString(cursor.getColumnIndex(DISPLAY_NAME)));
@@ -72,6 +73,8 @@ public class Contact {
     }
 
     public void setId(int id) {
+
+        if (id==0) throw new RuntimeException("HEY YOU CAN'T DO THAT");
         this.id = id;
     }
 
@@ -120,19 +123,30 @@ public class Contact {
         };
 
         ContentResolver contentResolver = baseContext.getContentResolver();
-        Cursor cursor = contentResolver.query(PhoneCONTENT_URI, null, NUMBER + "=" + number, null, null);
+        //Cursor cursor = contentResolver.query(PhoneCONTENT_URI, phone_projection, NUMBER + "=?", new String[]{"\"" + number + "\""}, null);
+        Cursor cursor = contentResolver.query(PhoneCONTENT_URI, phone_projection, null, null, null);
         int output = -1;
 
         if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            output = Integer.parseInt(cursor.getString(cursor.getColumnIndex(Phone_CONTACT_ID)));
+            while (cursor.moveToNext()) {
+
+                String thisNumber = cursor.getString(cursor.getColumnIndex(NUMBER));
+
+                if (thisNumber.equals(number)) {
+
+                    output = Integer.parseInt(cursor.getString(cursor.getColumnIndex(Phone_CONTACT_ID)));
+                }
+            }
+        } else {
+            throw new RuntimeException("No matching IDs for " + number + " found!");
         }
+
         cursor.close();
         return output;
     }
 
     @Override
     public String toString() {
-        return this.getName() + " ID:" + this.getId() + " Number:" + this.getNumber();
+        return "Name:" + this.getName() + "\nID:" + this.getId() + "\nNumber:" + this.getNumber();
     }
 }

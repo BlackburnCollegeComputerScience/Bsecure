@@ -78,9 +78,9 @@ public class Contacts extends ActionBarActivity {
             if (cursor != null && cursor.moveToFirst()) {
                 int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
                 String number = cursor.getString(numberIndex);
-                System.out.println(number);
+
                 int IDIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-                System.out.println(IDIndex);
+
                 // Do something with the phone number
             }
         }

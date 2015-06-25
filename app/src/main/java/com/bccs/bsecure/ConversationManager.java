@@ -111,8 +111,8 @@ public class ConversationManager extends SQLiteOpenHelper {
     }
 
     private int getMasterRecordID(int contactid) {
-        String select = "SELECT * FROM " + TABLE_CONVERSATIONS + " WHERE " + COLUMN_CONTACT_ID + "=" + contactid;
-        Cursor c = sDatabase.rawQuery(select, null);
+        String select = "SELECT * FROM " + TABLE_CONVERSATIONS + " WHERE " + COLUMN_CONTACT_ID + "=?";
+        Cursor c = sDatabase.rawQuery(select, new String[]{"" + contactid});
         int ret = -1;
         if (c != null) {
             try {
@@ -129,7 +129,7 @@ public class ConversationManager extends SQLiteOpenHelper {
                 ContentValues vals = new ContentValues();
                 vals.put(COLUMN_CONTACT_ID, contactid);
                 sDatabase.insert(TABLE_CONVERSATIONS, null, vals);
-                System.out.println(contactid + " added to record as " + vals.get(COLUMN_ID));
+
             } catch (Exception ignored) {
                 ignored.printStackTrace();
                 sDatabase.delete(TABLE_CONVERSATIONS, COLUMN_ID + "=" +
@@ -137,7 +137,7 @@ public class ConversationManager extends SQLiteOpenHelper {
             }
             
         } else {
-            System.out.println(contactid + " found in record with " + getMasterRecordID(contactid));
+
         }
     }
 
@@ -204,8 +204,8 @@ public class ConversationManager extends SQLiteOpenHelper {
         }
 
         private myMessage getSingleMessage(int id) {
-            String select = "SELECT * FROM " + this.tableName + " WHERE " + COLUMN_ID + "=" + id;
-            Cursor c = sDatabase.rawQuery(select, null);
+            String select = "SELECT * FROM " + this.tableName + " WHERE " + COLUMN_ID + "=?";
+            Cursor c = sDatabase.rawQuery(select, new String[]{id + ""});
             if (c != null && c.getCount()>0) {
                 myMessage retObj = null;
                 try {

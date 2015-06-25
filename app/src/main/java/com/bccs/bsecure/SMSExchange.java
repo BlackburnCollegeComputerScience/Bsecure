@@ -60,8 +60,6 @@ public class SMSExchange extends ActionBarActivity {
                                 currentSession.hashSecret());
                         helper.close();
                         progressTextView.append("Secret key successfully created.");
-                        System.out.println("Secret is: ");
-                        System.out.println(currentSession.packSecret(intent.getStringExtra("body")));
                         //currentSession.generateSecret(intent.getStringExtra("body"));
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -82,7 +80,6 @@ public class SMSExchange extends ActionBarActivity {
                             currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                             getApplicationContext(), true);
                     progressBar.setProgress(50);
-                    System.out.println("Sent g^b%p");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -126,8 +123,6 @@ public class SMSExchange extends ActionBarActivity {
                                 currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                                 getApplicationContext(), true);
                         progressTextView.append("sent g^a%p to " + currentNumber + "\n");
-                        System.out.println("g^a%p = " +
-                                currentSession.packKey(currentSession.getPublicKey().getEncoded()));
 
                         progressTextView.append("Awaiting reply...\n");
                         progressBar.setProgress(50);

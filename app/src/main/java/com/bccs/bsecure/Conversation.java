@@ -89,7 +89,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
         //If convo was opened from the main view, it will have a number value in the intent
         //currentNumber variable is used when loading messages from the DB.
         if (getIntent().hasExtra("contactid")) {
-            currentNumber = new Contact(Integer.parseInt(getIntent().getStringExtra("contactid")));
+            currentNumber = new Contact(getIntent().getIntExtra("contactid", -1));
             //Cancel any notifications for this number
             if (currentNumber.getId() == smsBroadcastReceiver.recentID) messageReceivedNotification.cancel(this);
         } else {
@@ -167,7 +167,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
      * This method updates the chat with new messages and will filter out duplicates.
      */
     private void updateConvo() {
-        System.out.println("Updating conversation " + currentNumber);
+
 
         ConversationManager.ConversationHelper helper = ConversationManager.getConversation(this,
                 currentNumber.getId());
@@ -179,7 +179,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     }
 
     protected void onStart() {
-        System.out.println("Sender onStart");
+
         if (!receiversRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
             receiversRegistered = true;
@@ -188,7 +188,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     }
 
     protected void onResume() {
-        System.out.println("Sender onResume");
+
         if (!receiversRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
             receiversRegistered = true;
@@ -197,7 +197,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     }
 
     protected void onPause() {
-        System.out.println("Sender onPause");
+
         if (receiversRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
             receiversRegistered = false;
@@ -207,7 +207,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     }
 
     protected void onStop() {
-        System.out.println("Sender onStop");
+
         if (receiversRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
             receiversRegistered = false;
@@ -216,7 +216,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     }
 
     protected void onDestroy() {
-        System.out.println("Sender onDestroy");
+
         if (receiversRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
             receiversRegistered = false;

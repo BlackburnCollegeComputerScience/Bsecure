@@ -163,7 +163,6 @@ public class dbHelper extends SQLiteOpenHelper {
                 c.moveToFirst();
                 output[0] = c.getString(2);
                 output[1] = c.getString(3);
-                System.out.println(output[0] + "\n" + output[1]);
                 return output;
             } catch (Exception e) {
                 return null;
@@ -220,8 +219,7 @@ public class dbHelper extends SQLiteOpenHelper {
             String pNum = this.getSingleMessage(i).get_number();
 
             //String cName = this.getSingleMessage(i).get_name();
-            System.out.println(pNum);
-            //System.out.println(cName);
+            //this.getId()
             if (!activeInfo.contains(pNum)) {
                 activeInfo.add(pNum);
                 //names.add(cName);
@@ -238,12 +236,10 @@ public class dbHelper extends SQLiteOpenHelper {
         ArrayList<myMessage> activeInfo = new ArrayList<>();
         ArrayList<String> nums = new ArrayList<String>();
         int recordCount = this.getRecordCount();
-        System.out.println("Record count: " + recordCount);
         for (int i = 1; i <= recordCount; i++) {
             //get phone number out of message object and add it to array list
             String pNum = this.getSingleMessage(i).get_number();
             if (!nums.contains(pNum)) {
-                System.out.println(pNum + " added to active numbers list");
                 activeInfo.add(this.getSingleMessage(i));
                 nums.add(pNum);
             }

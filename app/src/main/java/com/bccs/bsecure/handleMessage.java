@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 
@@ -68,13 +69,13 @@ public class handleMessage {
 
 
     public static myMessage send(int contactid, String msg, Context context, boolean isDH) {
-        Contact contact = new Contact(contactid);
+        Contact contact = new Contact(context, contactid);
         if (!isDH) {
-            System.out.println("Creating message object: ");
+
             SmsManager sms = SmsManager.getDefault();
 
             myMessage msgObj = new myMessage(contactid, msg, true);
-            System.out.println(msgObj.toString());
+
 
             //PULL FROM DB
             String key = null;
@@ -92,7 +93,7 @@ public class handleMessage {
             //new multipart text messages
             ArrayList<String> messages = sms.divideMessage(msg);
             int numberOfParts = messages.size();
-            System.out.println(numberOfParts);
+
 
             ArrayList<PendingIntent> sentIntents = new ArrayList<>();
             ArrayList<PendingIntent> deliveryIntents = new ArrayList<>();
@@ -105,25 +106,22 @@ public class handleMessage {
                 deliveryIntents.add(PendingIntent.getBroadcast(context, 0, mDeliveryIntent, 0));
             }
 
+
             sms.sendMultipartTextMessage(contact.getNumber(), null, messages, sentIntents, deliveryIntents);
             msgObj.set_encrypted(key != null);
 
-            System.out.println("Message sent: " + msg);
+
             return msgObj;
         } else {
-            System.out.println("Creating message object: ");
+
             SmsManager sms = SmsManager.getDefault();
             ArrayList<String> messages = sms.divideMessage(msg);
             int numberOfParts = messages.size();
-            System.out.println(numberOfParts);
-            for (String s : messages) {
-                System.out.println(s.length());
-            }
             System.out.printf("Total: " + msg.length());
             myMessage msgObj = new myMessage(contactid, msg, true);
             msgObj.setIsDHKey(true);
             sms.sendMultipartTextMessage(contact.getNumber(), null, messages, null, null);
-            System.out.println("Message sent: " + msg);
+
             return msgObj;
         }
     }
@@ -145,14 +143,14 @@ public class handleMessage {
             //Large messages might be broken into an array
             SmsMessage[] smsMessages = new SmsMessage[pdus.length];
             StringBuilder stringBuilder = new StringBuilder();
-            System.out.println(pdus.length);
+
             for (int i = 0; i < pdus.length; i++) {
                 smsMessages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
                 stringBuilder.append(smsMessages[i].getMessageBody());
             }
             String sender = smsMessages[0].getOriginatingAddress();
             String message = stringBuilder.toString();
-            System.out.println("Here is the message you sent: " + message);
+
             myMessage msgObj = new myMessage(Contact.getIdFromNumber(sender), message);
             msgObj.set_encrypted(false);
             return msgObj;
@@ -176,17 +174,31 @@ public class handleMessage {
             //Large messages might be broken into an array
             SmsMessage[] smsMessages = new SmsMessage[pdus.length];
             StringBuilder stringBuilder = new StringBuilder();
-            System.out.println(pdus.length);
+
             for (int i = 0; i < pdus.length; i++) {
                 smsMessages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
                 stringBuilder.append(smsMessages[i].getMessageBody());
             }
             String sender = smsMessages[0].getOriginatingAddress();
-            String message = stringBuilder.toString();
-            System.out.println("Here is the message you sent: " + message);
+
+            sender = PhoneNumberUtils.formatNumber(smsMessages[0].getOriginatingAddress());
+
+                    String message = stringBuilder.toString();
+            String newSender = "";
+            boolean caughtFirstDash = false;
+            for (char c : sender.toCharArray()) {
+                if (c == '-' && !caughtFirstDash) {
+                    caughtFirstDash = true;
+                    newSender = newSender + ' ';
+                } else {
+                    newSender = newSender + c;
+                }
+            }
+            sender = newSender;
 
 
-            Contact contact = new Contact(Contact.getIdFromNumber(sender));
+            int numberID =  Contact.getIdFromNumber(sender);
+            Contact contact = new Contact(context, numberID);
             String key = null;
             SecurityContact sContact = null;
             if (SecurityContact.contactIdIsASecurityContact(contact.getId())) {
@@ -216,7 +228,7 @@ public class handleMessage {
             } else { fixed = message; }
 
             //Return the Message
-            myMessage msgObj = new myMessage(contact.getId(), fixed, false);
+            myMessage msgObj = new myMessage(numberID, fixed, false);
             msgObj.set_encrypted(encrypted);
             if (message.contains(prependDH)) {
                 msgObj.setIsDHKey(true);

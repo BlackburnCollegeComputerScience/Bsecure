@@ -181,7 +181,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
 
 
     protected void onStart() {
-        System.out.println("Convo view onStart");
+
         if (!receiverRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
             receiverRegistered = true;
@@ -191,7 +191,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     }
 
     private void updateActiveNums() {
-        System.out.println("Updating active nums!");
+
         ConversationManager manager = ConversationManager.getManager(this);
 
         ArrayList<Integer> activeConversations = manager.getActiveConversations();
@@ -247,16 +247,16 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
             notifyDataSetChanged();
         }
         public void updateMessage(myMessage message) {
-            System.out.println("Updating messages!");
+
             for (myMessage m : contactsArray) {
                 if (message.get_name().equals(m.get_name())) {
-                    System.out.println(message.getBody() + " " + m.getBody());
-                    System.out.println(message.get_time() + " " + m.get_time());
+
+
                     if (message.get_time() > m.get_time()) {
-                        System.out.println("Message was younger!");
+
                         m.setBody(message.getBody());
                     } else {
-                        System.out.println("Message was not younger!");
+
                     }
                     break;
                 }
@@ -324,7 +324,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     }
 
     protected void onResume() {
-        System.out.println("Convo view onResume");
+
         if (!receiverRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(onNewMsg, onNewMsgFilter);
             receiverRegistered = true;
@@ -334,7 +334,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     }
 
     protected void onPause() {
-        System.out.println("Convo view onPause");
+
         if (receiverRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
             receiverRegistered = false;
@@ -343,7 +343,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     }
 
     protected void onStop() {
-        System.out.println("Convo view onStop");
+
         if (receiverRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
             receiverRegistered = false;
@@ -355,7 +355,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     // onDestroy is called when the entire application is exited
     // We can close our DB from here.
     protected void onDestroy() {
-        System.out.println("Convo view onDestroy");
+
         if (receiverRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(onNewMsg);
             receiverRegistered = false;
