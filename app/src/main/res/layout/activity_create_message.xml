@@ -31,7 +31,8 @@
         android:id="@+id/recipientList"
         android:clickable="true"
         android:stackFromBottom="false"
-        android:layout_below="@+id/linearLayout2" />
+        android:layout_below="@+id/linearLayout2"
+        android:layout_alignParentBottom="true"/>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -41,19 +42,30 @@
         android:layout_alignParentStart="true"
         android:id="@+id/linearLayout2">
 
-        <EditText
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="textMultiLine"
-            android:ems="10"
-            android:id="@+id/recipientEditText"
-            android:layout_weight="1" />
+            android:text="Recipients:"
+            android:id="@+id/textView22"
+            android:layout_weight="1"
+            android:textSize="20sp"/>
 
-        <Button
+        <HorizontalScrollView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Recipient"
-            android:id="@+id/addRecipientButton" />
+            android:id="@+id/horizontalScrollView"
+            android:layout_weight="1">
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:ems="10"
+                android:id="@+id/recipientEditText"
+                android:editable="false"
+                android:enabled="true"
+                android:focusable="false"/>
+        </HorizontalScrollView>
 
     </LinearLayout>
 
@@ -77,7 +89,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send"
+            android:text="@string/sendtext"
             android:id="@+id/sendButton" />
     </LinearLayout>
 

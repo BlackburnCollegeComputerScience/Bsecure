@@ -61,6 +61,7 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
     private static final String SMS_SENT = "android.provider.Telephony.SMS_SENT";
 
     public static String recentNumber = "5556";
+    public static int recentID = 0;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -70,7 +71,7 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
 
     private void addReceivedMessageToDatabase(myMessage message, Context context) {
         ConversationManager.ConversationHelper helper =
-                ConversationManager.getConversation(context, message.get_number());
+                ConversationManager.getConversation(context, message.getId());
         helper.addMessage(message);
     }
 
@@ -90,6 +91,7 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
                 Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived");
                 receivedMSG.putExtra("number", msg.get_number());
                 recentNumber = msg.get_number();
+                recentID = msg.getId();
                 messageReceivedNotification.cancel(context); //cancel old message
                 messageReceivedNotification.notify(context, msg.get_number(), msg.getBody());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);

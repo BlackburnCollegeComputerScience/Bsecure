@@ -6,10 +6,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import java.util.ArrayList;
 
 /**
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
@@ -35,14 +42,10 @@ public class Contacts extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacts);
-        Button test = (Button) findViewById(R.id.testButton);
-        test.setOnClickListener(new Button.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-                selectContact();
-            }
-        });
+        ListView contactsView = (ListView) findViewById(R.id.contactsView);
+        contactSelectionAdapter adapter = new contactSelectionAdapter();
+        adapter.addItems(SecurityContact.getAllContacts(this.getApplicationContext()));
+        contactsView.setAdapter(adapter);
     }
 
     static final int REQUEST_SELECT_PHONE_NUMBER = 1;
@@ -144,5 +147,94 @@ public class Contacts extends ActionBarActivity {
         Intent intent = new Intent(this, About.class);
         startActivity(intent);
     }
+
+    private class contactSelectionAdapter extends BaseAdapter {
+
+
+        private static final int MAX_TYPES = 1;
+
+        private ArrayList<Contact> contactsArray = new ArrayList<>();
+        private LayoutInflater inflater;
+
+        public contactSelectionAdapter() {
+            //create inflater that will hold the chat boxes
+            inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        }
+
+        public void addItem(Contact contact) {
+            contactsArray.add(contact);
+            notifyDataSetChanged();
+        }
+
+        public void addItems(ArrayList<Contact> contacts) {
+            for (Contact c : contacts) {
+                addItem(c);
+            }
+        }
+
+        public void clearItems() {
+            contactsArray = new ArrayList<>();
+            notifyDataSetChanged();
+        }
+
+        public ArrayList<Contact> getContactsArray() {
+            ArrayList<Contact> newContact = new ArrayList<>();
+            for (Contact c : contactsArray) {
+                newContact.add(c);
+            }
+            return newContact;
+        }
+
+
+        @Override
+        public int getItemViewType(int position) {
+            return 0;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return MAX_TYPES;
+        }
+
+        @Override
+        public int getCount() {
+            return contactsArray.size();
+        }
+
+        @Override
+        public Contact getItem(int position) {
+            return contactsArray.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            RelativeLayout holder = null;
+            int type = getItemViewType(position);
+            if (convertView == null) {
+                switch (type) {
+                    default:
+                        convertView = inflater.inflate(R.layout.contact_row, null);
+                        holder = (RelativeLayout) convertView;
+                        break;
+                }
+            } else {
+                holder = (RelativeLayout) convertView;
+            }
+            TextView contactName = (TextView) convertView.findViewById(R.id.contactText);
+            TextView contactNumber = (TextView) convertView.findViewById(R.id.numberText);
+            Contact contact = getItem(position);
+            contactName.setText(contact.getName());
+            contactNumber.setText(contact.getNumber());
+
+
+            return convertView;
+        }
+    }
+
 
 }

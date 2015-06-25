@@ -77,7 +77,8 @@ public class SMSExchange extends ActionBarActivity {
                     currentlyWorking = true;
                     contactNumText.setText(currentNumber);
                     progressTextView.append("Received g^a%p from " + currentNumber);
-                    handleMessage.send(currentNumber,
+                    //TODO FIX THIS!!!!!!!!!!!
+                    handleMessage.send(0,
                             currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                             getApplicationContext(), true);
                     progressBar.setProgress(50);
@@ -120,7 +121,8 @@ public class SMSExchange extends ActionBarActivity {
                         currentNumber = contactNumText.getText().toString();
                         currentlyWorking = true;
                         progressTextView.append("g^a%p generated");
-                        handleMessage.send(currentNumber,
+                        //TODO FIX TIHS!!!!!!!!!
+                        handleMessage.send(0,
                                 currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                                 getApplicationContext(), true);
                         progressTextView.append("sent g^a%p to " + currentNumber + "\n");

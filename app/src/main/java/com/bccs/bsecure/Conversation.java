@@ -57,7 +57,7 @@ import java.util.Date;
  */
 
 public class Conversation extends ActionBarActivity implements WipeConversationDialog.WipeConversationDialogListener {
-    String currentNumber;
+    Contact currentNumber;
     boolean receiversRegistered = false; // track if receivers are registered or not
     ArrayList<String> conversation;
     EditText typeMessage;
@@ -74,7 +74,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getStringExtra("number").equals(currentNumber)) {
+            if (intent.getStringExtra("contactid").equals(Integer.toString(currentNumber.getId()))) {
                 updateConvo();
             }
         }
@@ -88,19 +88,19 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
 
         //If convo was opened from the main view, it will have a number value in the intent
         //currentNumber variable is used when loading messages from the DB.
-        if (getIntent().hasExtra("number")) {
-            currentNumber = getIntent().getStringExtra("number");
+        if (getIntent().hasExtra("contactid")) {
+            currentNumber = new Contact(Integer.parseInt(getIntent().getStringExtra("contactid")));
             //Cancel any notifications for this number
-            if (currentNumber == smsBroadcastReceiver.recentNumber) messageReceivedNotification.cancel(this);
+            if (currentNumber.getId() == smsBroadcastReceiver.recentID) messageReceivedNotification.cancel(this);
         } else {
             //If it was not opened from the main view, use the most recent number an SMS
             //was received from.
-            currentNumber = smsBroadcastReceiver.recentNumber;
+            currentNumber = new Contact(smsBroadcastReceiver.recentID);
         }
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
-        setTitle(currentNumber);
+        setTitle(currentNumber.getName());
 
         conversation = new ArrayList<>();
         typeMessage = (EditText) findViewById(R.id.messageEditText);
@@ -116,10 +116,10 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
                 String message = typeMessage.getText().toString();
                 typeMessage.setText("");
 
-                if (currentNumber.length() > 0 && message.length() > 0) {
-                    myMessage msgObj = handleMessage.send(currentNumber, message, getApplicationContext());
+                if (currentNumber.getNumber().length() > 0 && message.length() > 0) {
+                    myMessage msgObj = handleMessage.send(currentNumber.getId(), message, getApplicationContext());
                     ConversationManager.ConversationHelper helper = ConversationManager.getConversation(Conversation.this,
-                            currentNumber);
+                            currentNumber.getId());
                     helper.addMessage(msgObj);
                     updateConvo();
                 }
@@ -170,7 +170,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
         System.out.println("Updating conversation " + currentNumber);
 
         ConversationManager.ConversationHelper helper = ConversationManager.getConversation(this,
-                currentNumber);
+                currentNumber.getId());
         ArrayList<myMessage> checkConversation = helper.getMessages(chatAdapter.getCount());
 
         for (myMessage m : checkConversation) {
@@ -227,7 +227,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     @Override
     public void onOKPressed(DialogFragment dialog) {
         ConversationManager.ConversationHelper helper = ConversationManager.getConversation(this,
-                currentNumber);
+                currentNumber.getId());
         helper.deleteConversation();
         dialog.dismiss();
         Intent intent = new Intent(Conversation.this, Main.class);
@@ -334,7 +334,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
             myMessage msg = getItem(position);
             TextView text =(TextView) ((LinearLayout) holder.getChildAt(0)).getChildAt(0);
             TextView date = (TextView) holder.getChildAt(1);
-            String dateText = (new SimpleDateFormat("h:mm a, EEE, MMM d, ''yy")).format(
+            String dateText = (SimpleDateFormat.getDateTimeInstance()).format(
                     new Date(msg.get_time()));
             text.setText(msg.getBody());
             date.setText(dateText);

@@ -3,14 +3,18 @@ package com.bccs.bsecure;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -36,10 +40,9 @@ public class CreateMessage extends ActionBarActivity {
     //Global Variables
     ListView recipientList;
 
-    //Array of strings that the recipientList is drawn from
-    ArrayList<String> recipientStrings = new ArrayList<String>();
-    //String adapter that will handle the data of the recipientList
-    ArrayAdapter<String> adapter;
+    ArrayList<Contact> recipientContacts = new ArrayList<>();
+
+
 
     //Buttons
     Button addContactButton;
@@ -53,35 +56,15 @@ public class CreateMessage extends ActionBarActivity {
     private Button.OnClickListener sendMessageListener = new Button.OnClickListener() {
         @Override
         public void onClick(View v) {
-            for (String number : recipientStrings) {
-                ConversationManager.ConversationHelper helper = ConversationManager.getConversation(CreateMessage.this,
-                        number);
-                helper.addMessage(handleMessage.send(number, messageText.getText().toString(), getApplicationContext()));
+            for (Contact c : recipientContacts) {
+                ConversationManager.ConversationHelper helper = ConversationManager.getConversation(
+                        CreateMessage.this, c.getId());
+                helper.addMessage(handleMessage.send(c.getId(), messageText.getText().toString(),
+                        getApplicationContext()));
             }
             Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
-            conversationIntent.putExtra("name", recipientStrings.get(0));
-            conversationIntent.putExtra("number", recipientStrings.get(0));
+            conversationIntent.putExtra("contactid", recipientContacts.get(0).getId());
             startActivity(conversationIntent);
-        }
-    };
-    /**
-     * This Method will remove a contact that has been clicked on the recipientList
-     */
-    private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
-            recipientStrings.remove(pos);
-            adapter.notifyDataSetChanged();
-        }
-    };
-    /**
-     * This Method will take the Recipient the user entered and add it to the contact list
-     */
-    private Button.OnClickListener addRecipientToList = new Button.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            recipientStrings.add(addContactText.getText().toString());
-            adapter.notifyDataSetChanged();
-            addContactText.setText("");
         }
     };
 
@@ -90,14 +73,11 @@ public class CreateMessage extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_message);
         //Initialize Global Variables
-        addContactButton = (Button) findViewById(R.id.addRecipientButton);
         sendMessage = (Button) findViewById(R.id.sendButton);
         addContactText = (EditText) findViewById(R.id.recipientEditText);
         messageText = (EditText) findViewById(R.id.messageEditText);
         //Performs recipientList setup
         setupRecipientList();
-        //Adds a listener to the addContactButton
-        addContactButton.setOnClickListener(addRecipientToList);
         //Adds a listener to the handleMessage Button
         sendMessage.setOnClickListener(sendMessageListener);
     }
@@ -106,13 +86,10 @@ public class CreateMessage extends ActionBarActivity {
      * This will apply all necessary settings to the recipientList
      */
     private void setupRecipientList() {
-        //Grab the recipientList object
+
         recipientList = (ListView) findViewById(R.id.recipientList);
-        //Adds the click listener for the recipientList
-        recipientList.setOnItemClickListener(onListClick);
-        //Sets up the recipientList adapter
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
-                recipientStrings);
+        contactSelectionAdapter adapter = new contactSelectionAdapter();
+        adapter.addItems(SecurityContact.getAllContacts(this.getApplicationContext()));
         recipientList.setAdapter(adapter);
     }
 
@@ -182,4 +159,144 @@ public class CreateMessage extends ActionBarActivity {
         startActivity(intent);
     }
 
+    public void updateRecipientContacts(Contact contact, boolean add) {
+        if (add) {
+            if (!recipientContacts.contains(contact)) recipientContacts.add(contact);
+        } else {
+            recipientContacts.remove(contact);
+        }
+        StringBuffer s = new StringBuffer();
+        for (Contact c : recipientContacts) {
+            s.append(c.getName());
+            s.append(";");
+        }
+        s.trimToSize();
+        addContactText.setText(s);
+    }
+
+    private class contactSelectionAdapter extends BaseAdapter {
+
+        private class ContactWrapper {
+            private boolean selected;
+            private Contact contact;
+
+            public ContactWrapper(Contact contact) {
+                this.contact = contact;
+                this.selected = false;
+            }
+
+            public boolean isSelected() {
+                return selected;
+            }
+
+            public void setSelected(boolean selected) {
+                this.selected = selected;
+            }
+
+            public Contact getContact() {
+                return contact;
+            }
+        }
+
+        private static final int MAX_TYPES = 1;
+
+        private ArrayList<ContactWrapper> contactsArray = new ArrayList<>();
+        private LayoutInflater inflater;
+
+        public contactSelectionAdapter() {
+            //create inflater that will hold the chat boxes
+            inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        }
+
+        public void addItem(Contact contact) {
+            contactsArray.add(new ContactWrapper(contact));
+            notifyDataSetChanged();
+        }
+
+        public void addItems(ArrayList<Contact> contacts) {
+            for (Contact c : contacts) {
+                addItem(c);
+            }
+        }
+
+        public ArrayList<Contact> getSelectedContacts() {
+            ArrayList<Contact> contacts = new ArrayList<>();
+            for (ContactWrapper cw : contactsArray) {
+                if (cw.isSelected()) contacts.add(cw.getContact());
+            }
+            return contacts;
+        }
+
+        public void clearItems() {
+            contactsArray = new ArrayList<>();
+            notifyDataSetChanged();
+        }
+
+        public ArrayList<Contact> getContactsArray() {
+            ArrayList<Contact> newContact = new ArrayList<>();
+            for (ContactWrapper c : contactsArray) {
+                newContact.add(c.getContact());
+            }
+            return newContact;
+        }
+
+
+        @Override
+        public int getItemViewType(int position) {
+            return 0;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return MAX_TYPES;
+        }
+
+        @Override
+        public int getCount() {
+            return contactsArray.size();
+        }
+
+        @Override
+        public ContactWrapper getItem(int position) {
+            return contactsArray.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            RelativeLayout holder = null;
+            int type = getItemViewType(position);
+            if (convertView == null) {
+                switch (type) {
+                    default:
+                        convertView = inflater.inflate(R.layout.new_message_contact_row, null);
+                        holder = (RelativeLayout) convertView;
+                        break;
+                }
+            } else {
+                holder = (RelativeLayout) convertView;
+            }
+            TextView contactName = (TextView) convertView.findViewById(R.id.contactText);
+            TextView contactNumber = (TextView) convertView.findViewById(R.id.numberText);
+            final ContactWrapper wrapper = getItem(position);
+            final Contact contact = wrapper.getContact();
+            contactName.setText(contact.getName());
+            contactNumber.setText(contact.getNumber());
+            final CheckBox box = (CheckBox) convertView.findViewById(R.id.checkBox);
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    box.setChecked(!box.isChecked());
+                    wrapper.setSelected(box.isChecked());
+                    updateRecipientContacts(contact, wrapper.isSelected());
+                }
+            });
+
+            return convertView;
+        }
+    }
 }

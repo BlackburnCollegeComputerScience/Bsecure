@@ -48,7 +48,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     //The list view that contains the on-screen info being displayed
     private ListView userListView;
     //ArrayList storing names and numbers in outbox
-    private ArrayList<String> activeNums = new ArrayList<>();
+    private ArrayList<Integer> activeNums = new ArrayList<>();
     private boolean receiverRegistered = false;
 
     private Button.OnClickListener optionsClick = new Button.OnClickListener() {
@@ -83,8 +83,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateActiveNums(intent.getStringExtra("number"));
-            updateActiveNums(intent.getStringExtra("number"));
+            updateActiveNums();
         }
     };
 
@@ -95,6 +94,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        Contact.setBaseContext(this.getApplicationContext());
 
 //        Intent intent = new Intent(this, TestActivity.class);
 //        startActivity(intent);
@@ -210,17 +210,12 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
         super.onStart();
     }
 
-
-    private void updateActiveNums(String newNumber) {
-        updateActiveNums();
-    }
-
     private void updateActiveNums() {
         System.out.println("Updating active nums!");
         ConversationManager manager = ConversationManager.getManager(this);
-        // TODO: Use contact names instead of numbers
-        ArrayList<String> activeConversations = manager.getActiveConversations();
-        for (String s : activeConversations) {
+
+        ArrayList<Integer> activeConversations = manager.getActiveConversations();
+        for (int s : activeConversations) {
             ConversationManager.ConversationHelper helper = ConversationManager.getConversation(s);
             myMessage message = helper.getLastMessage();
             if (!activeNums.contains(s)) {
@@ -338,9 +333,9 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
                 //holder.setOnClickListener();
                 holder = (RelativeLayout) convertView;
             }
+            myMessage item = getItem(position);
             TextView contactName = (TextView) holder.getChildAt(1);
             TextView lastMessage = (TextView) holder.getChildAt(2);
-            myMessage item = getItem(position);
             contactName.setText(item.get_name());
             lastMessage.setText((item.getSent() ? "You: " : item.get_name() + ": ") + item.getBody());
             holder.setOnClickListener(itemClick);

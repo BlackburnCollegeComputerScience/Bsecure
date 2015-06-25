@@ -67,18 +67,4 @@ public class WipeConversationDialog extends DialogFragment {
         return dialog;
     }
 
-
-
-    private final class holder {
-        private int b;
-        public holder(int b) {
-            this.b = b;
-        }
-        public int getValue() {
-            return this.b;
-        }
-        public void setValue(int b) {
-            this.b = b;
-        }
-    }
 }

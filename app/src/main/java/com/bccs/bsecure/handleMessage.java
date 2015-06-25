@@ -48,10 +48,9 @@ import java.util.ArrayList;
  */
 public class handleMessage {
 
-    //These temp keys were generated with Diffie-Hellman key exchange. The second key (the IV for the cipher)
-    //Is a SHA-256 hash of the key1, a Diffie-Hellman generated key.
+    //These are temp keys
     //private static final String key1 = "524F0D82AFA4779CB7A55358798117A88A90549730659C0778CEBE5BAD7FDD77";
-    //private static final String key2 = "5155F276EB66C9D56D3335A3B7150E621CA012EF6A660834D90EB67341BA36C6";
+    private static final String key2 = "NVzTTl4v9Z0jOL2qyNuOFodEhN8ArwZIG4RJ9g8zQlI=";
 
 
     private static final String prepend = "-&*&-"; // current message header
@@ -59,29 +58,34 @@ public class handleMessage {
 
     /**
      * send method for sending messages to a number
-     * @param number number to send to
+     * @param contactid the contactid to send to
      * @param msg message to send
      * @return myMessage object to be used by UI
      */
-    public static myMessage send(String number, String msg, Context context) {
-        return send(number, msg, context, false);
+    public static myMessage send(int contactid, String msg, Context context) {
+        return send(contactid, msg, context, false);
     }
 
 
-    public static myMessage send(String number, String msg, Context context, boolean isDH) {
+    public static myMessage send(int contactid, String msg, Context context, boolean isDH) {
+        Contact contact = new Contact(contactid);
         if (!isDH) {
             System.out.println("Creating message object: ");
             SmsManager sms = SmsManager.getDefault();
 
-            myMessage msgObj = new myMessage(number, msg, true);
+            myMessage msgObj = new myMessage(contactid, msg, true);
             System.out.println(msgObj.toString());
 
             //PULL FROM DB
-            dbHelper helper = new dbHelper(context);
-            String[] keys = helper.getKey(number);
-            helper.close();
-            if (keys != null) {
-                msg = messageCipher.encrypt(msg, keys[0], keys[1]);
+            String key = null;
+            SecurityContact sContact = null;
+            if (SecurityContact.contactIdIsASecurityContact(contactid)) {
+                sContact = new SecurityContact(contactid);
+                key = sContact.getSessionKey();
+            }
+
+            if (key != null) {
+                msg = messageCipher.encrypt(msg, key, key2);
                 msg = getPrepend() + msg;
             }
 
@@ -101,8 +105,8 @@ public class handleMessage {
                 deliveryIntents.add(PendingIntent.getBroadcast(context, 0, mDeliveryIntent, 0));
             }
 
-            sms.sendMultipartTextMessage(number, null, messages, sentIntents, deliveryIntents);
-            msgObj.set_encrypted(keys != null);
+            sms.sendMultipartTextMessage(contact.getNumber(), null, messages, sentIntents, deliveryIntents);
+            msgObj.set_encrypted(key != null);
 
             System.out.println("Message sent: " + msg);
             return msgObj;
@@ -116,9 +120,9 @@ public class handleMessage {
                 System.out.println(s.length());
             }
             System.out.printf("Total: " + msg.length());
-            myMessage msgObj = new myMessage(number, msg, true);
+            myMessage msgObj = new myMessage(contactid, msg, true);
             msgObj.setIsDHKey(true);
-            sms.sendMultipartTextMessage(number, null, messages, null, null);
+            sms.sendMultipartTextMessage(contact.getNumber(), null, messages, null, null);
             System.out.println("Message sent: " + msg);
             return msgObj;
         }
@@ -149,7 +153,7 @@ public class handleMessage {
             String sender = smsMessages[0].getOriginatingAddress();
             String message = stringBuilder.toString();
             System.out.println("Here is the message you sent: " + message);
-            myMessage msgObj = new myMessage(sender, message);
+            myMessage msgObj = new myMessage(Contact.getIdFromNumber(sender), message);
             msgObj.set_encrypted(false);
             return msgObj;
         }
@@ -175,24 +179,33 @@ public class handleMessage {
             System.out.println(pdus.length);
             for (int i = 0; i < pdus.length; i++) {
                 smsMessages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                stringBuilder.append(smsMessages[i].getMessageBody().toString());
+                stringBuilder.append(smsMessages[i].getMessageBody());
             }
             String sender = smsMessages[0].getOriginatingAddress();
             String message = stringBuilder.toString();
             System.out.println("Here is the message you sent: " + message);
+
+
+            Contact contact = new Contact(Contact.getIdFromNumber(sender));
+            String key = null;
+            SecurityContact sContact = null;
+            if (SecurityContact.contactIdIsASecurityContact(contact.getId())) {
+                sContact = new SecurityContact(contact.getId());
+                key = sContact.getSessionKey();
+            }
+
+
             //Handling check for encryption and decryption
             String fixed = null;
             boolean encrypted = false;
-            dbHelper helper = new dbHelper(context);
-            String[] keys = helper.getKey(sender);
-            helper.close();
-            if (message.contains(getPrepend()) && keys != null) {
+
+            if (message.contains(getPrepend()) && key != null) {
                 fixed = "";
                 encrypted = true;
                 for (int j = getPrepend().length(); j < message.length(); j++) {
                     fixed += message.charAt(j);
                 }
-                fixed = messageCipher.decrypt(fixed, keys[0], keys[1]);
+                fixed = messageCipher.decrypt(fixed, key, key2);
                 //fixed = messageCipher.decrypt(fixed, key1, key2);
 
             } else if (message.contains(prependDH)) {
@@ -203,7 +216,7 @@ public class handleMessage {
             } else { fixed = message; }
 
             //Return the Message
-            myMessage msgObj = new myMessage(sender, fixed, false);
+            myMessage msgObj = new myMessage(contact.getId(), fixed, false);
             msgObj.set_encrypted(encrypted);
             if (message.contains(prependDH)) {
                 msgObj.setIsDHKey(true);

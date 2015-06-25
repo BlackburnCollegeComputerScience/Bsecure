@@ -77,7 +77,7 @@ public class dbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Msgs.db";
 
     //Temporary Diffie-Hellman key storage
-    //TODO: Pull this out of here and use Dr Coogan's contact list database
+
     public static final String TABLE_CONTACTS = "contacts";
     //Table info
     public static final String COLUMN_NUM = "contact_num"; //contact's number
@@ -202,7 +202,7 @@ public class dbHelper extends SQLiteOpenHelper {
             c.moveToFirst();
         }
 
-        myMessage retObj = new myMessage(c.getString(1), c.getString(2), c.getInt(3) == 1);
+        myMessage retObj = new myMessage(c.getInt(1), c.getString(2), c.getInt(3) == 1);
         retObj.setId(Integer.parseInt(c.getString(0)));
         retObj.set_time(Long.parseLong(c.getString(4)));
         retObj.set_encrypted(c.getInt(5) == 1);

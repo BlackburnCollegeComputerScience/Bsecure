@@ -30,29 +30,7 @@ public class TestActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        SecurityContact lucas = new SecurityContact(100, "Lucas", "15555215554");
-        SecurityContact shane = new SecurityContact(101, "Shane", "15555215556");
-        SecurityContact kevin = new SecurityContact(102, "Kevin", "15555215558");
-        SCSQLiteHelper dbase = new SCSQLiteHelper(this);
-        try {
-            dbase.createSecurityContact(lucas);
-            dbase.createSecurityContact(shane);
-            dbase.createSecurityContact(kevin);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        int id = lucas.getID();
-        String fromID = dbase.getFromID(id);
-        System.out.println(dbase.getFromID(shane.getID()));
-        System.out.println(dbase.getFromID(kevin.getID()));
-
-        dbase.clearDatabase();
-
-        System.out.println(fromID);
-        System.out.println(dbase.getFromID(shane.getID()));
-        System.out.println(dbase.getFromID(kevin.getID()));
-        dbase.close();
     }
 
     @Override

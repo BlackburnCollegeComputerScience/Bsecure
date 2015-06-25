@@ -42,7 +42,7 @@ import java.util.Calendar;
 
 public class myMessage {
     private int _id;
-    private String _name = "dummy"; // TODO: Add name functionality to database
+    private String _name = "dummy";
     private String _number;
     private String _body;
     private boolean _sent = true;
@@ -55,13 +55,15 @@ public class myMessage {
     }
 
     // non-specific constructor
-    public myMessage(String number, String body) {
-        this(number, body, true);
+    public myMessage(int contactid, String body) {
+        this(contactid, body, true);
     }
 
-    public myMessage(String number, String body, boolean sent) {
-        this._name = number;
-        this._number = number;
+    public myMessage(int contactid, String body, boolean sent) {
+        Contact contact = new Contact(contactid);
+        contact.loadFromAndroidDB();
+        this._name = contact.getName();
+        this._number = contact.getNumber();
         this._body = body;
         this._sent = sent;
         this._time = Calendar.getInstance().getTimeInMillis(); // get current time in seconds

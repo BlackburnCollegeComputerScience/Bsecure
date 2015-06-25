@@ -61,7 +61,7 @@ public class Settings extends ActionBarActivity {
 
         //Set up settings display
         nameTv.setText(contact.getName());
-        androidIdTv.setText(contact.getID());
+        androidIdTv.setText(contact.getId());
         sequenceNumberTv.setText(contact.getSeqNum());
         expirationTv.setText(getKeyExpiration());
         remainingKeysTv.setText(getRemainingKeys());

@@ -53,7 +53,7 @@ public class ConversationManager extends SQLiteOpenHelper {
     //Table to store conversation db data
     private static final String TABLE_CONVERSATIONS = "conversations";
     //Table info
-    private static final String COLUMN_NUMBER = "conv_number"; // The conversation contact's number
+    private static final String COLUMN_CONTACT_ID = "conv_contact_id"; // The conversation contact's number
 
     private static ConversationManager sInstance = null;
     private static SQLiteDatabase sDatabase = null;
@@ -67,7 +67,7 @@ public class ConversationManager extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createMasterTable = "CREATE TABLE IF NOT EXISTS " + TABLE_CONVERSATIONS + "(" + COLUMN_ID +
-                INT_TYPE + " PRIMARY KEY AUTOINCREMENT" + COMMA_SEP + COLUMN_NUMBER + TEXT_TYPE + ")";
+                INT_TYPE + " PRIMARY KEY AUTOINCREMENT" + COMMA_SEP + COLUMN_CONTACT_ID + INT_TYPE + ")";
         db.execSQL(createMasterTable);
 
     }
@@ -79,18 +79,18 @@ public class ConversationManager extends SQLiteOpenHelper {
         return sInstance;
     }
 
-    public static ConversationHelper getConversation(Context context, String number) {
+    public static ConversationHelper getConversation(Context context, int contactid) {
         if (sInstance==null) {
             sInstance = new ConversationManager(context.getApplicationContext());
         }
-        ConversationHelper conversationHelper = new ConversationHelper(sInstance, number);
-        sInstance.addMasterRecord(number);
+        ConversationHelper conversationHelper = new ConversationHelper(sInstance, contactid);
+        sInstance.addMasterRecord(contactid);
         return conversationHelper;
     }
 
-    public static ConversationHelper getConversation(String number) {
-        sInstance.addMasterRecord(number);
-        return new ConversationHelper(sInstance, number);
+    public static ConversationHelper getConversation(int contactid) {
+        sInstance.addMasterRecord(contactid);
+        return new ConversationHelper(sInstance, contactid);
     }
 
     public void clearAllConversations() {
@@ -100,7 +100,7 @@ public class ConversationManager extends SQLiteOpenHelper {
             try {
                 while (!cursor.isLast()) {
                     cursor.moveToNext();
-                    removeMasterRecord(cursor.getString(1));
+                    removeMasterRecord(cursor.getInt(1));
                 }
                 cursor.close();
             } catch (Exception ignored) {
@@ -110,8 +110,8 @@ public class ConversationManager extends SQLiteOpenHelper {
         sDatabase.delete(TABLE_CONVERSATIONS, null, null);
     }
 
-    private int getMasterRecordID(String number) {
-        String select = "SELECT * FROM " + TABLE_CONVERSATIONS + " WHERE " + COLUMN_NUMBER+ "=" + number;
+    private int getMasterRecordID(int contactid) {
+        String select = "SELECT * FROM " + TABLE_CONVERSATIONS + " WHERE " + COLUMN_CONTACT_ID + "=" + contactid;
         Cursor c = sDatabase.rawQuery(select, null);
         int ret = -1;
         if (c != null) {
@@ -123,13 +123,13 @@ public class ConversationManager extends SQLiteOpenHelper {
         }
         return ret;
     }
-    private void addMasterRecord(String number) {
-        if (getMasterRecordID(number)==-1) {
+    private void addMasterRecord(int contactid) {
+        if (getMasterRecordID(contactid)==-1) {
             try {
                 ContentValues vals = new ContentValues();
-                vals.put(COLUMN_NUMBER, number);
+                vals.put(COLUMN_CONTACT_ID, contactid);
                 sDatabase.insert(TABLE_CONVERSATIONS, null, vals);
-                System.out.println(number + " added to record as " + vals.get(COLUMN_ID));
+                System.out.println(contactid + " added to record as " + vals.get(COLUMN_ID));
             } catch (Exception ignored) {
                 ignored.printStackTrace();
                 sDatabase.delete(TABLE_CONVERSATIONS, COLUMN_ID + "=" +
@@ -137,25 +137,25 @@ public class ConversationManager extends SQLiteOpenHelper {
             }
             
         } else {
-            System.out.println(number + " found in record with " + getMasterRecordID(number));
+            System.out.println(contactid + " found in record with " + getMasterRecordID(contactid));
         }
     }
 
-    private void removeMasterRecord(String number) {
+    private void removeMasterRecord(int contactid) {
         try {
-            sDatabase.delete(TABLE_MESSAGES_TEMPLATE + number, null, null);
-            sDatabase.delete(TABLE_CONVERSATIONS, COLUMN_NUMBER + " = " + number, null);
+            sDatabase.delete(TABLE_MESSAGES_TEMPLATE + contactid, null, null);
+            sDatabase.delete(TABLE_CONVERSATIONS, COLUMN_CONTACT_ID + " = " + contactid, null);
         } catch (Exception ignored) {ignored.printStackTrace();}
     }
 
     static class ConversationHelper {
         private final String tableName;
-        private final String number;
+        private final int contactid;
         private final ConversationManager db;
-        public ConversationHelper(ConversationManager db, String number) {
+        public ConversationHelper(ConversationManager db, int contactid) {
             this.db = db;
-            this.tableName = TABLE_MESSAGES_TEMPLATE + number;
-            this.number = number;
+            this.tableName = TABLE_MESSAGES_TEMPLATE + contactid;
+            this.contactid = contactid;
             String createConversation = "CREATE TABLE IF NOT EXISTS " + tableName + "(" +
                     COLUMN_ID + SPACE_SEP + INT_TYPE + " PRIMARY KEY" +
                     COMMA_SEP + COLUMN_BODY + SPACE_SEP + TEXT_TYPE + COMMA_SEP + COLUMN_SENT +
@@ -216,7 +216,7 @@ public class ConversationManager extends SQLiteOpenHelper {
                     int id1 = Integer.parseInt(c.getString(0));
                     long time = Long.parseLong(c.getString(3));
 
-                    retObj = new myMessage(this.number, body, sent);
+                    retObj = new myMessage(this.contactid, body, sent);
                     retObj.setId(id1);
                     retObj.set_time(time);
                     retObj.set_encrypted(encrypted);
@@ -232,7 +232,7 @@ public class ConversationManager extends SQLiteOpenHelper {
 
         public void deleteConversation() {
             sDatabase.delete(this.tableName, null, null);
-            this.db.removeMasterRecord(this.number);
+            this.db.removeMasterRecord(this.contactid);
         }
 
     }
@@ -259,15 +259,15 @@ public class ConversationManager extends SQLiteOpenHelper {
         }
     }
 
-    public ArrayList<String> getActiveConversations() {
-        ArrayList<String> output = new ArrayList<>();
+    public ArrayList<Integer> getActiveConversations() {
+        ArrayList<Integer> output = new ArrayList<>();
         String countQuery = "SELECT * FROM " + TABLE_CONVERSATIONS;
         Cursor cursor = sDatabase.rawQuery(countQuery, null);
         if (cursor!=null && cursor.getCount()>0) {
             try {
                 while (!cursor.isLast()) {
                     cursor.moveToNext();
-                    output.add(cursor.getString(1));
+                    output.add(cursor.getInt(1));
                 }
                 cursor.close();
             } catch (Exception ignored) {

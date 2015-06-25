@@ -60,19 +60,23 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
     public static abstract class SCEntry implements BaseColumns {
         public static final String TABLE_NAME = "scentry";
         public static final String COLUMN_NAME_CONTACT_ID = "contactid";
-        public static final String COLUMN_NAME_NAME ="contactname";
         public static final String COLUMN_NAME_CURRENT_SEQ = "currentseq";
+        public static final String COLUMN_NAME_MAX_SEQ = "maxseq";
+        public static final String COLUMN_NAME_TOTAL_KEYS = "totalkeys";
         public static final String COLUMN_NAME_EXPIRE_TIME = "expire";
         public static final String COLUMN_NAME_USES_LEFT = "uses";
+        public static final String COLUMN_NAME_USES_MAX = "maxuses";
 
 
         public static final String SQL_CREATE_SC_ENTRIES = "CREATE TABLE " + TABLE_NAME + " (" +
                 _ID + " INTEGER PRIMARY KEY," +
                 COLUMN_NAME_CONTACT_ID + INT_TYPE + COMMA_SEP +
-                COLUMN_NAME_NAME + TEXT_TYPE + COMMA_SEP +
                 COLUMN_NAME_CURRENT_SEQ + INT_TYPE + COMMA_SEP +
+                COLUMN_NAME_MAX_SEQ + INT_TYPE + COMMA_SEP +
+                COLUMN_NAME_TOTAL_KEYS + INT_TYPE + COMMA_SEP +
                 COLUMN_NAME_EXPIRE_TIME + INT_TYPE + COMMA_SEP +
-                COLUMN_NAME_USES_LEFT + INT_TYPE +
+                COLUMN_NAME_USES_LEFT + INT_TYPE + COMMA_SEP +
+                COLUMN_NAME_USES_MAX + INT_TYPE +
                 " )";
 
         //public static final String SQL_DELETE_SC_ENTRIES = "DROP TABLE IF EXISTS " + TABLE_NAME;
@@ -143,14 +147,27 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
             } else {
                 System.out.println("Cursor was empty or null - LB");
             }
-            return 0;
+            return -1;
         } catch (Exception e) {
             System.out.println("Table did not exist or was empty - LB");
             e.printStackTrace();
         }
-        return 0;
+        return -1;
     }
 
+    public void setCollumnFromId(String tableName, String collumn, int value, int id) {
+        SQLiteDatabase dbase = this.getWritableDatabase();
+        ContentValues vals = new ContentValues();
+        vals.put(collumn, value);
+        dbase.update(tableName, vals, SCEntry.COLUMN_NAME_CONTACT_ID + "=?", new String[]{Integer.toString(id)});
+    }
+
+    public void setCollumnFromId(String tableName, String collumn, String value, int id) {
+        SQLiteDatabase dbase = this.getWritableDatabase();
+        ContentValues vals = new ContentValues();
+        vals.put(collumn, value);
+        dbase.update(tableName, vals, SCEntry.COLUMN_NAME_CONTACT_ID + "=?", new String[]{Integer.toString(id)});
+    }
 
     public String getCollumnFromId(String tableName, String collumn, int id) {
         String select = "SELECT * FROM " + tableName + " WHERE " + collumn + " = " + id;
@@ -163,12 +180,12 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
             } else {
                 System.out.println("Cursor was empty or null - LB");
             }
-            return "Empty";
+            return null;
         } catch (Exception e) {
             System.out.println("Table did not exist or was empty - LB");
             e.printStackTrace();
         }
-        return "Empty";
+        return null;
     }
 
     @Override
@@ -176,7 +193,8 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         //original version, no upgrades to handle yet
     }
 
-    public void createSecurityContact(SecurityContact sc) throws Exception {
+
+    public void createSecurityContact(SecurityContact sc) {
         //get writable db to put new contact in
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -185,45 +203,49 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
 
         //if security contact already exists, don't create duplicate
         //else create from sc info
-        values.put(SCEntry.COLUMN_NAME_CONTACT_ID, sc.getID());
-        values.put(SCEntry.COLUMN_NAME_NAME, sc.getName());
+        values.put(SCEntry.COLUMN_NAME_CONTACT_ID, sc.getId());
         values.put(SCEntry.COLUMN_NAME_CURRENT_SEQ, sc.getSeqNum());
-        //TODO: Need other settings as they occur
+        values.put(SCEntry.COLUMN_NAME_MAX_SEQ, sc.getSeqMax());
+        values.put(SCEntry.COLUMN_NAME_TOTAL_KEYS, sc.getTotalKeys());
+        values.put(SCEntry.COLUMN_NAME_EXPIRE_TIME, sc.getTimeLeft());
+        values.put(SCEntry.COLUMN_NAME_USES_LEFT, sc.getUsesLeft());
+        values.put(SCEntry.COLUMN_NAME_USES_MAX, sc.getUsesMax());
 
-        long retVal = db.insert(SCEntry.TABLE_NAME, null, values);
-        if(retVal < 0) { // error
-            //throw exception??
-            throw new Exception("SQL exception - LB");
+        if (getCollumnFromId(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CONTACT_ID, sc.getId())!=null) {
+            db.update(SCEntry.TABLE_NAME, values,
+                    SCEntry.COLUMN_NAME_CONTACT_ID + "=" + sc.getId(), null);
+        } else {
+            db.insert(SCEntry.TABLE_NAME, null, values);
         }
         db.close();
     }
 
-    public String getContactName(int id) {
-        return getCollumnFromId(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_NAME, id);
-    }
-
-    public int getContactIdFromName(String name) {
-        String select = "SELECT * FROM " + SCEntry.TABLE_NAME + " WHERE " + SCEntry.COLUMN_NAME_NAME
-                + " = " + name;
-        SQLiteDatabase dbase = this.getReadableDatabase();
-        try {
-            Cursor c = dbase.rawQuery(select, null);
-            if (c != null && c.getCount() > 0) {
-                c.moveToFirst();
-                return c.getInt(c.getColumnIndex(SCEntry.COLUMN_NAME_CONTACT_ID));
-            } else {
-                System.out.println("Cursor was empty or null - LB");
-            }
-            return 0;
-        } catch (Exception e) {
-            System.out.println("Table did not exist or was empty");
-            e.printStackTrace();
-        }
-        return 0;
+    public boolean contactIsInDatabase(int id) {
+        return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CONTACT_ID, id) != -1;
     }
 
     public int getContactSeqNum(int id) {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CURRENT_SEQ, id);
+    }
+
+    public int getContactSeqMax(int id) {
+        return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_MAX_SEQ, id);
+    }
+
+    public int getContactTotalKeys(int id) {
+        return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_TOTAL_KEYS, id);
+    }
+
+    public int getContactTimeLeft(int id) {
+        return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_EXPIRE_TIME, id);
+    }
+
+    public int getContactUsesLeft(int id) {
+        return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_USES_LEFT, id);
+    }
+
+    public int getContactUsesMax(int id) {
+        return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_USES_MAX, id);
     }
 
     public int getNextSequence(int id) {
@@ -248,7 +270,65 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         return newSeq;
     }
 
-    public String getNextKey(int id, int seqNum) {
+
+    public void clearKey(int seq, int id) {
+        SQLiteDatabase dbase = this.getWritableDatabase();
+        if (keyExists(seq, id)) {
+            ContentValues vals = new ContentValues();
+            vals.put(KeyPairEntry.COLUMN_NAME_CONTACT_ID, id);
+            vals.put(KeyPairEntry.COLUMN_NAME_KEY, "");
+            vals.put(KeyPairEntry.COLUMN_NAME_SEQ_NUM, seq);
+            dbase.update(KeyPairEntry.TABLE_NAME, vals,
+                    KeyPairEntry.COLUMN_NAME_CONTACT_ID + "=? AND " +
+                    KeyPairEntry.COLUMN_NAME_SEQ_NUM + "=?",
+                    new String[]{Integer.toString(id), Integer.toString(seq)});
+        }
+    }
+
+    public boolean keyExists(int seq, int id) {
+        String select = "SELECT * FROM " + KeyPairEntry.TABLE_NAME + " WHERE " +
+                KeyPairEntry.COLUMN_NAME_CONTACT_ID + "=" + id + " AND " +
+                KeyPairEntry.COLUMN_NAME_SEQ_NUM + "=" + seq;
+        SQLiteDatabase dbase = this.getReadableDatabase();
+        try {
+            Cursor c = dbase.rawQuery(select, null);
+            if (c != null && c.getCount() > 0) {
+                c.moveToFirst();
+                String key = c.getString(c.getColumnIndex(KeyPairEntry.COLUMN_NAME_KEY));
+                c.close();
+                return !(key.equals(""));
+            }
+            return false;
+        } catch (Exception ignored) { }
+        return false;
+    }
+
+    public int addKeys(String[] keys, int id, int seq, int maxSeq, int totalKeys) {
+        SQLiteDatabase database = this.getWritableDatabase();
+        database.beginTransaction();
+        int newMaxSeq = maxSeq;
+        for (String key : keys) {
+            if (seq == newMaxSeq) break;
+            ContentValues vals = new ContentValues();
+            vals.put(KeyPairEntry.COLUMN_NAME_KEY, key);
+            vals.put(KeyPairEntry.COLUMN_NAME_CONTACT_ID, id);
+            vals.put(KeyPairEntry.COLUMN_NAME_SEQ_NUM, newMaxSeq);
+            if (keyExists(newMaxSeq, id)) {
+                database.update(KeyPairEntry.TABLE_NAME, vals,
+                        KeyPairEntry.COLUMN_NAME_CONTACT_ID + "=? AND " +
+                                KeyPairEntry.COLUMN_NAME_SEQ_NUM + "=?",
+                        new String[]{Integer.toString(id), Integer.toString(newMaxSeq)});
+            } else {
+                database.insert(KeyPairEntry.TABLE_NAME, null, vals);
+            }
+            newMaxSeq = Math.abs((newMaxSeq + 1) % totalKeys);
+        }
+        database.setTransactionSuccessful();
+        database.endTransaction();
+        return newMaxSeq;
+    }
+
+    public String getKey(int id, int seqNum) {
         String select = "SELECT * FROM " + KeyPairEntry.TABLE_NAME + " WHERE " +
                 KeyPairEntry.COLUMN_NAME_CONTACT_ID + " = " + id + " AND " +
                 KeyPairEntry.COLUMN_NAME_SEQ_NUM + " = " + seqNum;
@@ -257,7 +337,9 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
             Cursor c = dbase.rawQuery(select, null);
             if (c != null && c.getCount() > 0) {
                 c.moveToFirst();
-                return c.getString(c.getColumnIndex(KeyPairEntry.COLUMN_NAME_KEY));
+                String key = c.getString(c.getColumnIndex(KeyPairEntry.COLUMN_NAME_KEY));
+                c.close();
+                return key;
             } else {
                 System.out.println("Cursor was empty or null - LB");
             }
