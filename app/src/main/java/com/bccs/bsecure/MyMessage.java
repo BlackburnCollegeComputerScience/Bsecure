@@ -38,7 +38,7 @@ import java.util.Calendar;
  * Added boolean to check whether a message is encrypted or not.
  */
 
-public class MyMessagexxx {
+public class MyMessage {
     private long _id;
     private String _name = "dummy";
     private String _number;
@@ -49,15 +49,15 @@ public class MyMessagexxx {
     private boolean _encrypted = false;
 
     // Empty constructor
-    public MyMessagexxx() {
+    public MyMessage() {
     }
 
     // non-specific constructor
-    public MyMessagexxx(long contactid, String body) {
+    public MyMessage(long contactid, String body) {
         this(contactid, body, true);
     }
 
-    public MyMessagexxx(long contactid, String body, boolean sent) {
+    public MyMessage(long contactid, String body, boolean sent) {
         Contact contact = new Contact(contactid);
         contact.loadFromAndroidDB();
         this._name = contact.getName();

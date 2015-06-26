@@ -71,7 +71,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     //Receiver for detecting if a message was received by the main smsBroadcastReceiver.
     //Subclassed the smsBroadcastReceiver rather than BroadcastReceiver
     //for some convenience that is no longer apparent.
-    SmsBroadcastReceiverxxx onNewMsg = new SmsBroadcastReceiverxxx() {
+    SmsBroadcastReceiver onNewMsg = new SmsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getStringExtra("contactid").equals(Long.toString(currentNumber.getId()))) {
@@ -91,12 +91,12 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
         if (getIntent().hasExtra("contactid")) {
             currentNumber = new Contact(getIntent().getIntExtra("contactid", -1));
             //Cancel any notifications for this number
-            if (currentNumber.getId() == SmsBroadcastReceiverxxx.recentID)
-                MessageReceivedNotificationxxx.cancel(this);
+            if (currentNumber.getId() == SmsBroadcastReceiver.recentID)
+                MessageReceivedNotification.cancel(this);
         } else {
             //If it was not opened from the main view, use the most recent number an SMS
             //was received from.
-            currentNumber = new Contact(SmsBroadcastReceiverxxx.recentID);
+            currentNumber = new Contact(SmsBroadcastReceiver.recentID);
         }
 
         super.onCreate(savedInstanceState);
@@ -118,7 +118,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
                 typeMessage.setText("");
 
                 if (currentNumber.getNumber().length() > 0 && message.length() > 0) {
-                    MyMessagexxx msgObj = HandleMessagexxxx.send(currentNumber.getId(), message, getApplicationContext());
+                    MyMessage msgObj = HandleMessage.send(currentNumber.getId(), message, getApplicationContext());
                     ConversationManager.ConversationHelper helper = ConversationManager.getConversation(Conversation.this,
                             currentNumber.getId());
                     helper.addMessage(msgObj);
@@ -172,9 +172,9 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
 
         ConversationManager.ConversationHelper helper = ConversationManager.getConversation(this,
                 currentNumber.getId());
-        ArrayList<MyMessagexxx> checkConversation = helper.getMessages(chatAdapter.getCount());
+        ArrayList<MyMessage> checkConversation = helper.getMessages(chatAdapter.getCount());
 
-        for (MyMessagexxx m : checkConversation) {
+        for (MyMessage m : checkConversation) {
             chatAdapter.addItem(m, m.getSent(), m.is_encrypted());
         }
     }
@@ -251,7 +251,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
         private static final int RECEIVED_NOENC = 3;
         private static final int MAX_TYPES = 4;
 
-        private ArrayList<MyMessagexxx> chatArray = new ArrayList<>();
+        private ArrayList<MyMessage> chatArray = new ArrayList<>();
         private LayoutInflater inflater;
         private ArrayList<Integer> typeArray = new ArrayList<>();
 
@@ -260,7 +260,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
             inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         }
 
-        public void addItem(MyMessagexxx message, boolean isSent, boolean isEncrypted) {
+        public void addItem(MyMessage message, boolean isSent, boolean isEncrypted) {
             chatArray.add(message);
             int type;
             if (!isEncrypted) {
@@ -273,9 +273,9 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
         }
 
 
-        public ArrayList<MyMessagexxx> getChatArray() {
-            ArrayList<MyMessagexxx> newChat = new ArrayList<>();
-            for (MyMessagexxx m : chatArray) {
+        public ArrayList<MyMessage> getChatArray() {
+            ArrayList<MyMessage> newChat = new ArrayList<>();
+            for (MyMessage m : chatArray) {
                 newChat.add(m);
             }
             return newChat;
@@ -298,7 +298,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
         }
 
         @Override
-        public MyMessagexxx getItem(int position) {
+        public MyMessage getItem(int position) {
             return chatArray.get(position);
         }
 
@@ -332,7 +332,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
             } else {
                 holder = (FrameLayout) ((LinearLayout) convertView).getChildAt(0);
             }
-            MyMessagexxx msg = getItem(position);
+            MyMessage msg = getItem(position);
             TextView text =(TextView) ((LinearLayout) holder.getChildAt(0)).getChildAt(0);
             TextView date = (TextView) holder.getChildAt(1);
             String dateText = (SimpleDateFormat.getDateTimeInstance()).format(

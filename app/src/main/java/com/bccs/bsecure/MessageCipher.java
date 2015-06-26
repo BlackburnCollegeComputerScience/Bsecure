@@ -39,7 +39,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Modified by lucas.burdell on 6/16/2015
  * Switched from hexadecimal encoding and decoding of bytes to base64.
  */
-public class MessageCipherxxx {
+public class MessageCipher {
 
 
     public static byte[] cutIV(byte[] IV) {

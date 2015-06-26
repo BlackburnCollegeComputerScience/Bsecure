@@ -56,7 +56,7 @@ import android.support.v4.content.LocalBroadcastManager;
     BSecure.
  */
 
-public class SmsBroadcastReceiverxxx extends BroadcastReceiver {
+public class SmsBroadcastReceiver extends BroadcastReceiver {
     private static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
     private static final String SMS_SENT = "android.provider.Telephony.SMS_SENT";
 
@@ -69,21 +69,21 @@ public class SmsBroadcastReceiverxxx extends BroadcastReceiver {
         if (intent.getAction().equals(SMS_SENT)) handleOutgoingMessage(intent, context);
     }
 
-    private void addReceivedMessageToDatabase(MyMessagexxx message, Context context) {
+    private void addReceivedMessageToDatabase(MyMessage message, Context context) {
         ConversationManager.ConversationHelper helper =
                 ConversationManager.getConversation(context, message.getId());
         helper.addMessage(message);
     }
 
     public void handleOutgoingMessage(Intent intent, Context context) {
-        MyMessagexxx msg = HandleMessagexxxx.handleOutgoingMessage(intent);
+        MyMessage msg = HandleMessage.handleOutgoingMessage(intent);
         if (msg != null) {
             addReceivedMessageToDatabase(msg, context);
         }
     }
 
     public void handleIncomingMessage(Intent intent, Context context) {
-        MyMessagexxx msg = HandleMessagexxxx.handleIncomingMessage(intent, context);
+        MyMessage msg = HandleMessage.handleIncomingMessage(intent, context);
         if (msg != null) {
             if (msg.is_encrypted() || msg.isDHKey()) abortBroadcast();
             if (!msg.isDHKey()) {
@@ -92,8 +92,8 @@ public class SmsBroadcastReceiverxxx extends BroadcastReceiver {
                 receivedMSG.putExtra("contactid", msg.getId());
                 recentNumber = msg.get_number();
                 recentID = msg.getId();
-                MessageReceivedNotificationxxx.cancel(context); //cancel old message
-                MessageReceivedNotificationxxx.notify(context, msg.get_number(), msg.getBody());
+                MessageReceivedNotification.cancel(context); //cancel old message
+                MessageReceivedNotification.notify(context, msg.get_number(), msg.getBody());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(receivedMSG);
             } else {
                 Intent receivedMSG = new Intent("com.bccs.bsecure.msgReceived_DH");

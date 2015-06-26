@@ -75,7 +75,7 @@ public class ContactSettings extends ActionBarActivity {
                     Intent intent = new Intent(ContactSettings.this, Bluetooth.class);
                     startActivityForResult(intent, Constants.REQUEST_KEYS);
                 } else {
-                    Intent intent = new Intent(ContactSettings.this, SmsBroadcastReceiverxxx.class);
+                    Intent intent = new Intent(ContactSettings.this, SmsBroadcastReceiver.class);
                     startActivity(intent);
                 }
 

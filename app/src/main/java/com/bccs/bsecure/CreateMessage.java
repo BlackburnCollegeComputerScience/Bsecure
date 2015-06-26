@@ -59,7 +59,7 @@ public class CreateMessage extends ActionBarActivity {
             for (Contact c : recipientContacts) {
                 ConversationManager.ConversationHelper helper = ConversationManager.getConversation(
                         CreateMessage.this, c.getId());
-                helper.addMessage(HandleMessagexxxx.send(c.getId(), messageText.getText().toString(),
+                helper.addMessage(HandleMessage.send(c.getId(), messageText.getText().toString(),
                         getApplicationContext()));
             }
             Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);

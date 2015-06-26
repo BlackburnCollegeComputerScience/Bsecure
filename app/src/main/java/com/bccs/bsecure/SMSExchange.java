@@ -47,13 +47,13 @@ public class SMSExchange extends ActionBarActivity {
     TextView manualKey;
     Button manualButton;
 
-    SmsBroadcastReceiverxxx onNewMsg = new SmsBroadcastReceiverxxx() {
+    SmsBroadcastReceiver onNewMsg = new SmsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (currentlyWorking) {
                 if (intent.getStringExtra("number").equals(currentNumber)) {
                     try {
-                        DbHelperxxx helper = new DbHelperxxx(context);
+                        DbHelper helper = new DbHelper(context);
                         progressTextView.append("Received g^b%p from " + currentNumber);
                         helper.addKey(intent.getStringExtra("number"),
                                 currentSession.packSecret(intent.getStringExtra("body")),
@@ -76,7 +76,7 @@ public class SMSExchange extends ActionBarActivity {
                     contactNumText.setText(currentNumber);
                     progressTextView.append("Received g^a%p from " + currentNumber);
 //                    TODO FIX THIS!!!!!!!!!!!
-                    HandleMessagexxxx.send(0,
+                    HandleMessage.send(0,
                             currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                             getApplicationContext(), true);
                     progressBar.setProgress(50);
@@ -119,7 +119,7 @@ public class SMSExchange extends ActionBarActivity {
                         currentlyWorking = true;
                         progressTextView.append("g^a%p generated");
                         //TODO FIX THIS
-                        HandleMessagexxxx.send(0,
+                        HandleMessage.send(0,
                                 currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                                 getApplicationContext(), true);
                         progressTextView.append("sent g^a%p to " + currentNumber + "\n");
@@ -137,7 +137,7 @@ public class SMSExchange extends ActionBarActivity {
         manualButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DbHelperxxx helper = new DbHelperxxx(getApplicationContext());
+                DbHelper helper = new DbHelper(getApplicationContext());
                 String key = manualKey.getText().toString();
                 String hash = DiffieHellmanKeySession.toHexString(
                         DiffieHellmanKeySession.getHash(

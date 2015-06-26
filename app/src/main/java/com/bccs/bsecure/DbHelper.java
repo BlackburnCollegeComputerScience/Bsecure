@@ -59,7 +59,7 @@ import java.util.ArrayList;
  * This is mainly for the conversation UI.
  */
 
-public class DbHelperxxx extends SQLiteOpenHelper {
+public class DbHelper extends SQLiteOpenHelper {
     public static final String TABLE_MESSAGES = "messages";
     //Table Info
     public static final String COLUMN_ID = "id"; //ID of message
@@ -81,7 +81,7 @@ public class DbHelperxxx extends SQLiteOpenHelper {
     public static final String COLUMN_HASH = "contact_keyhash"; //hash of secret for IV
     public static final String COLUMN_CONTACT_ID = "contact_id"; //row ID
 
-    public DbHelperxxx(Context context) {
+    public DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -108,7 +108,7 @@ public class DbHelperxxx extends SQLiteOpenHelper {
 
 
     //adds single record
-    public void addRecord(MyMessagexxx msg) {
+    public void addRecord(MyMessage msg) {
         SQLiteDatabase dbase = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
         // Fill vals with appropriate content
@@ -189,7 +189,7 @@ public class DbHelperxxx extends SQLiteOpenHelper {
     }
 
     //get single message
-    public MyMessagexxx getSingleMessage(int id) {
+    public MyMessage getSingleMessage(int id) {
 
         String select = "SELECT * FROM " + TABLE_MESSAGES + " WHERE " + COLUMN_ID + " = " + id;
         SQLiteDatabase dbase = this.getReadableDatabase();
@@ -198,7 +198,7 @@ public class DbHelperxxx extends SQLiteOpenHelper {
             c.moveToFirst();
         }
 
-        MyMessagexxx retObj = new MyMessagexxx(c.getInt(1), c.getString(2), c.getInt(3) == 1);
+        MyMessage retObj = new MyMessage(c.getInt(1), c.getString(2), c.getInt(3) == 1);
         retObj.setId(Integer.parseInt(c.getString(0)));
         retObj.set_time(Long.parseLong(c.getString(4)));
         retObj.set_encrypted(c.getInt(5) == 1);
@@ -229,8 +229,8 @@ public class DbHelperxxx extends SQLiteOpenHelper {
         return activeInfo;
     }
 
-    public ArrayList<MyMessagexxx> getActiveNumbersAsMyMessages() {
-        ArrayList<MyMessagexxx> activeInfo = new ArrayList<>();
+    public ArrayList<MyMessage> getActiveNumbersAsMyMessages() {
+        ArrayList<MyMessage> activeInfo = new ArrayList<>();
         ArrayList<String> nums = new ArrayList<String>();
         int recordCount = this.getRecordCount();
         for (int i = 1; i <= recordCount; i++) {
@@ -255,8 +255,8 @@ public class DbHelperxxx extends SQLiteOpenHelper {
         return ret;
     }
 
-    public ArrayList<MyMessagexxx> getConversationMessages(String no) {
-        ArrayList<MyMessagexxx> ret = new ArrayList<>();
+    public ArrayList<MyMessage> getConversationMessages(String no) {
+        ArrayList<MyMessage> ret = new ArrayList<>();
         for (int i = 1; i <= this.getRecordCount(); i++) {
             if (this.getSingleMessage(i).get_number().equalsIgnoreCase(no)) {
                 ret.add(this.getSingleMessage(i));
@@ -298,7 +298,7 @@ public class DbHelperxxx extends SQLiteOpenHelper {
     }
 
     //deletes a single record
-    public void deleteRecord(MyMessagexxx msg) {
+    public void deleteRecord(MyMessage msg) {
         SQLiteDatabase dbase = this.getWritableDatabase();
         dbase.delete(TABLE_MESSAGES, COLUMN_ID + " = ?",
                 new String[]{String.valueOf(msg.getId())});
