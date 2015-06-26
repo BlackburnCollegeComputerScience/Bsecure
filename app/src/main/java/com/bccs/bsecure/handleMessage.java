@@ -63,12 +63,12 @@ public class handleMessage {
      * @param msg message to send
      * @return myMessage object to be used by UI
      */
-    public static myMessage send(int contactid, String msg, Context context) {
+    public static myMessage send(long contactid, String msg, Context context) {
         return send(contactid, msg, context, false);
     }
 
 
-    public static myMessage send(int contactid, String msg, Context context, boolean isDH) {
+    public static myMessage send(long contactid, String msg, Context context, boolean isDH) {
         Contact contact = new Contact(context, contactid);
         if (!isDH) {
 
@@ -197,7 +197,7 @@ public class handleMessage {
             sender = newSender;
 
 
-            int numberID =  Contact.getIdFromNumber(sender);
+            long numberID =  Contact.getIdFromNumber(sender);
             Contact contact = new Contact(context, numberID);
             String key = null;
             SecurityContact sContact = null;

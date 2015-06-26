@@ -57,17 +57,7 @@ public class ContactSettings extends ActionBarActivity {
         remainingKeysTv = (TextView) findViewById(R.id.remainingKeysTv);
         exchangeBtn = (Button) findViewById(R.id.exchangeBtn);
         forceExpirationBtn = (Button) findViewById(R.id.forceExpBtn);
-
-        //Grab the security contact from the bundle
-        byte[] serializedContact = getIntent().getExtras().getByteArray("contact");
-        try {
-            //De-serialized contact object
-            contact = deserialize(serializedContact);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        contact = new SecurityContact(getIntent().getExtras().getLong("contact"));
 
         //Set up settings display
         nameTv.setText(contact.getName());

@@ -27,12 +27,15 @@
         android:layout_height="match_parent"
         android:background="#ffe8aaff"
         android:layout_gravity="right"
-        android:minHeight="50sp">
+        android:minHeight="50sp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp">
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent"
+            >
 
             <TextView
                 android:layout_width="wrap_content"

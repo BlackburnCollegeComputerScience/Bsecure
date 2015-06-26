@@ -118,7 +118,7 @@ public class SMSExchange extends ActionBarActivity {
                         currentNumber = contactNumText.getText().toString();
                         currentlyWorking = true;
                         progressTextView.append("g^a%p generated");
-                        //TODO FIX TIHS!!!!!!!!!
+                        //TODO FIX THIS
                         handleMessage.send(0,
                                 currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                                 getApplicationContext(), true);

@@ -10,19 +10,20 @@ import android.provider.ContactsContract;
  * Created by lucas.burdell on 6/24/2015.
  */
 public class Contact {
-    private int id;         //this should be primary _ID for contact from android db
+    private long id;         //this should be primary _ID for contact from android db
     private String name;
     private String number;
+    private String lookupKey;
     private static Context baseContext = null;
 
 
     public Contact() { };
 
-    public Contact(int id) {
+    public Contact(long id) {
         this(baseContext, id);
     }
 
-    public Contact(Context context, int id) {
+    public Contact(Context context, long id) {
         this.setId(id);
 
         if (baseContext == null) baseContext = context.getApplicationContext();
@@ -32,10 +33,12 @@ public class Contact {
     public void loadFromAndroidDB() {
         Uri CONTENT_URI = ContactsContract.Contacts.CONTENT_URI;
         String _ID = ContactsContract.Contacts._ID;
+        String CONTACT_KEY  = ContactsContract.Contacts.LOOKUP_KEY;
         String DISPLAY_NAME = ContactsContract.Contacts.DISPLAY_NAME;
         String HAS_PHONE_NUMBER = ContactsContract.Contacts.HAS_PHONE_NUMBER;
         String[] contact_projection = {
                 _ID,
+                CONTACT_KEY,
                 DISPLAY_NAME,
                 HAS_PHONE_NUMBER
         };
@@ -55,10 +58,11 @@ public class Contact {
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             this.setName(cursor.getString(cursor.getColumnIndex(DISPLAY_NAME)));
+            this.setLookupKey(cursor.getString(cursor.getColumnIndex(CONTACT_KEY)));
             int hasPhoneNumber = Integer.parseInt(cursor.getString(cursor.getColumnIndex(HAS_PHONE_NUMBER)));
 
             if (hasPhoneNumber > 0) {
-                Cursor phoneCursor = contentResolver.query(PhoneCONTENT_URI, phone_projection, Phone_CONTACT_ID + " = ?", new String[]{Integer.toString(this.getId())}, null);
+                Cursor phoneCursor = contentResolver.query(PhoneCONTENT_URI, phone_projection, Phone_CONTACT_ID + " = ?", new String[]{Long.toString(this.getId())}, null);
                 phoneCursor.moveToFirst();
                 this.setNumber(phoneCursor.getString(phoneCursor.getColumnIndex(NUMBER)));
                 phoneCursor.close();
@@ -68,11 +72,11 @@ public class Contact {
     }
 
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
 
         if (id==0) throw new RuntimeException("HEY YOU CAN'T DO THAT");
         this.id = id;
@@ -102,7 +106,7 @@ public class Contact {
         baseContext = context;
     }
 
-    public static int getIdFromNumber(String number) {
+    public static long getIdFromNumber(String number) {
         Uri CONTENT_URI = ContactsContract.Contacts.CONTENT_URI;
         String _ID = ContactsContract.Contacts._ID;
         String DISPLAY_NAME = ContactsContract.Contacts.DISPLAY_NAME;
@@ -125,7 +129,7 @@ public class Contact {
         ContentResolver contentResolver = baseContext.getContentResolver();
         //Cursor cursor = contentResolver.query(PhoneCONTENT_URI, phone_projection, NUMBER + "=?", new String[]{"\"" + number + "\""}, null);
         Cursor cursor = contentResolver.query(PhoneCONTENT_URI, phone_projection, null, null, null);
-        int output = -1;
+        long output = -1;
 
         if (cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
@@ -134,7 +138,7 @@ public class Contact {
 
                 if (thisNumber.equals(number)) {
 
-                    output = Integer.parseInt(cursor.getString(cursor.getColumnIndex(Phone_CONTACT_ID)));
+                    output = Long.parseLong(cursor.getString(cursor.getColumnIndex(Phone_CONTACT_ID)));
                 }
             }
         } else {
@@ -148,5 +152,13 @@ public class Contact {
     @Override
     public String toString() {
         return "Name:" + this.getName() + "\nID:" + this.getId() + "\nNumber:" + this.getNumber();
+    }
+
+    public String getLookupKey() {
+        return lookupKey;
+    }
+
+    public void setLookupKey(String lookupKey) {
+        this.lookupKey = lookupKey;
     }
 }

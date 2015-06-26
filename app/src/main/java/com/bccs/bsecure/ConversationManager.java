@@ -79,7 +79,7 @@ public class ConversationManager extends SQLiteOpenHelper {
         return sInstance;
     }
 
-    public static ConversationHelper getConversation(Context context, int contactid) {
+    public static ConversationHelper getConversation(Context context, long contactid) {
         if (sInstance==null) {
             sInstance = new ConversationManager(context.getApplicationContext());
         }
@@ -110,7 +110,7 @@ public class ConversationManager extends SQLiteOpenHelper {
         sDatabase.delete(TABLE_CONVERSATIONS, null, null);
     }
 
-    private int getMasterRecordID(int contactid) {
+    private int getMasterRecordID(long contactid) {
         String select = "SELECT * FROM " + TABLE_CONVERSATIONS + " WHERE " + COLUMN_CONTACT_ID + "=?";
         Cursor c = sDatabase.rawQuery(select, new String[]{"" + contactid});
         int ret = -1;
@@ -123,7 +123,7 @@ public class ConversationManager extends SQLiteOpenHelper {
         }
         return ret;
     }
-    private void addMasterRecord(int contactid) {
+    private void addMasterRecord(long contactid) {
         if (getMasterRecordID(contactid)==-1) {
             try {
                 ContentValues vals = new ContentValues();
@@ -141,7 +141,7 @@ public class ConversationManager extends SQLiteOpenHelper {
         }
     }
 
-    private void removeMasterRecord(int contactid) {
+    private void removeMasterRecord(long contactid) {
         try {
             sDatabase.delete(TABLE_MESSAGES_TEMPLATE + contactid, null, null);
             sDatabase.delete(TABLE_CONVERSATIONS, COLUMN_CONTACT_ID + " = " + contactid, null);
@@ -150,9 +150,9 @@ public class ConversationManager extends SQLiteOpenHelper {
 
     static class ConversationHelper {
         private final String tableName;
-        private final int contactid;
+        private final long contactid;
         private final ConversationManager db;
-        public ConversationHelper(ConversationManager db, int contactid) {
+        public ConversationHelper(ConversationManager db, long contactid) {
             this.db = db;
             this.tableName = TABLE_MESSAGES_TEMPLATE + contactid;
             this.contactid = contactid;

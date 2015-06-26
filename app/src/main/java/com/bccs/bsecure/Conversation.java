@@ -74,7 +74,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getStringExtra("contactid").equals(Integer.toString(currentNumber.getId()))) {
+            if (intent.getStringExtra("contactid").equals(Long.toString(currentNumber.getId()))) {
                 updateConvo();
             }
         }

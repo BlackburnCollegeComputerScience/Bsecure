@@ -61,7 +61,7 @@ public class smsBroadcastReceiver extends BroadcastReceiver {
     private static final String SMS_SENT = "android.provider.Telephony.SMS_SENT";
 
     public static String recentNumber = "5556";
-    public static int recentID = 0;
+    public static long recentID = 0;
 
     @Override
     public void onReceive(Context context, Intent intent) {

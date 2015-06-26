@@ -27,7 +27,9 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="#FFFF00"
-        android:minHeight="50sp">
+        android:minHeight="50sp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp">
 
         <LinearLayout
             android:orientation="horizontal"

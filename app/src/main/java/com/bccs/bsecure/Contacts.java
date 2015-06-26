@@ -17,7 +17,6 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -188,14 +187,29 @@ public class Contacts extends ActionBarActivity {
             contactNumber.setText(contact.getNumber());
 
             Button settingsBtn = (Button) convertView.findViewById(R.id.settingsButton);
+            Button editButton = (Button) convertView.findViewById(R.id.editButton);
+
+            editButton.setOnClickListener(new View.OnClickListener(){
+
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_EDIT);
+                    Uri contactUri = ContactsContract.Contacts.getLookupUri((long) contact.getId(), contact.getLookupKey());
+                    intent.setData(contactUri);
+                    intent.putExtra("finishActivityOnSaveCompleted", true);
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+                }
+            });
+
             settingsBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SecurityContact securityContact = new SecurityContact(contact.getId());
                     Intent intent = new Intent(Contacts.this, ContactSettings.class);
                     try {
-                        intent.putExtra("contact", securityContact.serialize());
-                    } catch (IOException e) {
+                        intent.putExtra("contact", contact.getId());
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     startActivity(intent);

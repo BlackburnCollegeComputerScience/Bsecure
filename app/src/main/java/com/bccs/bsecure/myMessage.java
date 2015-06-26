@@ -41,7 +41,7 @@ import java.util.Calendar;
  */
 
 public class myMessage {
-    private int _id;
+    private long _id;
     private String _name = "dummy";
     private String _number;
     private String _body;
@@ -55,11 +55,11 @@ public class myMessage {
     }
 
     // non-specific constructor
-    public myMessage(int contactid, String body) {
+    public myMessage(long contactid, String body) {
         this(contactid, body, true);
     }
 
-    public myMessage(int contactid, String body, boolean sent) {
+    public myMessage(long contactid, String body, boolean sent) {
         Contact contact = new Contact(contactid);
         contact.loadFromAndroidDB();
         this._name = contact.getName();
@@ -101,7 +101,7 @@ public class myMessage {
         this._id = id;
     }
 
-    public int getId() {
+    public long getId() {
         return this._id;
     }
 

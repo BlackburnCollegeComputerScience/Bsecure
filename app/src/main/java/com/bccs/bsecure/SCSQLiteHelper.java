@@ -117,8 +117,6 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         public static final String COLUMN_NAME_CONTACT_ID = "contactid";
         public static final String COLUMN_NAME_SEQ_NUM = "seqnum";
         public static final String COLUMN_NAME_KEY = "key";
-
-        //TODO: DO I NEED TO AUTOINCREMENT PRIMARY KEY???
         public static final String SQL_CREATE_KEY_PAIR_ENTRIES = "CREATE TABLE " + TABLE_NAME +
                 " (" +
                 _ID + " INTEGER PRIMARY KEY," +
@@ -154,7 +152,7 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         db.insert(GeneralSettings.TABLE_NAME, null, vals);
     }
 
-    public int getCollumnFromIdAsInt(String tableName, String collumn, int id) {
+    public int getCollumnFromIdAsInt(String tableName, String collumn, long id) {
         String select = "SELECT * FROM " + tableName + " WHERE ?=?";
         SQLiteDatabase dbase = this.getReadableDatabase();
         try {
@@ -172,21 +170,21 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         return -1;
     }
 
-    public void setCollumnFromId(String tableName, String collumn, int value, int id) {
+    public void setCollumnFromId(String tableName, String collumn, int value, long id) {
         SQLiteDatabase dbase = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
         vals.put(collumn, value);
-        dbase.update(tableName, vals, SCEntry.COLUMN_NAME_CONTACT_ID + "=?", new String[]{Integer.toString(id)});
+        dbase.update(tableName, vals, SCEntry.COLUMN_NAME_CONTACT_ID + "=?", new String[]{Long.toString(id)});
     }
 
-    public void setCollumnFromId(String tableName, String collumn, String value, int id) {
+    public void setCollumnFromId(String tableName, String collumn, String value, long id) {
         SQLiteDatabase dbase = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
         vals.put(collumn, value);
-        dbase.update(tableName, vals, SCEntry.COLUMN_NAME_CONTACT_ID + "=?", new String[]{Integer.toString(id)});
+        dbase.update(tableName, vals, SCEntry.COLUMN_NAME_CONTACT_ID + "=?", new String[]{Long.toString(id)});
     }
 
-    public String getCollumnFromId(String tableName, String collumn, int id) {
+    public String getCollumnFromId(String tableName, String collumn, long id) {
         String select = "SELECT * FROM " + tableName + " WHERE ?=?";
         SQLiteDatabase dbase = this.getReadableDatabase();
         try {
@@ -235,13 +233,13 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public boolean contactIsInDatabase(int id) {
+    public boolean contactIsInDatabase(long id) {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CONTACT_ID, id) != -1;
     }
 
 
 
-    public int getContactSeqNum(int id) {
+    public int getContactSeqNum(long id) {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CURRENT_SEQ, id);
     }
 
@@ -274,27 +272,27 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         dbase.update(GeneralSettings.TABLE_NAME, vals, null, null);
     }
 
-    public int getContactSeqMax(int id) {
+    public int getContactSeqMax(long id) {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_MAX_SEQ, id);
     }
 
-    public int getContactTotalKeys(int id) {
+    public int getContactTotalKeys(long id) {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_TOTAL_KEYS, id);
     }
 
-    public int getContactTimeLeft(int id) {
+    public int getContactTimeLeft(long id) {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_EXPIRE_TIME, id);
     }
 
-    public int getContactUsesLeft(int id) {
+    public int getContactUsesLeft(long id) {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_USES_LEFT, id);
     }
 
-    public int getContactUsesMax(int id) {
+    public int getContactUsesMax(long id) {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_USES_MAX, id);
     }
 
-    public int getNextSequence(int id) {
+    public int getNextSequence(long id) {
         String select = "SELECT * FROM " + SCEntry.TABLE_NAME + " WHERE " + SCEntry.COLUMN_NAME_CONTACT_ID
                 + " = " + id;
         SQLiteDatabase dbase = this.getReadableDatabase();
@@ -315,7 +313,7 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
     }
 
 
-    public void clearKey(int seq, int id) {
+    public void clearKey(int seq, long id) {
         SQLiteDatabase dbase = this.getWritableDatabase();
         if (keyExists(seq, id)) {
             ContentValues vals = new ContentValues();
@@ -325,11 +323,11 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
             dbase.update(KeyPairEntry.TABLE_NAME, vals,
                     KeyPairEntry.COLUMN_NAME_CONTACT_ID + "=? AND " +
                     KeyPairEntry.COLUMN_NAME_SEQ_NUM + "=?",
-                    new String[]{Integer.toString(id), Integer.toString(seq)});
+                    new String[]{Long.toString(id), Integer.toString(seq)});
         }
     }
 
-    public boolean keyExists(int seq, int id) {
+    public boolean keyExists(int seq, long id) {
         String select = "SELECT * FROM " + KeyPairEntry.TABLE_NAME + " WHERE " +
                 KeyPairEntry.COLUMN_NAME_CONTACT_ID + "=" + id + " AND " +
                 KeyPairEntry.COLUMN_NAME_SEQ_NUM + "=" + seq;
@@ -347,7 +345,7 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         return false;
     }
 
-    public int addKeys(String[] keys, int id, int seq, int maxSeq, int totalKeys) {
+    public int addKeys(String[] keys, long id, int seq, int maxSeq, int totalKeys) {
         SQLiteDatabase database = this.getWritableDatabase();
         database.beginTransaction();
         int newMaxSeq = maxSeq;
@@ -361,7 +359,7 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
                 database.update(KeyPairEntry.TABLE_NAME, vals,
                         KeyPairEntry.COLUMN_NAME_CONTACT_ID + "=? AND " +
                                 KeyPairEntry.COLUMN_NAME_SEQ_NUM + "=?",
-                        new String[]{Integer.toString(id), Integer.toString(newMaxSeq)});
+                        new String[]{Long.toString(id), Integer.toString(newMaxSeq)});
             } else {
                 database.insert(KeyPairEntry.TABLE_NAME, null, vals);
             }
@@ -372,7 +370,7 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         return newMaxSeq;
     }
 
-    public String getKey(int id, int seqNum) {
+    public String getKey(long id, int seqNum) {
         String select = "SELECT * FROM " + KeyPairEntry.TABLE_NAME + " WHERE " +
                 KeyPairEntry.COLUMN_NAME_CONTACT_ID + " = " + id + " AND " +
                 KeyPairEntry.COLUMN_NAME_SEQ_NUM + " = " + seqNum;

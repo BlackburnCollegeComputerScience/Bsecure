@@ -59,16 +59,6 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
 
         }
     };
-    private View.OnClickListener itemClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            TextView contactName = (TextView) ((RelativeLayout) v).getChildAt(1);
-            Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
-            conversationIntent.putExtra("name", contactName.getText().toString());
-            conversationIntent.putExtra("number", contactName.getText().toString());
-            startActivity(conversationIntent);
-        }
-    };
 
     private AdapterView.OnItemClickListener onListClick = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
@@ -313,12 +303,19 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
                 //holder.setOnClickListener();
                 holder = (RelativeLayout) convertView;
             }
-            myMessage item = getItem(position);
+            final myMessage item = getItem(position);
             TextView contactName = (TextView) holder.getChildAt(1);
             TextView lastMessage = (TextView) holder.getChildAt(2);
             contactName.setText(item.get_name());
             lastMessage.setText((item.getSent() ? "You: " : item.get_name() + ": ") + item.getBody());
-            holder.setOnClickListener(itemClick);
+            holder.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent conversationIntent = new Intent(getApplicationContext(), Conversation.class);
+                    conversationIntent.putExtra("contactid", item.getId());
+                    startActivity(conversationIntent);
+                }
+            });
             return convertView;
         }
     }

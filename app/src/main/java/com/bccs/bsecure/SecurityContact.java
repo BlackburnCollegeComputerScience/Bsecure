@@ -42,23 +42,21 @@ public class SecurityContact extends Contact implements Serializable {
     private int timeLeft = 0;
     private int usesMax = 100;
     private SCSQLiteHelper database;
-    private ConversationManager.ConversationHelper conversation;
 
     /* need empty constructor */
 
     public SecurityContact() {
     }
 
-    public SecurityContact(int id) {
+    public SecurityContact(long id) {
         this(Contact.getBaseContext(), id);
     }
 
-    public SecurityContact(Context context, int id) {
+    public SecurityContact(Context context, long id) {
         super(context, id);
 
         //Initialize conversation
         //this.number should have been loaded by loadFromAndroidDB
-        this.conversation = ConversationManager.getConversation(context, getId());
 
 
         //Lookup in SC db.scentry table using id
@@ -107,6 +105,12 @@ public class SecurityContact extends Contact implements Serializable {
         return currKey;
     }
 
+    public int getRemainingKeys() {
+        if (seqNum>seqMax) {
+
+        }
+        return 0;
+    }
 
     public int getSeqNum() {
         return seqNum;
@@ -246,7 +250,7 @@ public class SecurityContact extends Contact implements Serializable {
         return contacts;
     }
 
-    public static boolean contactIdIsASecurityContact(int id) {
+    public static boolean contactIdIsASecurityContact(long id) {
         SCSQLiteHelper database = new SCSQLiteHelper(Contact.getBaseContext());
         return (database.contactIsInDatabase(id));
     }
