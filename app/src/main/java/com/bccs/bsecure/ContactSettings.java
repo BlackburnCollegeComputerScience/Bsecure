@@ -66,6 +66,7 @@ public class ContactSettings extends ActionBarActivity {
         expirationTv.setText("Messages Till Key Expiration" + getKeyExpiration());
         remainingKeysTv.setText("Remaining Keys: " + getRemainingKeys());
 
+        exchangeBtn.setText("Exchange keys with " + contact.getName());
         exchangeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,7 +75,7 @@ public class ContactSettings extends ActionBarActivity {
                     Intent intent = new Intent(ContactSettings.this, Bluetooth.class);
                     startActivityForResult(intent, Constants.REQUEST_KEYS);
                 } else {
-                    Intent intent = new Intent(ContactSettings.this, smsBroadcastReceiver.class);
+                    Intent intent = new Intent(ContactSettings.this, SmsBroadcastReceiverxxx.class);
                     startActivity(intent);
                 }
 

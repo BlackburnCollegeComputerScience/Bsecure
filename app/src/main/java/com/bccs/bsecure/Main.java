@@ -69,7 +69,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
         }
     };
 
-    smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
+    SmsBroadcastReceiverxxx onNewMsg = new SmsBroadcastReceiverxxx() {
         @Override
         public void onReceive(Context context, Intent intent) {
             updateActiveNums();
@@ -187,7 +187,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
         ArrayList<Integer> activeConversations = manager.getActiveConversations();
         for (int s : activeConversations) {
             ConversationManager.ConversationHelper helper = ConversationManager.getConversation(s);
-            myMessage message = helper.getLastMessage();
+            MyMessagexxx message = helper.getLastMessage();
             if (!activeNums.contains(s)) {
                 activeNums.add(s);
                 activeInfoAdapter.addItem(message);
@@ -219,7 +219,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
 
         private static final int MAX_TYPES = 1;
 
-        private ArrayList<myMessage> contactsArray = new ArrayList<>();
+        private ArrayList<MyMessagexxx> contactsArray = new ArrayList<>();
         private LayoutInflater inflater;
 
         public contactsAdapter() {
@@ -227,7 +227,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
             inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         }
 
-        public void addItem(myMessage message) {
+        public void addItem(MyMessagexxx message) {
             contactsArray.add(message);
             notifyDataSetChanged();
         }
@@ -236,9 +236,10 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
             contactsArray = new ArrayList<>();
             notifyDataSetChanged();
         }
-        public void updateMessage(myMessage message) {
 
-            for (myMessage m : contactsArray) {
+        public void updateMessage(MyMessagexxx message) {
+
+            for (MyMessagexxx m : contactsArray) {
                 if (message.get_name().equals(m.get_name())) {
 
 
@@ -255,9 +256,9 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
         }
 
 
-        public ArrayList<myMessage> getContactsArray() {
-            ArrayList<myMessage> newChat = new ArrayList<>();
-            for (myMessage m : contactsArray) {
+        public ArrayList<MyMessagexxx> getContactsArray() {
+            ArrayList<MyMessagexxx> newChat = new ArrayList<>();
+            for (MyMessagexxx m : contactsArray) {
                 newChat.add(m);
             }
             return newChat;
@@ -280,7 +281,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
         }
 
         @Override
-        public myMessage getItem(int position) {
+        public MyMessagexxx getItem(int position) {
             return contactsArray.get(position);
         }
 
@@ -303,7 +304,7 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
                 //holder.setOnClickListener();
                 holder = (RelativeLayout) convertView;
             }
-            final myMessage item = getItem(position);
+            final MyMessagexxx item = getItem(position);
             TextView contactName = (TextView) holder.getChildAt(1);
             TextView lastMessage = (TextView) holder.getChildAt(2);
             contactName.setText(item.get_name());

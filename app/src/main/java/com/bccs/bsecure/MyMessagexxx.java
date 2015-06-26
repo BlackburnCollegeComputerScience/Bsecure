@@ -3,23 +3,21 @@ package com.bccs.bsecure;
 import java.util.Calendar;
 
 /**
- *
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
- *
+ * <p>
  * Bsecure is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * Bsecure is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 /**
@@ -40,7 +38,7 @@ import java.util.Calendar;
  * Added boolean to check whether a message is encrypted or not.
  */
 
-public class myMessage {
+public class MyMessagexxx {
     private long _id;
     private String _name = "dummy";
     private String _number;
@@ -51,15 +49,15 @@ public class myMessage {
     private boolean _encrypted = false;
 
     // Empty constructor
-    public myMessage() {
+    public MyMessagexxx() {
     }
 
     // non-specific constructor
-    public myMessage(long contactid, String body) {
+    public MyMessagexxx(long contactid, String body) {
         this(contactid, body, true);
     }
 
-    public myMessage(long contactid, String body, boolean sent) {
+    public MyMessagexxx(long contactid, String body, boolean sent) {
         Contact contact = new Contact(contactid);
         contact.loadFromAndroidDB();
         this._name = contact.getName();

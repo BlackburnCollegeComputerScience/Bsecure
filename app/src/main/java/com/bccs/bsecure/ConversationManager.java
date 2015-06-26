@@ -164,21 +164,21 @@ public class ConversationManager extends SQLiteOpenHelper {
             sDatabase.execSQL(createConversation);
         }
 
-        public ArrayList<myMessage> getMessages() {
-            ArrayList<myMessage> ret = new ArrayList<>();
+        public ArrayList<MyMessagexxx> getMessages() {
+            ArrayList<MyMessagexxx> ret = new ArrayList<>();
             for (int i = 1; i <= db.getRecordCount(this.tableName); i++) {
-                myMessage singleMessage = this.getSingleMessage(i);
+                MyMessagexxx singleMessage = this.getSingleMessage(i);
                 ret.add(singleMessage);
             }
             return ret;
         }
 
-        public myMessage getLastMessage() {
+        public MyMessagexxx getLastMessage() {
             return this.getSingleMessage(this.db.getRecordCount(this.tableName));
         }
 
-        public ArrayList<myMessage> getMessages(int lastMessageId) {
-            ArrayList<myMessage> ret = new ArrayList<>();
+        public ArrayList<MyMessagexxx> getMessages(int lastMessageId) {
+            ArrayList<MyMessagexxx> ret = new ArrayList<>();
             int recordCount = db.getRecordCount(this.tableName);
             if (recordCount == 0) return ret;
             if (lastMessageId == recordCount) return ret;
@@ -188,7 +188,7 @@ public class ConversationManager extends SQLiteOpenHelper {
             return ret;
         }
 
-        public void addMessage(myMessage msg) {
+        public void addMessage(MyMessagexxx msg) {
             try {
                 ContentValues vals = new ContentValues();
 
@@ -203,11 +203,11 @@ public class ConversationManager extends SQLiteOpenHelper {
             } catch (Exception ignored) {ignored.printStackTrace();}
         }
 
-        private myMessage getSingleMessage(int id) {
+        private MyMessagexxx getSingleMessage(int id) {
             String select = "SELECT * FROM " + this.tableName + " WHERE " + COLUMN_ID + "=?";
             Cursor c = sDatabase.rawQuery(select, new String[]{id + ""});
             if (c != null && c.getCount()>0) {
-                myMessage retObj = null;
+                MyMessagexxx retObj = null;
                 try {
                     c.moveToFirst();
                     String body = c.getString(1);
@@ -216,7 +216,7 @@ public class ConversationManager extends SQLiteOpenHelper {
                     int id1 = Integer.parseInt(c.getString(0));
                     long time = Long.parseLong(c.getString(3));
 
-                    retObj = new myMessage(this.contactid, body, sent);
+                    retObj = new MyMessagexxx(this.contactid, body, sent);
                     retObj.setId(id1);
                     retObj.set_time(time);
                     retObj.set_encrypted(encrypted);

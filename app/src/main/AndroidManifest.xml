@@ -56,7 +56,7 @@
         <!-- Declare my receiver class -->
 
         <receiver
-            android:name=".smsBroadcastReceiver"
+            android:name=".SmsBroadcastReceiverxxx"
             android:enabled="true"
             android:exported="true" >
 

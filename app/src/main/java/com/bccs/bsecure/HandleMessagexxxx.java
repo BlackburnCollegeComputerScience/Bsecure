@@ -12,42 +12,38 @@ import java.util.ArrayList;
 
 
 /**
- *
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
- *
+ * <p>
  * Bsecure is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * Bsecure is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 /**
  * Created by lucas.burdell on 6/4/2015.
  * This file will handle sending outbound messages, which includes setting the header and calling
  * the cipher module for encryption.
- *
+ * <p>
  * Modified by shane.nalezyty on 6/9/2015
  * Edited the Sms receiving method to recognise sms split into parts and append them back together
  * before decryption.
- *
+ * <p>
  * Modified by lucas.burdell on 6/12/2015
  * Changed original temporary keys to a Diffie-Hellman generated key and an SHA-256 hash of the
  * that key. Both were converted to hexadecimal represented in a string.
  * Added very basic functionality to database to store and retrieve DH keys
- *
- *
  */
-public class handleMessage {
+public class HandleMessagexxxx {
 
     //These are temp keys
     //private static final String key1 = "524F0D82AFA4779CB7A55358798117A88A90549730659C0778CEBE5BAD7FDD77";
@@ -59,22 +55,23 @@ public class handleMessage {
 
     /**
      * send method for sending messages to a number
+     *
      * @param contactid the contactid to send to
-     * @param msg message to send
+     * @param msg       message to send
      * @return myMessage object to be used by UI
      */
-    public static myMessage send(long contactid, String msg, Context context) {
+    public static MyMessagexxx send(long contactid, String msg, Context context) {
         return send(contactid, msg, context, false);
     }
 
 
-    public static myMessage send(long contactid, String msg, Context context, boolean isDH) {
+    public static MyMessagexxx send(long contactid, String msg, Context context, boolean isDH) {
         Contact contact = new Contact(context, contactid);
         if (!isDH) {
 
             SmsManager sms = SmsManager.getDefault();
 
-            myMessage msgObj = new myMessage(contactid, msg, true);
+            MyMessagexxx msgObj = new MyMessagexxx(contactid, msg, true);
 
 
             //PULL FROM DB
@@ -86,7 +83,7 @@ public class handleMessage {
             }
 
             if (key != null) {
-                msg = messageCipher.encrypt(msg, key, key2);
+                msg = MessageCipherxxx.encrypt(msg, key, key2);
                 msg = getPrepend() + msg;
             }
 
@@ -118,7 +115,7 @@ public class handleMessage {
             ArrayList<String> messages = sms.divideMessage(msg);
             int numberOfParts = messages.size();
             System.out.printf("Total: " + msg.length());
-            myMessage msgObj = new myMessage(contactid, msg, true);
+            MyMessagexxx msgObj = new MyMessagexxx(contactid, msg, true);
             msgObj.setIsDHKey(true);
             sms.sendMultipartTextMessage(contact.getNumber(), null, messages, null, null);
 
@@ -129,10 +126,11 @@ public class handleMessage {
 
     /**
      * Handle outgoing messages not sent by this application
+     *
      * @param intent Intent from received message
      * @return myMessage object to represent message
      */
-    public static myMessage handleOutgoingMessage(Intent intent) {
+    public static MyMessagexxx handleOutgoingMessage(Intent intent) {
         Bundle bundle = intent.getExtras();
         if (bundle != null && bundle.containsKey("pdus")) {
             //Get Sms objects
@@ -151,7 +149,7 @@ public class handleMessage {
             String sender = smsMessages[0].getOriginatingAddress();
             String message = stringBuilder.toString();
 
-            myMessage msgObj = new myMessage(Contact.getIdFromNumber(sender), message);
+            MyMessagexxx msgObj = new MyMessagexxx(Contact.getIdFromNumber(sender), message);
             msgObj.set_encrypted(false);
             return msgObj;
         }
@@ -160,10 +158,11 @@ public class handleMessage {
 
     /**
      * Handle incoming message and return myMessage object to be added to the DB
+     *
      * @param intent Intent from the received message
      * @return myMessage object to represent the message
      */
-    public static myMessage handleIncomingMessage(Intent intent, Context context) {
+    public static MyMessagexxx handleIncomingMessage(Intent intent, Context context) {
         Bundle bundle = intent.getExtras();
         if (bundle != null && bundle.containsKey("pdus")) {
             //Get Sms objects
@@ -183,7 +182,7 @@ public class handleMessage {
 
             sender = PhoneNumberUtils.formatNumber(smsMessages[0].getOriginatingAddress());
 
-                    String message = stringBuilder.toString();
+            String message = stringBuilder.toString();
             String newSender = "";
             boolean caughtFirstDash = false;
             for (char c : sender.toCharArray()) {
@@ -197,7 +196,7 @@ public class handleMessage {
             sender = newSender;
 
 
-            long numberID =  Contact.getIdFromNumber(sender);
+            long numberID = Contact.getIdFromNumber(sender);
             Contact contact = new Contact(context, numberID);
             String key = null;
             SecurityContact sContact = null;
@@ -217,7 +216,7 @@ public class handleMessage {
                 for (int j = getPrepend().length(); j < message.length(); j++) {
                     fixed += message.charAt(j);
                 }
-                fixed = messageCipher.decrypt(fixed, key, key2);
+                fixed = MessageCipherxxx.decrypt(fixed, key, key2);
                 //fixed = messageCipher.decrypt(fixed, key1, key2);
 
             } else if (message.contains(prependDH)) {
@@ -225,10 +224,12 @@ public class handleMessage {
                 for (int j = prependDH.length(); j < message.length(); j++) {
                     fixed += message.charAt(j);
                 }
-            } else { fixed = message; }
+            } else {
+                fixed = message;
+            }
 
             //Return the Message
-            myMessage msgObj = new myMessage(numberID, fixed, false);
+            MyMessagexxx msgObj = new MyMessagexxx(numberID, fixed, false);
             msgObj.set_encrypted(encrypted);
             if (message.contains(prependDH)) {
                 msgObj.setIsDHKey(true);

@@ -47,13 +47,13 @@ public class SMSExchange extends ActionBarActivity {
     TextView manualKey;
     Button manualButton;
 
-    smsBroadcastReceiver onNewMsg = new smsBroadcastReceiver() {
+    SmsBroadcastReceiverxxx onNewMsg = new SmsBroadcastReceiverxxx() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (currentlyWorking) {
                 if (intent.getStringExtra("number").equals(currentNumber)) {
                     try {
-                        dbHelper helper = new dbHelper(context);
+                        DbHelperxxx helper = new DbHelperxxx(context);
                         progressTextView.append("Received g^b%p from " + currentNumber);
                         helper.addKey(intent.getStringExtra("number"),
                                 currentSession.packSecret(intent.getStringExtra("body")),
@@ -75,8 +75,8 @@ public class SMSExchange extends ActionBarActivity {
                     currentlyWorking = true;
                     contactNumText.setText(currentNumber);
                     progressTextView.append("Received g^a%p from " + currentNumber);
-                    //TODO FIX THIS!!!!!!!!!!!
-                    handleMessage.send(0,
+//                    TODO FIX THIS!!!!!!!!!!!
+                    HandleMessagexxxx.send(0,
                             currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                             getApplicationContext(), true);
                     progressBar.setProgress(50);
@@ -119,7 +119,7 @@ public class SMSExchange extends ActionBarActivity {
                         currentlyWorking = true;
                         progressTextView.append("g^a%p generated");
                         //TODO FIX THIS
-                        handleMessage.send(0,
+                        HandleMessagexxxx.send(0,
                                 currentSession.packKey(currentSession.getPublicKey().getEncoded()),
                                 getApplicationContext(), true);
                         progressTextView.append("sent g^a%p to " + currentNumber + "\n");
@@ -137,7 +137,7 @@ public class SMSExchange extends ActionBarActivity {
         manualButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dbHelper helper = new dbHelper(getApplicationContext());
+                DbHelperxxx helper = new DbHelperxxx(getApplicationContext());
                 String key = manualKey.getText().toString();
                 String hash = DiffieHellmanKeySession.toHexString(
                         DiffieHellmanKeySession.getHash(

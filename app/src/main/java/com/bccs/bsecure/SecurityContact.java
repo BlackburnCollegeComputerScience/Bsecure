@@ -158,8 +158,7 @@ public class SecurityContact extends Contact implements Serializable {
         int prediction = (this.seqMax + keys.length) % this.totalKeys;
         int newMax = database.addKeys(keys, this.getId(), this.seqNum, this.seqMax, this.totalKeys);
         if (prediction!=newMax) {
-            //Ran out of room for keys!
-            //TODO
+            //TODO: Ran out of room for keys!
         }
         this.seqMax = newMax;
     }

@@ -10,23 +10,21 @@ import android.util.Log;
 import java.util.ArrayList;
 
 /**
- *
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
- *
+ * <p>
  * Bsecure is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * Bsecure is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 /**
@@ -34,36 +32,34 @@ import java.util.ArrayList;
  * This file serves as the creator and traverses
  * the outbox database required by this
  * application.
- *
+ * <p>
  * Modified by traci.kamp on 11/17/2014.
  * Added getConversation() method to read the outbox
  * for all messages from a specified phone number
  * for display in the conversation history.
- *
+ * <p>
  * Modified by traci.kamp on 12/1/2014.
  * Removed system.outs used for debugging. Some
  * bugs remain and need to be resolved. Why
  * doesn't the emulator show up as a name in
  * the active conversations list?
- *
+ * <p>
  * Modified by lucas.burdell 6/5/2015.
  * Restructured table to reflect changes
  * made in myMessage object. This database helper will
  * most likely only ever be used for storing and
  * retrieving messages. Should messages be encrypted
  * when stored?
- *
+ * <p>
  * Modified by lucas.burdell 6/11/2015.
  * Added new table that tracks diffie-hellman pairs.
- *
+ * <p>
  * Modified by lucas.burdell 6/12/2015.
  * Added new collumn to messages table to track whether a message was encrypted or not.
  * This is mainly for the conversation UI.
- *
- *
  */
 
-public class dbHelper extends SQLiteOpenHelper {
+public class DbHelperxxx extends SQLiteOpenHelper {
     public static final String TABLE_MESSAGES = "messages";
     //Table Info
     public static final String COLUMN_ID = "id"; //ID of message
@@ -85,7 +81,7 @@ public class dbHelper extends SQLiteOpenHelper {
     public static final String COLUMN_HASH = "contact_keyhash"; //hash of secret for IV
     public static final String COLUMN_CONTACT_ID = "contact_id"; //row ID
 
-    public dbHelper(Context context) {
+    public DbHelperxxx(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -99,7 +95,7 @@ public class dbHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_MESSAGES_TABLE);
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_CONTACTS + "(" +
                 COLUMN_CONTACT_ID + " INTEGER PRIMARY KEY," + COLUMN_NUM +
-                " TEXT," + COLUMN_KEY  + " TEXT," + COLUMN_HASH + " TEXT" +  ")";
+                " TEXT," + COLUMN_KEY + " TEXT," + COLUMN_HASH + " TEXT" + ")";
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
@@ -111,9 +107,8 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
 
-
     //adds single record
-    public void addRecord(myMessage msg) {
+    public void addRecord(MyMessagexxx msg) {
         SQLiteDatabase dbase = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
         // Fill vals with appropriate content
@@ -150,6 +145,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
     /**
      * Returns the key associated with the number (or null)
+     *
      * @param number
      * @return String key
      */
@@ -175,6 +171,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
     /**
      * Checks if a key is already in the database. Returns the ID of row for key or -1.
+     *
      * @param number Number to search for
      * @return int row ID or -1
      */
@@ -192,7 +189,7 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     //get single message
-    public myMessage getSingleMessage(int id) {
+    public MyMessagexxx getSingleMessage(int id) {
 
         String select = "SELECT * FROM " + TABLE_MESSAGES + " WHERE " + COLUMN_ID + " = " + id;
         SQLiteDatabase dbase = this.getReadableDatabase();
@@ -201,7 +198,7 @@ public class dbHelper extends SQLiteOpenHelper {
             c.moveToFirst();
         }
 
-        myMessage retObj = new myMessage(c.getInt(1), c.getString(2), c.getInt(3) == 1);
+        MyMessagexxx retObj = new MyMessagexxx(c.getInt(1), c.getString(2), c.getInt(3) == 1);
         retObj.setId(Integer.parseInt(c.getString(0)));
         retObj.set_time(Long.parseLong(c.getString(4)));
         retObj.set_encrypted(c.getInt(5) == 1);
@@ -232,8 +229,8 @@ public class dbHelper extends SQLiteOpenHelper {
         return activeInfo;
     }
 
-    public ArrayList<myMessage> getActiveNumbersAsMyMessages() {
-        ArrayList<myMessage> activeInfo = new ArrayList<>();
+    public ArrayList<MyMessagexxx> getActiveNumbersAsMyMessages() {
+        ArrayList<MyMessagexxx> activeInfo = new ArrayList<>();
         ArrayList<String> nums = new ArrayList<String>();
         int recordCount = this.getRecordCount();
         for (int i = 1; i <= recordCount; i++) {
@@ -258,8 +255,8 @@ public class dbHelper extends SQLiteOpenHelper {
         return ret;
     }
 
-    public ArrayList<myMessage> getConversationMessages(String no) {
-        ArrayList<myMessage> ret = new ArrayList<>();
+    public ArrayList<MyMessagexxx> getConversationMessages(String no) {
+        ArrayList<MyMessagexxx> ret = new ArrayList<>();
         for (int i = 1; i <= this.getRecordCount(); i++) {
             if (this.getSingleMessage(i).get_number().equalsIgnoreCase(no)) {
                 ret.add(this.getSingleMessage(i));
@@ -301,7 +298,7 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     //deletes a single record
-    public void deleteRecord(myMessage msg) {
+    public void deleteRecord(MyMessagexxx msg) {
         SQLiteDatabase dbase = this.getWritableDatabase();
         dbase.delete(TABLE_MESSAGES, COLUMN_ID + " = ?",
                 new String[]{String.valueOf(msg.getId())});
