@@ -88,7 +88,7 @@ public class ConversationManager extends SQLiteOpenHelper {
         return conversationHelper;
     }
 
-    public static ConversationHelper getConversation(int contactid) {
+    public static ConversationHelper getConversation(long contactid) {
         sInstance.addMasterRecord(contactid);
         return new ConversationHelper(sInstance, contactid);
     }

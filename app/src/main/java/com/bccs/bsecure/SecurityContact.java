@@ -102,10 +102,11 @@ public class SecurityContact extends Contact {
     }
 
     public int getRemainingKeys() {
-        if (seqNum>seqMax) {
-
+        if (seqNum<=seqMax) {
+            return seqNum - seqMax + 1;
+        } else {
+            return totalKeys - seqNum + seqMax + 1;
         }
-        return 0;
     }
 
     public int getSeqNum() {
@@ -139,6 +140,7 @@ public class SecurityContact extends Contact {
             ignored.printStackTrace();
         }
     }
+
 
     public void close() {
         database.close();
