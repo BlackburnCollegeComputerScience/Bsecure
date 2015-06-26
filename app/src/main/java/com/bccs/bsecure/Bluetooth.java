@@ -20,7 +20,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Set;
 
-/**
+/*
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
  * <p/>
@@ -38,21 +38,47 @@ import java.util.Set;
  * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Bluetooth enabled and disables bluetooth connectivity and manages the discovery of devices.
+ *
+ * @author Shane Nalezyty
+ * @version 1.0
+ */
 public class Bluetooth extends ActionBarActivity {
 
-    //Layout objects
+    /**
+     * Displays if bluetooth is enabled or disabled.
+     */
     private TextView btStatus;
+    /**
+     * Opens a list of devices the device is already paired with
+     */
     private Button showBTPairsBtn;
+    /**
+     * Starts bluetooth discovery
+     */
     private Button scanBtn;
 
-    //Dialog to show when scanning
+    /**
+     * Dialog message to inform the user that we are discovering devices, and lets them cancel.
+     */
     private ProgressDialog progressDlg;
 
-    //ArrayList of devices
+    /**
+     * Array list of devices to send to the DeviceListActivity
+     */
     private ArrayList<BluetoothDevice> deviceList = new ArrayList<>();
 
-    //The bluetooth adapter
+    /**
+     * The default bluetooth adapter
+     */
     private BluetoothAdapter bluetoothAdapter;
+
+    /**
+     * Boolean to store if bluetooth was already on, or if we turned it on. Used to tell if we
+     * need to shut off bluetooth when we are done.
+     */
+    private boolean bluetoothOn = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +180,9 @@ public class Bluetooth extends ActionBarActivity {
 
     }
 
+    /**
+     * Makes sure we cancel discovery when the user leaves the activity.
+     */
     @Override
     public void onPause() {
         if (bluetoothAdapter != null) {
@@ -166,6 +195,9 @@ public class Bluetooth extends ActionBarActivity {
         super.onPause();
     }
 
+    /**
+     * Un-registers our receiver so the activity won't open out of context
+     */
     @Override
     public void onDestroy() {
         //Unregister our receiver before the user leaves the activity
@@ -174,6 +206,9 @@ public class Bluetooth extends ActionBarActivity {
         super.onDestroy();
     }
 
+    /**
+     * Updates display to "Bluetooth is On", and enables the functionality of the buttons
+     */
     private void showEnabled() {
         btStatus.setText("Bluetooth is On");
         btStatus.setTextColor(Color.BLUE);
@@ -182,6 +217,9 @@ public class Bluetooth extends ActionBarActivity {
         scanBtn.setEnabled(true);
     }
 
+    /**
+     * Updates display to "Bluetooth is Off", and disables the functionality of the buttons
+     */
     private void showDisabled() {
         btStatus.setText("Bluetooth is Off");
         btStatus.setTextColor(Color.RED);
@@ -190,11 +228,22 @@ public class Bluetooth extends ActionBarActivity {
         scanBtn.setEnabled(false);
     }
 
+    /**
+     * Short hand method to display a toast
+     *
+     * @param message Message that needs to be toasted.
+     */
     private void showToast(String message) {
         //Shortcut method to display a toast
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Handles responds to actions we request the user to do.
+     * @param requestCode Integer representing what we have requested.
+     * @param resultCode Integer representing the result of the request.
+     * @param data Intent holding information we may have requested.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -207,6 +256,7 @@ public class Bluetooth extends ActionBarActivity {
             } else {
                 //If they did enable allow them to use the functionality buttons
                 showEnabled();
+                bluetoothOn = true;
             }
         } else if (requestCode == Constants.REQUEST_ENABLE_BT_DIS) {
             //If we requested the user turn discoverability on
@@ -226,14 +276,29 @@ public class Bluetooth extends ActionBarActivity {
                 returnIntent.putExtra("expireCount", expireCount);
                 setResult(RESULT_OK, returnIntent);
                 showToast("Exchange complete! 100 keys added to contact.");
+                turnOffBluetooth();
                 finish();
             } else {
                 setResult(RESULT_CANCELED);
+                turnOffBluetooth();
                 finish();
             }
         }
     }
 
+    /**
+     * If bluetooth is on and we turned it on this method will disable it.
+     */
+    private void turnOffBluetooth() {
+        if (bluetoothAdapter.isEnabled() && bluetoothOn) {
+            bluetoothAdapter.disable();
+        }
+    }
+
+    /**
+     * Starts the DeviceListActivity.
+     * @param list List of devices to pass to the new activity.
+     */
     private void startDeviceList(ArrayList<BluetoothDevice> list) {
         //Initialize and start the Intent to open a list of the device pairs
         Intent intent = new Intent(Bluetooth.this, DeviceListActivity.class);
@@ -241,6 +306,10 @@ public class Bluetooth extends ActionBarActivity {
         startActivityForResult(intent, Constants.REQUEST_KEYS);
     }
 
+    /**
+     * The receiver looking for state changes in the bluetooth adapter.
+     * Responds to state change, discovery start, discover end, and device found.
+     */
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             //Get the action that resulted in the receiver activation

@@ -1,6 +1,8 @@
 package com.bccs.bsecure;
 
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -9,10 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 
 /**
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
@@ -44,6 +42,7 @@ public class ContactSettings extends ActionBarActivity {
     TextView remainingKeysTv;
     Button exchangeBtn;
     Button forceExpirationBtn;
+    Button forceAllKeyExperationBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +56,8 @@ public class ContactSettings extends ActionBarActivity {
         remainingKeysTv = (TextView) findViewById(R.id.remainingKeysTv);
         exchangeBtn = (Button) findViewById(R.id.exchangeBtn);
         forceExpirationBtn = (Button) findViewById(R.id.forceExpBtn);
+        forceAllKeyExperationBtn = (Button) findViewById(R.id.ExpireAllBtn);
+
         contact = new SecurityContact(getIntent().getExtras().getLong("contact"));
 
         //Set up settings display
@@ -85,7 +86,38 @@ public class ContactSettings extends ActionBarActivity {
         forceExpirationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: Create a protocol for informing other party of key expiration
+                AlertDialog.Builder builder = new AlertDialog.Builder(ContactSettings.this);
+                builder.setTitle("Warning!");
+                builder.setMessage("This action is irreversible! The current key in use will be deleted. Do you want to continue?");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //TODO: Create a protocol for informing other party of key expiration
+                    }
+                });
+                //Negative button is null because we just want to cancel the dialog not perform an action
+                builder.setNegativeButton("No", null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
+
+        forceAllKeyExperationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ContactSettings.this);
+                builder.setTitle("Warning!");
+                builder.setMessage("This action is irreversible! All keys will be deleted. Do you want to continue?");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //TODO: Create a protocol for informing other party of all key expiration
+                    }
+                });
+                //Negative button is null because we just want to cancel the dialog not perform an action
+                builder.setNegativeButton("No", null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
     }
@@ -113,12 +145,6 @@ public class ContactSettings extends ActionBarActivity {
 
     private String getKeyExpiration() {
         return contact.getUsesLeft() + "";
-    }
-
-    public static SecurityContact deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-        ObjectInputStream o = new ObjectInputStream(b);
-        return (SecurityContact) o.readObject();
     }
 
     @Override

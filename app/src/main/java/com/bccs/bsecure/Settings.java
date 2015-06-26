@@ -1,5 +1,7 @@
 package com.bccs.bsecure;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -35,6 +37,7 @@ public class Settings extends ActionBarActivity {
     Button minimumDisplayBtn;
     Button maximumDisplayBtn;
     Button saveBtn;
+    Button expireAllKeysBtn;
 
     SCSQLiteHelper database;
 
@@ -49,6 +52,7 @@ public class Settings extends ActionBarActivity {
         minimumDisplayBtn = (Button) findViewById(R.id.MinimumDisplayBtn);
         maximumDisplayBtn = (Button) findViewById(R.id.MaximumDisplayBtn);
         saveBtn = (Button) findViewById(R.id.SaveBtn);
+        expireAllKeysBtn = (Button) findViewById(R.id.ExpireAllKeysAllContacts);
 
         database = new SCSQLiteHelper(this);
 
@@ -80,6 +84,24 @@ public class Settings extends ActionBarActivity {
             }
         });
 
+        expireAllKeysBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
+                builder.setTitle("Warning!");
+                builder.setMessage("This action is irreversible! All keys for all contacts will be deleted. Do you want to continue?");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //TODO: Create a protocol for informing all contacts with keys to be deleted
+                    }
+                });
+                //Negative button is null because we just want to cancel the dialog not perform an action
+                builder.setNegativeButton("No", null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
 
     }
 

@@ -206,19 +206,76 @@
                 android:layout_width="match_parent"
                 android:layout_height="5dp" />
 
+            <ProgressBar
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/progressBar5"
+                android:layout_alignTop="@+id/scrollView2"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_gravity="center_horizontal"
+                android:focusableInTouchMode="true" />
+
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/layout_border"
+                android:background="@drawable/layout_border_danger_zone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Danger Zone"
+                    android:id="@+id/textView16"
+                    android:padding="3dp"
+                    android:gravity="center"
+                    android:textSize="15dp" />
+            </LinearLayout>
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/progressBar6"
+                android:layout_alignTop="@+id/scrollView2"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_gravity="center_horizontal" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/layout_border_danger_zone"
                 android:weightSum="1">
 
                 <Button
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="fill_parent"
                     android:layout_height="35dp"
-                    android:text="Force Key Expiration"
+                    android:text="Expire A Single Key"
                     android:id="@+id/forceExpBtn"
+                    android:layout_weight="0.04" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="5dp" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/layout_border_danger_zone"
+                android:weightSum="1">
+
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="fill_parent"
+                    android:layout_height="35dp"
+                    android:text="Expire All Keys"
+                    android:id="@+id/ExpireAllBtn"
                     android:layout_weight="0.04" />
             </LinearLayout>
 

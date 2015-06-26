@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-/**
+/*
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
  * <p/>
@@ -23,10 +23,22 @@ import java.io.Serializable;
  * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Bluetooth package for easily serializing varying data.
+ */
 public class BluetoothPackage implements Serializable {
 
+    /**
+     * Public key encodings
+     */
     private String[] keys;
+    /**
+     * Code to inform the receiver how to handle the package.
+     */
     private int protocolCode;
+    /**
+     *
+     */
     private int minExpire;
     private int maxExpire;
 

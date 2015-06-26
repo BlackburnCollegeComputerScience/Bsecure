@@ -6,10 +6,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -30,7 +26,7 @@ import java.util.ArrayList;
  * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class SecurityContact extends Contact implements Serializable {
+public class SecurityContact extends Contact {
 //    private int id;         //this should be primary _ID for contact from android db
 //    private String name;
 //    private String number;
@@ -134,13 +130,6 @@ public class SecurityContact extends Contact implements Serializable {
         String key = database.getKey(this.getId(), this.seqNum);
         if (key == null) System.out.println("Key missing - LB");
         return key;
-    }
-
-    public byte[] serialize() throws IOException {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        ObjectOutputStream o = new ObjectOutputStream(b);
-        o.writeObject(this);
-        return b.toByteArray();
     }
 
     public void save() {
