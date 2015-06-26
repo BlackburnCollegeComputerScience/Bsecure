@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -19,24 +18,67 @@ import android.widget.Toast;
 
 import java.io.IOException;
 
-
+/**
+ * Exchange handles exchanging of encodings to compute secret keys for each devices in the exchange.
+ *
+ * @author Shane Nalezyty
+ * @version 1.0
+ */
 public class Exchange extends Activity {
 
+    /**
+     * Bluetooth service for controlling connect, accept, and connected threads.
+     */
     private BluetoothService bluetoothService;
+
+    /**
+     * Session objects for each key.
+     */
     private DiffieHellmanKeySession[] session;
+
+    /**
+     * Amount of times a key should be used before expiration.
+     */
     private int expireCount;
 
+    /**
+     * Device we need to connect to.
+     */
     private BluetoothDevice device;
 
+    /**
+     * Button to start the exchange of data.
+     */
     private Button exchangeBtn;
 
+    /**
+     * Database to load the user settings from.
+     */
     private SCSQLiteHelper database;
 
+    /**
+     * Restriction on the SeekBar for security parameters.
+     */
     private int minSeek;
+    /**
+     * Restriction on the SeekBar for security parameters.
+     */
     private int maxSeek;
+    /**
+     * Displays the selected number on the SeekBar
+     */
     private TextView amountTv;
+    /**
+     * SeekBar to display if necessary
+     */
     private SeekBar selectionBar;
+    /**
+     * Multiple uses for displaying information to the user.
+     */
     AlertDialog dialog;
+    /**
+     * Custom dialog to show if security parameters need to be selected.
+     */
     Dialog expireDialog;
 
     @Override
@@ -70,32 +112,28 @@ public class Exchange extends Activity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
+    /**
+     * Makes sure we close the database before we leave the activity.
+     */
     @Override
     protected void onDestroy() {
         database.close();
         super.onDestroy();
     }
 
+    /**
+     * Short hand method to display a toast.
+     *
+     * @param message Message that needs to be toasted.
+     */
     private void showToast(String message) {
         //Shortcut method to display a toast
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Checks the protocol code of received packages and continues key exchange.
+     */
     private final Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -204,6 +242,9 @@ public class Exchange extends Activity {
         }
     });
 
+    /**
+     * When no overlap of security parameter range exists this will display a manual selector.
+     */
     private void pickExpireDialog() {
         expireDialog = new Dialog(Exchange.this);
         expireDialog.setCancelable(false);
@@ -247,6 +288,9 @@ public class Exchange extends Activity {
         expireDialog.show();
     }
 
+    /**
+     * Used to send new parameters after manual selection
+     */
     private void continueExchange() {
         BluetoothPackage btPack = new BluetoothPackage(expireCount, expireCount, Constants.EXCHANGE_AGREEMENT_FINAL_SELECTION);
         byte[] toSend = getSerializedBytes(btPack);
@@ -254,6 +298,10 @@ public class Exchange extends Activity {
         startExchange();
     }
 
+    /**
+     * Warns the user that the security parameter range of the two devices doesn't overlap.
+     * Lets users select new parameters if they are the more secure device.
+     */
     private void showOutOfRangeWarning() {
         AlertDialog.Builder builder = new AlertDialog.Builder(Exchange.this);
         builder.setMessage("User has key expiration set outside " +
@@ -283,6 +331,9 @@ public class Exchange extends Activity {
         dialog.show();
     }
 
+    /**
+     * Sends the first packet of actual key exchange after security parameter check.
+     */
     private void startExchange() {
         dialog = showDialog("Exchanging " + Constants.KEY_AMOUNT + " keys");
         if (bluetoothService.isServer()) {
@@ -306,10 +357,23 @@ public class Exchange extends Activity {
         }
     }
 
+    /**
+     * Checks if a int in the bounds set in parameters.
+     * @param toCheck Int to check.
+     * @param lowerBound The lower bound.
+     * @param upperBound The upper bound.
+     * @return Returns true if the int exists between the bounds.
+     */
     private boolean inBounds(int toCheck, int lowerBound, int upperBound) {
         return (toCheck >= lowerBound && toCheck <= upperBound);
     }
 
+    /**
+     * Constructs session keys from the received public encodings.
+     * @param keyAmount Amount of keys.
+     * @param receivedKeys Public encodings.
+     * @return Returns string array of session keys
+     */
     private String[] getSecretKeys(int keyAmount, String[] receivedKeys) {
         String[] keys = new String[keyAmount];
         for (int i = 0; i < keys.length; i++) {
@@ -324,6 +388,11 @@ public class Exchange extends Activity {
         return keys;
     }
 
+    /**
+     * Constructs the byte array produced from serializing a BluetoothPackage
+     * @param bluetoothPackage Package to serialise.
+     * @return Byte array representing a Bluetooth Package.
+     */
     private byte[] getSerializedBytes(BluetoothPackage bluetoothPackage) {
         //Array of bytes to hold the serialized version of the bluetooth package
         byte[] serialized = null;
@@ -336,6 +405,11 @@ public class Exchange extends Activity {
         return serialized;
     }
 
+    /**
+     * Get the public encodings created from our diffie hellman sessions.
+     * @param keyAmount Amount of keys
+     * @return String array of public encodings
+     */
     private String[] getPublicEncodings(int keyAmount) {
         String[] publicEncodes = new String[keyAmount];
         for (int i = 0; i < publicEncodes.length; i++) {
@@ -344,6 +418,12 @@ public class Exchange extends Activity {
         return publicEncodes;
     }
 
+    /**
+     * Initializes the array of diffie hellman sessions based on
+     * parameters send from the other device.
+     * @param keyAmount Amount of keys.
+     * @param receivedKeys Received public encodings.
+     */
     private void initializeDiffieHellmanSessionsFromKeys(int keyAmount, String[] receivedKeys) {
         session = new DiffieHellmanKeySession[keyAmount];
         for (int i = 0; i < session.length; i++) {
@@ -357,6 +437,10 @@ public class Exchange extends Activity {
         }
     }
 
+    /**
+     * Initializes the array of diffie hellman sessions.
+     * @param keyAmount amount of keys.
+     */
     private void initializeDiffieHellmanSessions(int keyAmount) {
         //Create an array of key sessions for this device
         session = new DiffieHellmanKeySession[keyAmount];
@@ -370,6 +454,11 @@ public class Exchange extends Activity {
         }
     }
 
+    /**
+     * Displays a non-cancelable message for the user.
+     * @param message Message to display.
+     * @return The AlertDialog created.
+     */
     private AlertDialog showDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(Exchange.this);
         builder.setCancelable(false);
@@ -379,6 +468,9 @@ public class Exchange extends Activity {
         return dialog;
     }
 
+    /**
+     * Sends this devices security parameters.
+     */
     private void sendCommunicationParameters() {
         int[] settings = database.getGeneralSettings();
         int min = settings[0];

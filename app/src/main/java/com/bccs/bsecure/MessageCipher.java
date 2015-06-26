@@ -6,7 +6,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-/**
+/*
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
  * <p>
