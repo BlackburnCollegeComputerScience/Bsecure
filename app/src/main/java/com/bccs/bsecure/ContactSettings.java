@@ -37,18 +37,26 @@ public class ContactSettings extends ActionBarActivity {
     SecurityContact contact;
 
     //Layout Objects
-    TextView nameTv = (TextView) findViewById(R.id.nameTv);
-    TextView androidIdTv = (TextView) findViewById(R.id.androidIdTv);
-    TextView sequenceNumberTv = (TextView) findViewById(R.id.sequanceNumberTv);
-    TextView expirationTv = (TextView) findViewById(R.id.experationTv);
-    TextView remainingKeysTv = (TextView) findViewById(R.id.remainingKeysTv);
-    Button exchangeBtn = (Button) findViewById(R.id.exchangeBtn);
-    Button forceExpirationBtn = (Button) findViewById(R.id.forceExpBtn);
+    TextView nameTv;
+    TextView androidIdTv;
+    TextView sequenceNumberTv;
+    TextView expirationTv;
+    TextView remainingKeysTv;
+    Button exchangeBtn;
+    Button forceExpirationBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_settings);
+
+        nameTv = (TextView) findViewById(R.id.nameTv);
+        androidIdTv = (TextView) findViewById(R.id.androidIdTv);
+        sequenceNumberTv = (TextView) findViewById(R.id.sequanceNumberTv);
+        expirationTv = (TextView) findViewById(R.id.experationTv);
+        remainingKeysTv = (TextView) findViewById(R.id.remainingKeysTv);
+        exchangeBtn = (Button) findViewById(R.id.exchangeBtn);
+        forceExpirationBtn = (Button) findViewById(R.id.forceExpBtn);
 
         //Grab the security contact from the bundle
         byte[] serializedContact = getIntent().getExtras().getByteArray("contact");

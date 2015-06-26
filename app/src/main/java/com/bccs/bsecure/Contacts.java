@@ -12,10 +12,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -181,10 +183,24 @@ public class Contacts extends ActionBarActivity {
             }
             TextView contactName = (TextView) convertView.findViewById(R.id.contactText);
             TextView contactNumber = (TextView) convertView.findViewById(R.id.numberText);
-            Contact contact = getItem(position);
+            final Contact contact = getItem(position);
             contactName.setText(contact.getName());
             contactNumber.setText(contact.getNumber());
 
+            Button settingsBtn = (Button) convertView.findViewById(R.id.settingsButton);
+            settingsBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SecurityContact securityContact = new SecurityContact(contact.getId());
+                    Intent intent = new Intent(Contacts.this, ContactSettings.class);
+                    try {
+                        intent.putExtra("contact", securityContact.serialize());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    startActivity(intent);
+                }
+            });
 
             return convertView;
         }
