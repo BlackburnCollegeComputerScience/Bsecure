@@ -240,12 +240,13 @@ public class Main extends AppCompatActivity implements WipeActiveConversationsDi
         public void updateMessage(MyMessage message) {
 
             for (MyMessage m : contactsArray) {
-                if (message.get_name().equals(m.get_name())) {
-
+                if (message.getId() == m.getId()) {
 
                     if (message.get_time() > m.get_time()) {
 
                         m.setBody(message.getBody());
+                        m.set_name(message.get_name());
+
                     } else {
 
                     }

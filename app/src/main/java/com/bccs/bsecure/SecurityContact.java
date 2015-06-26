@@ -106,10 +106,11 @@ public class SecurityContact extends Contact implements Serializable {
     }
 
     public int getRemainingKeys() {
-        if (seqNum>seqMax) {
-
+        if (seqNum<=seqMax) {
+            return seqNum - seqMax + 1;
+        } else {
+            return totalKeys - seqNum + seqMax + 1;
         }
-        return 0;
     }
 
     public int getSeqNum() {
@@ -150,6 +151,7 @@ public class SecurityContact extends Contact implements Serializable {
             ignored.printStackTrace();
         }
     }
+
 
     public void close() {
         database.close();

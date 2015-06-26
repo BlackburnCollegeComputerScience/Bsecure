@@ -60,7 +60,7 @@ public class MyMessage {
     public MyMessage(long contactid, String body, boolean sent) {
         Contact contact = new Contact(contactid);
         contact.loadFromAndroidDB();
-        this._name = contact.getName();
+        this.set_name(contact.getName());
         this._number = contact.getNumber();
         this._body = body;
         this._sent = sent;
@@ -125,5 +125,9 @@ public class MyMessage {
 
     public void set_encrypted(boolean _encrypted) {
         this._encrypted = _encrypted;
+    }
+
+    public void set_name(String _name) {
+        this._name = _name;
     }
 }
