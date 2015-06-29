@@ -37,23 +37,28 @@ public class BluetoothPackage implements Serializable {
      */
     private int protocolCode;
     /**
-     *
+     * Used in the agreement stage of the protocol. Minimum number of messages that
+     * a key should be used on.
      */
     private int minExpire;
+    /**
+     * Used in the agreement stage of the protocol. Maximum number of messages that
+     * a key should be used on.
+     */
     private int maxExpire;
 
     /**
      * Constructor for just exchanging agreement codes.
-     * @param protocolCode
+     * @param protocolCode Agreement or Denial of security parameters.
      */
     public BluetoothPackage(int protocolCode) {
         this.protocolCode = protocolCode;
     }
 
     /**
-     * Constructor for exchanging options
-     * @param minExpire minimum message count
-     * @param maxExpire maximum message count
+     * Constructor for exchanging security parameters
+     * @param minExpire Minimum number of messages that a key should be used on.
+     * @param maxExpire Maximum number of messages that a key should be used on.
      * @param protocolCode Stage of the exchange
      */
     public BluetoothPackage(int minExpire, int maxExpire, int protocolCode) {
@@ -64,8 +69,7 @@ public class BluetoothPackage implements Serializable {
 
     /**
      * Constructor for exchanging keys.
-     *
-     * @param keys         Encoded public keys to send.
+     * @param keys Encoded public keys to send.
      * @param protocolCode Stage of the exchange.
      */
     public BluetoothPackage(String[] keys, int protocolCode) {
@@ -81,13 +85,6 @@ public class BluetoothPackage implements Serializable {
         return keys;
     }
 
-    public byte[] serialize() throws IOException {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        ObjectOutputStream o = new ObjectOutputStream(b);
-        o.writeObject(this);
-        return b.toByteArray();
-    }
-
     public int getMinExpire() {
         return minExpire;
     }
@@ -95,7 +92,19 @@ public class BluetoothPackage implements Serializable {
     public int getMaxExpire() {
         return maxExpire;
     }
+
     /**
+     * Serializes this package to send over the bluetooth byte stream.
+     * @return Array of bytes representing this package
+     * @throws IOException
+     */
+    public byte[] serialize() throws IOException {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        ObjectOutputStream o = new ObjectOutputStream(b);
+        o.writeObject(this);
+        return b.toByteArray();
+    }
+    /*
      * De-serialize method
      *
      public static BluetoothPackage deserialize(byte[] bytes) throws IOException, ClassNotFoundException {

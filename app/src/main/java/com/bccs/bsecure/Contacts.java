@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-/**
+/*
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
  * <p/>
@@ -206,7 +206,7 @@ public class Contacts extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(Intent.ACTION_EDIT);
-                    Uri contactUri = ContactsContract.Contacts.getLookupUri((long) contact.getId(), contact.getLookupKey());
+                    Uri contactUri = ContactsContract.Contacts.getLookupUri(contact.getId(), contact.getLookupKey());
                     intent.setData(contactUri);
                     intent.putExtra("finishActivityOnSaveCompleted", true);
                     if (intent.resolveActivity(getPackageManager()) != null) {

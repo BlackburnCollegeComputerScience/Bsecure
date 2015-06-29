@@ -229,8 +229,7 @@ public class Bluetooth extends ActionBarActivity {
     }
 
     /**
-     * Short hand method to display a toast
-     *
+     * Short hand method to display a toast.
      * @param message Message that needs to be toasted.
      */
     private void showToast(String message) {

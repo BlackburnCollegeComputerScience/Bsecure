@@ -14,7 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
-/**
+/*
  *
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
@@ -34,6 +34,13 @@ import java.util.UUID;
  *
  */
 
+/**
+ * BluetoothService handles three threads Connect, Accept, and Connected. These threads manage and
+ * create the bluetooth connection
+ *
+ * @author Shane Nalezyty
+ * @version 1.0
+ */
 public class BluetoothService {
 
     private static final UUID APP_UUID = UUID.fromString("e3bf2079-3842-4f71-a915-fecbb52bb8ca");
@@ -124,6 +131,11 @@ public class BluetoothService {
 
     }
 
+    /**
+     * Writes the byte stream using the connected thread.
+     *
+     * @param out Bytes to write.
+     */
     public void write(byte[] out) {
         // Create temporary object
         ConnectedThread r;

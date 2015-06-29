@@ -7,44 +7,54 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 
-/**
+/*
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
- * <p/>
+ *
  * Bsecure is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * <p/>
+ *
  * Bsecure is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * <p/>
+ *
  * You should have received a copy of the GNU General Public License
  * along with Bsecure.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * DeviceListActivity lists devices send to it in a clean format.
+ * Creates pair/un-pair and connect buttons for each device.
+ * Manages pairing and un-pairing of devices.
+ *
+ * @author Shane Nalezyty
+ * @version 1.0
+ */
 public class DeviceListActivity extends Activity {
 
-    //Layout Objects
+    /**
+     * List to hold devices
+     */
     private ListView list;
+    /**
+     * Adapter to bridge the connection of devices and the list view.
+     */
     private DeviceListAdapter adapter;
+    /**
+     * Array list of devices
+     */
     private ArrayList<BluetoothDevice> deviceList;
-    private TextView statusTv;
-
-    DiffieHellmanKeySession[] session;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,8 +67,6 @@ public class DeviceListActivity extends Activity {
 
         //Initialise list
         list = (ListView) findViewById(R.id.lv_paired);
-        statusTv = (TextView) findViewById(R.id.status);
-        statusTv.setMovementMethod(new ScrollingMovementMethod());
 
         //Initialise the adapter
         adapter = new DeviceListAdapter(this);
@@ -105,6 +113,9 @@ public class DeviceListActivity extends Activity {
         registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
     }
 
+    /**
+     * Un-registers our receiver so the activity won't launch out of context
+     */
     @Override
     public void onDestroy() {
         //Unregister our receiver before the user leaves the activity
@@ -113,12 +124,20 @@ public class DeviceListActivity extends Activity {
         super.onDestroy();
     }
 
-
+    /**
+     * Short hand method to display a toast.
+     *
+     * @param message Message that needs to be toasted.
+     */
     private void showToast(String message) {
         //Shortcut method to display a toast
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Pairs this device with another device.
+     * @param device Device to connect to.
+     */
     private void pairDevice(BluetoothDevice device) {
         try {
             //Grab and invoke the method for pairing with this device
@@ -129,6 +148,10 @@ public class DeviceListActivity extends Activity {
         }
     }
 
+    /**
+     * Un-pairs this device with another device.
+     * @param device Device to un-pair from.
+     */
     private void unpairDevice(BluetoothDevice device) {
         try {
             //Grab and invoke the method for unpairing with this device
@@ -139,6 +162,10 @@ public class DeviceListActivity extends Activity {
         }
     }
 
+    /**
+     * Receiver to respond to the pairing and un-pairing of devices.
+     * Sends toasts to inform the user.
+     */
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             //Get the action that resulted in the receiver activation
@@ -167,12 +194,6 @@ public class DeviceListActivity extends Activity {
     };
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -181,6 +202,12 @@ public class DeviceListActivity extends Activity {
         return true;
     }
 
+    /**
+     * If the Exchange activity sends back keys return them to the activity before us.
+     * @param requestCode Integer representing what we have requested.
+     * @param resultCode Integer representing the result of the request.
+     * @param data Intent holding information we may have requested.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

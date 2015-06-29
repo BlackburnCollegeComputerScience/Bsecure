@@ -11,8 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-/**
- *
+/*
  * This file is part of Bsecure. A open source, freely available, SMS encryption app.
  * Copyright (C) 2015 Dr Kevin Coogan, Shane Nalezyty, Lucas Burdell
  *
@@ -31,10 +30,26 @@ import java.util.List;
  *
  */
 
+/**
+ * DeviceListAdapter creates a pair/un-pair and connect button for each device listed.
+ * Displays them on a list view.
+ */
 public class DeviceListAdapter extends BaseAdapter {
+    /**
+     * Instantiate a XML file to be used for each view.
+     */
     private LayoutInflater inflater;
+    /**
+     * List of bluetooth devices
+     */
     private List<BluetoothDevice> data;
+    /**
+     * Listener for pair/un-pair clicks
+     */
     private OnPairButtonClickListener pairListener;
+    /**
+     * Listener for connect button clicks
+     */
     private OnConnectButtonClickListener connectListener;
 
 
