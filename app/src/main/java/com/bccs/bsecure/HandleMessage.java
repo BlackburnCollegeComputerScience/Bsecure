@@ -51,7 +51,21 @@ public class HandleMessage {
 
 
     private static final String prepend = "-&*&-"; // current message header
+    private static final String expireKey = "*-**-*";
+    private static final String expireAllKeys = "&-&&-&";
     private static final String prependDH = "*-&-*"; // header for DH key exchanges
+
+
+
+    public static void sendKeyExpired(SecurityContact contact) {
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(contact.getNumber(), null, expireKey, null, null);
+    }
+
+    public static void sendAllkeysExpired(SecurityContact contact) {
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(contact.getNumber(), null, expireAllKeys, null, null);
+    }
 
     /**
      * send method for sending messages to a number
@@ -60,6 +74,7 @@ public class HandleMessage {
      * @param msg       message to send
      * @return myMessage object to be used by UI
      */
+
     public static MyMessage send(long contactid, String msg, Context context) {
         return send(contactid, msg, context, false);
     }
@@ -210,7 +225,11 @@ public class HandleMessage {
             String fixed = null;
             boolean encrypted = false;
 
-            if (message.contains(getPrepend()) && key != null) {
+            if (message.contains(expireAllKeys) && key != null) {
+                sContact.receivedExpireAllKeys();
+            } else if (message.contains(expireKey) && key != null) {
+                sContact.receivedExpireKey();
+            } else if (message.contains(getPrepend()) && key != null) {
                 fixed = "";
                 encrypted = true;
                 for (int j = getPrepend().length(); j < message.length(); j++) {

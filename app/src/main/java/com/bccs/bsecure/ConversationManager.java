@@ -213,11 +213,9 @@ public class ConversationManager extends SQLiteOpenHelper {
                     String body = c.getString(1);
                     boolean sent = c.getInt(2) == 1;
                     boolean encrypted = c.getInt(4) == 1;
-                    int id1 = Integer.parseInt(c.getString(0));
                     long time = Long.parseLong(c.getString(3));
 
                     retObj = new MyMessage(this.contactid, body, sent);
-                    retObj.setId(id1);
                     retObj.set_time(time);
                     retObj.set_encrypted(encrypted);
 

@@ -74,7 +74,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
     SmsBroadcastReceiver onNewMsg = new SmsBroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getStringExtra("contactid").equals(Long.toString(currentNumber.getId()))) {
+            if (intent.getLongExtra("contactid", -1) == currentNumber.getId()) {
                 updateConvo();
             }
         }
@@ -89,7 +89,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
         //If convo was opened from the main view, it will have a number value in the intent
         //currentNumber variable is used when loading messages from the DB.
         if (getIntent().hasExtra("contactid")) {
-            currentNumber = new Contact(getIntent().getIntExtra("contactid", -1));
+            currentNumber = new Contact(getIntent().getLongExtra("contactid", -1));
             //Cancel any notifications for this number
             if (currentNumber.getId() == SmsBroadcastReceiver.recentID)
                 MessageReceivedNotification.cancel(this);
@@ -105,7 +105,7 @@ public class Conversation extends ActionBarActivity implements WipeConversationD
 
         conversation = new ArrayList<>();
         typeMessage = (EditText) findViewById(R.id.messageEditText);
-        listView = (ListView) findViewById(R.id.listView);
+        listView = (ListView) findViewById(R.id.contactListView);
         send = (Button) findViewById(R.id.sendButton);
 
 

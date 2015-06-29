@@ -37,7 +37,7 @@ public class SecurityContact extends Contact {
     private int usesLeft = 100;
     private int timeLeft = 0;
     private int usesMax = 100;
-    private SCSQLiteHelper database;
+    private static SCSQLiteHelper database = null;
 
     /* need empty constructor */
 
@@ -59,11 +59,12 @@ public class SecurityContact extends Contact {
         //if exists, BSecure contact exists, use db values
         //else, BSecure contact does not exist, create with default values
 
-        database = new SCSQLiteHelper(context);
+        if (database == null) database = new SCSQLiteHelper(context);
         if (database.contactIsInDatabase(id)) {
             this.seqNum = database.getContactSeqNum(id);
             this.seqMax = database.getContactSeqMax(id);
             this.totalKeys = database.getContactTotalKeys(id);
+            System.out.println("Total keys loaded: " + this.totalKeys);
             this.timeLeft = database.getContactTimeLeft(id);
             this.usesLeft = database.getContactUsesLeft(id);
             this.usesMax = database.getContactUsesMax(id);
@@ -76,29 +77,51 @@ public class SecurityContact extends Contact {
 
         } else {
             this.seqNum = -1;
-            this.seqMax = 0;
+            this.seqMax = -1;
             this.totalKeys = 1000;
             this.timeLeft = 0;
             this.usesLeft = 0;
-            this.usesMax = 100;
+            this.usesMax = 6;
             this.currKey = null;
             database.createSecurityContact(this);
         }
     }
 
-
-
     public String getSessionKey() {
-        if (this.seqNum < 0 && this.seqMax == 0) return null;
+        System.out.println("Getting session key!");
+        if (this.seqNum < 0 && this.seqMax == -1) return null;
         if (keyExpired() || this.seqNum < 0) {
             currKey = getNextKey();      //lookup in SC db.keypairentry using id and seqnum
         }
         this.usesLeft--;
+        database.setContactUsesLeft(this.getId(), this.usesLeft);
         return getKey();
     }
 
     private String getKey() {
         return currKey;
+    }
+
+    public void receivedExpireAllKeys() {
+        database.clearKeys(this.getId());
+        this.seqNum = -1;
+        this.seqMax = -1;
+        this.usesLeft = 0;
+        this.save();
+    }
+
+    public void receivedExpireKey() {
+        getNextKey();
+    }
+
+    public void expireAllKeys() {
+        HandleMessage.sendAllkeysExpired(this);
+        receivedExpireAllKeys();
+    }
+
+    public void expireCurrentKey() {
+        HandleMessage.sendKeyExpired(this);
+        receivedExpireKey();
     }
 
     public int getRemainingKeys() {
@@ -115,10 +138,12 @@ public class SecurityContact extends Contact {
 
 
     private boolean keyExpired() {
+        System.out.println("Uses left: " + getUsesLeft());
         return this.getUsesLeft() <= 0;
     }
 
     private String getNextKey() {
+        System.out.println("Getting next key");
         if (this.seqNum >= 0) {
             database.clearKey(this.seqNum, this.getId());
         }
@@ -130,6 +155,7 @@ public class SecurityContact extends Contact {
         this.usesLeft = this.getUsesMax();
         String key = database.getKey(this.getId(), this.seqNum);
         if (key == null) System.out.println("Key missing - LB");
+        save();
         return key;
     }
 
@@ -142,16 +168,23 @@ public class SecurityContact extends Contact {
     }
 
 
-    public void close() {
+    public static void close() {
         database.close();
     }
+
     public void addKeys(String[] keys) {
-        int prediction = (this.seqMax + keys.length) % this.totalKeys;
+        System.out.println("Adding keys!");
+        System.out.println("seqMax: " + this.seqMax + " keys: " + keys.length);
+        System.out.println("Total keys: " + this.totalKeys);
+        int prediction = Math.abs((this.seqMax + keys.length + 1) % this.totalKeys);
+        System.out.println("Prediction: " + prediction);
         int newMax = database.addKeys(keys, this.getId(), this.seqNum, this.seqMax, this.totalKeys);
+        System.out.println("newMax: " + newMax);
         if (prediction!=newMax) {
             //TODO: Ran out of room for keys!
         }
         this.seqMax = newMax;
+        save();
     }
 
     public int getSeqMax() {
@@ -176,9 +209,11 @@ public class SecurityContact extends Contact {
 
     public void setUses(int uses) {
         this.usesMax = uses;
+        save();
     }
 
     public static ArrayList<Contact> getSecurityContacts(Context context) {
+        System.out.println("GetSecurityContacts called");
         ArrayList<Contact> contacts = new ArrayList<>();
         Uri CONTENT_URI = ContactsContract.Contacts.CONTENT_URI;
         String _ID = ContactsContract.Contacts._ID;
@@ -191,6 +226,7 @@ public class SecurityContact extends Contact {
             while (cursor.moveToNext()) {
                 String contact_id = cursor.getString(cursor.getColumnIndex(_ID));
                 if (database.contactIsInDatabase(Integer.parseInt(contact_id))) {
+                    System.out.println("ID " + contact_id + " added");
                     contacts.add(new Contact(context, Integer.parseInt(contact_id)));
                 }
             }
@@ -211,7 +247,7 @@ public class SecurityContact extends Contact {
         if(cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
                 String contact_id = cursor.getString(cursor.getColumnIndex(_ID));
-                if (database.contactIsInDatabase(Integer.parseInt(contact_id))) {
+                if (!database.contactIsInDatabase(Integer.parseInt(contact_id))) {
                     contacts.add(new Contact(context, Integer.parseInt(contact_id)));
                 }
             }
@@ -243,6 +279,17 @@ public class SecurityContact extends Contact {
     public static boolean contactIdIsASecurityContact(long id) {
         SCSQLiteHelper database = new SCSQLiteHelper(Contact.getBaseContext());
         return (database.contactIsInDatabase(id));
+    }
+
+    public static void expireAllContactsKeys() {
+        ArrayList<Contact> contacts = getSecurityContacts(Contact.getBaseContext());
+        ArrayList<SecurityContact> sContacts = new ArrayList<>();
+        for (Contact c : contacts) {
+            sContacts.add(new SecurityContact(Contact.getBaseContext(), c.getId()));
+        }
+        for (SecurityContact sc : sContacts) {
+            sc.expireAllKeys();
+        }
     }
 
 }

@@ -98,5 +98,6 @@
     <string name="sendtext">Send</string>
     <string name="title_activity_exchange">Exchange</string>
     <string name="title_activity_contact_settings">ContactSettings</string>
+    <string name="title_activity_new_contact">NewContact</string>
 
 </resources>

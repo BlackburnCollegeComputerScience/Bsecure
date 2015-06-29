@@ -153,15 +153,17 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
     }
 
     public int getCollumnFromIdAsInt(String tableName, String collumn, long id) {
-        String select = "SELECT * FROM " + tableName + " WHERE ?=?";
+        System.out.println("Looking in " + tableName + "for " + collumn + " with id " + id);
+        String select = "SELECT * FROM " + tableName + " WHERE " + SCEntry.COLUMN_NAME_CONTACT_ID + " = " + id;
         SQLiteDatabase dbase = this.getReadableDatabase();
         try {
-            Cursor c = dbase.rawQuery(select, new String[]{collumn, "" + id});
+            Cursor c = dbase.rawQuery(select, null);
             if (c != null && c.getCount() > 0) {
+
                 c.moveToFirst();
                 return c.getInt(c.getColumnIndex(collumn));
             } else {
-
+                System.out.println("CURSOR FOR " + collumn + " with id " + id + " was empty!");
             }
             return -1;
         } catch (Exception e) {
@@ -224,17 +226,23 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         values.put(SCEntry.COLUMN_NAME_USES_LEFT, sc.getUsesLeft());
         values.put(SCEntry.COLUMN_NAME_USES_MAX, sc.getUsesMax());
 
-        if (getCollumnFromId(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CONTACT_ID, sc.getId())!=null) {
+        if (getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CONTACT_ID, sc.getId())!=-1) {
             db.update(SCEntry.TABLE_NAME, values,
                     SCEntry.COLUMN_NAME_CONTACT_ID + "=" + sc.getId(), null);
         } else {
+            System.out.println("Inserting contact " + sc.getId());
+            System.out.println("Total keys: " + sc.getTotalKeys());
+            System.out.println("Contact id: " + values.get(SCEntry.COLUMN_NAME_CONTACT_ID));
+            System.out.println("TOTAL KEYS: " + values.get(SCEntry.COLUMN_NAME_TOTAL_KEYS));
             db.insert(SCEntry.TABLE_NAME, null, values);
         }
         db.close();
     }
 
     public boolean contactIsInDatabase(long id) {
-        return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CONTACT_ID, id) != -1;
+        boolean b = getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_CONTACT_ID, id) != -1;
+        System.out.println("id " + id + " was in database: " + b);
+        return b;
     }
 
 
@@ -292,6 +300,27 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         return getCollumnFromIdAsInt(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_USES_MAX, id);
     }
 
+    public void setContactSeqMax(long id, int value) {
+        setCollumnFromId(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_MAX_SEQ, value, id);
+    }
+
+    public void setContactTotalKeys(long id, int value) {
+        setCollumnFromId(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_TOTAL_KEYS, value, id);
+    }
+
+    public void setContactTimeLeft(long id, int value) {
+        setCollumnFromId(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_EXPIRE_TIME, value, id);
+    }
+
+    public void setContactUsesLeft(long id, int value) {
+        setCollumnFromId(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_USES_LEFT, value, id);
+    }
+
+    public void setContactUsesMax(long id, int value) {
+        setCollumnFromId(SCEntry.TABLE_NAME, SCEntry.COLUMN_NAME_USES_MAX, value, id);
+    }
+
+
     public int getNextSequence(long id) {
         String select = "SELECT * FROM " + SCEntry.TABLE_NAME + " WHERE " + SCEntry.COLUMN_NAME_CONTACT_ID
                 + " = " + id;
@@ -348,7 +377,7 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
     public int addKeys(String[] keys, long id, int seq, int maxSeq, int totalKeys) {
         SQLiteDatabase database = this.getWritableDatabase();
         database.beginTransaction();
-        int newMaxSeq = maxSeq;
+        int newMaxSeq = Math.abs((maxSeq + 1) % totalKeys);;
         for (String key : keys) {
             if (seq == newMaxSeq) break;
             ContentValues vals = new ContentValues();
@@ -368,6 +397,16 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         database.setTransactionSuccessful();
         database.endTransaction();
         return newMaxSeq;
+    }
+
+    public void clearKeys(long id) {
+        SQLiteDatabase database = this.getWritableDatabase();
+        database.delete(KeyPairEntry.TABLE_NAME, "id=?", new String[]{Long.toString(id)});
+    }
+
+    public void clearKeys() {
+        SQLiteDatabase database = this.getWritableDatabase();
+        database.delete(KeyPairEntry.TABLE_NAME, null, null);
     }
 
     public String getKey(long id, int seqNum) {

@@ -57,6 +57,7 @@ public class ContactSettings extends ActionBarActivity {
         exchangeBtn = (Button) findViewById(R.id.exchangeBtn);
         forceExpirationBtn = (Button) findViewById(R.id.forceExpBtn);
         forceAllKeyExperationBtn = (Button) findViewById(R.id.ExpireAllBtn);
+        Button addKeysButton = (Button) findViewById(R.id.addKeys);
 
         contact = new SecurityContact(getIntent().getExtras().getLong("contact"));
 
@@ -82,6 +83,7 @@ public class ContactSettings extends ActionBarActivity {
 
             }
         });
+
 
         forceExpirationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,6 +122,7 @@ public class ContactSettings extends ActionBarActivity {
                 dialog.show();
             }
         });
+
     }
 
     @Override

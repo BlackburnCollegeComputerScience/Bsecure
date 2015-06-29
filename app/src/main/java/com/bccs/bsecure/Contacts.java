@@ -45,7 +45,7 @@ public class Contacts extends ActionBarActivity {
         setContentView(R.layout.activity_contacts);
         ListView contactsView = (ListView) findViewById(R.id.contactsView);
         contactSelectionAdapter adapter = new contactSelectionAdapter();
-        adapter.addItems(SecurityContact.getAllContacts(this.getApplicationContext()));
+        adapter.addItems(SecurityContact.getSecurityContacts(this.getApplicationContext()));
         contactsView.setAdapter(adapter);
     }
 
@@ -94,15 +94,27 @@ public class Contacts extends ActionBarActivity {
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        onBackPressed();
-        return true;
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_new:
+                newContact();
+                return true;
+            default:
+                onBackPressed();
+                return true;
+        }
     }
 
+    private void newContact() {
+        Intent intent = new Intent(this, NewContact.class);
+        startActivity(intent);
+    }
     private class contactSelectionAdapter extends BaseAdapter {
 
 
