@@ -1,0 +1,108 @@
+Design outline - a general idea of what we want to say
+
+IDEA 1 for flow
+	
+	Start with our contact database and BSecure Contact object facade
+	
+	Keys: explain how we use them and how we create them in our application.
+	
+	Talk about bluetooth and how it is used to exchange public data for generating the keys.
+	
+	Explain how the generated keys are then stored into our database and how we know which one to use when encrypting messages
+	
+	Explain the use of headers in the text messages to signal the receiving phone's application to do an action, such as decrypting the message or expiring keys
+	
+
+	This flow pattern follows the act of using the application; from key generation all the way to sending/receiving.
+	
+Contacts
+	
+	Created our own BSecure contact objects that wrap the base Android contact data structure
+		
+		BSecure Contacts contain the keys associated with that contact, 
+		
+		The current sequence number,
+		
+		the current max sequence number,
+		
+		the current key's uses left,
+		
+		and the maximum amount of uses per key decided for this contact.
+	
+Keys
+
+	Diffie-Hellman generated secret byte array stored as a Base64 string
+	
+	We used Java's crypto and security packages to handle key generation
+	
+	Used the keys to encrypt/decrypt messages using AES-256 encryption in CBC mode
+	
+		Note: In design we intended to add other encryption algorithms that the user could switch between, not implemented yet
+		
+		Note: In original design we intended to create a list of initialization vectors to use that the devices agreed on. This is not implemented yet
+	
+Bluetooth
+	
+	Server/client setup
+		
+		Server/client is determined by who requests first; whomever starts the Bluetooth connection first is client. 
+		
+		Server sends public data to client first
+		
+		client generates secret keys from public data received and stores them
+		
+		client then sends their public data and the server generates secret keys
+	
+	Used bluetooth sockets to connect and pass data using a serialized class
+	
+	Server/client agree on a mutual value for how many times a key can be used based on the users' minimum and maximum expire settings
+	
+		The highest minimum value is always selected between the two users for maximized key security
+	
+databases
+
+	Keys are stored in a SQLite database where each key has an associated "sequence number" value
+
+	With a consumer-producer model using the sequence numbers, the keys are consumed in the order they were generated
+
+		Note: was not able to implement choosing a random sequence number to start on yet
+		
+	Each key can be used a certain number of times before throwing it away and using the next key in the sequence
+	
+	Keys stored as Base64 strings
+	
+	SecurityContact Database layout - 
+		
+		two tables
+			
+			"contact" table contains stored information for each contact such as 		
+			
+				the current sequence number, 
+					
+				the max sequence number, 
+				
+				the key limit, 
+				
+				the amount of uses per key, 
+				
+				and the amount of uses left on the current key
+				
+			"key" table contains the 
+				
+				generated keys for each contact
+				
+				sequence number associated with each key
+	
+text message headers
+
+	The Receiving application looks for text messages containing our application's headers and acts accordingly
+
+	When user sends a text encrypted with our app a header is added to the message to signal to the receiver's app that the message is from our application
+
+	There is a header for signalling the receiving application to expire the current key it is using to communicate with the sender
+
+	Also a header for notifying the receiving application to expire all keys associated with the sender
+	
+	the header that signals for a text from our application is added by appending it to the beginning of the user's message after the encryption process
+	
+	other headers are sent to the receiver as their own text message with no other content
