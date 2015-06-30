@@ -93,7 +93,7 @@ public class Settings extends ActionBarActivity {
                 builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //TODO: Create a protocol for informing all contacts with keys to be deleted
+                        SecurityContact.expireAllContactsKeys();
                     }
                 });
                 //Negative button is null because we just want to cancel the dialog not perform an action

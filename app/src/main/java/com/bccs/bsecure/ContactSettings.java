@@ -93,7 +93,7 @@ public class ContactSettings extends ActionBarActivity {
                 builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //TODO: Create a protocol for informing other party of key expiration
+                        contact.expireCurrentKey();
                     }
                 });
                 //Negative button is null because we just want to cancel the dialog not perform an action
@@ -112,7 +112,7 @@ public class ContactSettings extends ActionBarActivity {
                 builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //TODO: Create a protocol for informing other party of all key expiration
+                        contact.expireAllKeys();
                     }
                 });
                 //Negative button is null because we just want to cancel the dialog not perform an action
