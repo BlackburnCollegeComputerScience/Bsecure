@@ -1,0 +1,1 @@
+del *.aux *.dvi *.bbl *.log *.pdf
