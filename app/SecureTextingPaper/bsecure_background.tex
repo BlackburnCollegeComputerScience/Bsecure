@@ -1,0 +1,16 @@
+\section{RELATED WORK}
+Short Message Service security has quickly become a topic of discussion in recent years.
+Many articles have begone to propose protocols such as SMS Security\cite[SmsSecurity] 
+and Secure SMS\cite[SecureSms] to modify existing technology to provide 
+end-to-end encryption to SMS. We take a different approach by designing and implementing 
+a application level solution to SMS security. 
+
+PK-SIM\cite[PkSim] also included the use of a third party certificate authority. 
+Taking a decentralized design means users never have to rely on the integrity 
+or strength of a third party and their systems. Key exchanges are done locally 
+with a Bluetooth connection. Users can be sure they are exchanging with the right 
+person, and keys never leave the local device.
+
+There are existing works that don't require modification to existing protocols like
+Bleep\cite[bleep]. However such options are closed source. We aim to 
+provide a freely available open source solution. 
