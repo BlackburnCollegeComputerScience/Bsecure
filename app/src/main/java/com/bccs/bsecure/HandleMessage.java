@@ -98,7 +98,7 @@ public class HandleMessage {
             }
 
             if (key != null) {
-                msg = MessageCipher.encrypt(msg, key, key2);
+                msg = MessageCipher.encrypt(msg, key, sContact.getSessionIV());
                 msg = getPrepend() + msg;
             }
 
@@ -235,7 +235,7 @@ public class HandleMessage {
                 for (int j = getPrepend().length(); j < message.length(); j++) {
                     fixed += message.charAt(j);
                 }
-                fixed = MessageCipher.decrypt(fixed, key, key2);
+                fixed = MessageCipher.decrypt(fixed, key, sContact.getSessionIV());
                 //fixed = messageCipher.decrypt(fixed, key1, key2);
 
             } else if (message.contains(prependDH)) {

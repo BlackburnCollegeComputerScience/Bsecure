@@ -33,6 +33,7 @@ public class SecurityContact extends Contact {
     private int seqNum;
     private int seqMax;
     private String currKey = null;
+    private String currIV = null;
     private int totalKeys = 1000;
     private int usesLeft = 100;
     private int timeLeft = 0;
@@ -74,6 +75,7 @@ public class SecurityContact extends Contact {
             //if does not exist, no more key pairs available. Throw exception??
             //this.currKey = "0123ABC";
             this.currKey = database.getKey(getId(), this.seqNum);
+            this.currIV = database.getIV(getId(), this.seqNum);
 
         } else {
             this.seqNum = -1;
@@ -83,8 +85,14 @@ public class SecurityContact extends Contact {
             this.usesLeft = 0;
             this.usesMax = 100;
             this.currKey = null;
+            this.currIV = null;
             database.createSecurityContact(this);
         }
+    }
+
+    public String getSessionIV() {
+        if (this.seqNum < 0 && this.seqMax == -1) return null;
+        return getIV();
     }
 
     public String getSessionKey() {
@@ -96,6 +104,10 @@ public class SecurityContact extends Contact {
         this.usesLeft--;
         database.setContactUsesLeft(this.getId(), this.usesLeft);
         return getKey();
+    }
+
+    private String getIV() {
+        return this.currIV;
     }
 
     private String getKey() {
@@ -172,13 +184,13 @@ public class SecurityContact extends Contact {
         database.close();
     }
 
-    public void addKeys(String[] keys) {
+    public void addKeys(String[] keys, String[] IVs) {
         System.out.println("Adding keys!");
         System.out.println("seqMax: " + this.seqMax + " keys: " + keys.length);
         System.out.println("Total keys: " + this.totalKeys);
         int prediction = Math.abs((this.seqMax + keys.length + 1) % this.totalKeys);
         System.out.println("Prediction: " + prediction);
-        int newMax = database.addKeys(keys, this.getId(), this.seqNum, this.seqMax, this.totalKeys);
+        int newMax = database.addKeys(keys, IVs, this.getId(), this.seqNum, this.seqMax, this.totalKeys);
         System.out.println("newMax: " + newMax);
         if (prediction!=newMax) {
             //TODO: Ran out of room for keys!

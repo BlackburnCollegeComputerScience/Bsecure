@@ -135,8 +135,7 @@ public class ContactSettings extends ActionBarActivity {
                 String[] keys = data.getExtras().getStringArray("keys");
                 String[] ivs = data.getExtras().getStringArray("ivs");
                 int expireCount = data.getExtras().getInt("expireCount");
-                contact.addIvs(ivs);
-                contact.addKeys(keys);
+                contact.addKeys(keys, ivs);
                 contact.setUses(expireCount);
             }
         }

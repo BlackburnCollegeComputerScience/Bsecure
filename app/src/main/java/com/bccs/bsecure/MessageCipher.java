@@ -43,7 +43,7 @@ public class MessageCipher {
 
 
     public static byte[] cutIV(byte[] IV) {
-        int len = 16;
+        int len = 32;
         byte[] b = new byte[len];
         for (int i = 0; i < len; i++) {
             b[i] = IV[i];
