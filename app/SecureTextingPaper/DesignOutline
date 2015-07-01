@@ -1,46 +1,83 @@
 Design outline - a general idea of what we want to say
 
-IDEA 1 for flow
-	
+
+************************************
+
+Outline 1 (Sloppy, decided against it)
+
 	Start with our contact database and BSecure Contact object facade
-	
+
 	Keys: explain how we use them and how we create them in our application.
-	
+
 	Talk about bluetooth and how it is used to exchange public data for generating the keys.
-	
+
 	Explain how the generated keys are then stored into our database and how we know which one to use when encrypting messages
-	
+
 	Explain the use of headers in the text messages to signal the receiving phone's application to do an action, such as decrypting the message or expiring keys
-	
+
 
 	This flow pattern follows the act of using the application; from key generation all the way to sending/receiving.
-	
-Contacts
-	
-	Created our own BSecure contact objects that wrap the base Android contact data structure
-		
-		BSecure Contacts contain the keys associated with that contact, 
-		
-		The current sequence number,
-		
-		the current max sequence number,
-		
-		the current key's uses left,
-		
-		and the maximum amount of uses per key decided for this contact.
-	
-Keys
 
-	Diffie-Hellman generated secret byte array stored as a Base64 string
-	
-	We used Java's crypto and security packages to handle key generation
-	
-	Used the keys to encrypt/decrypt messages using AES-256 encryption in CBC mode
-	
-		Note: In design we intended to add other encryption algorithms that the user could switch between, not implemented yet
-		
-		Note: In original design we intended to create a list of initialization vectors to use that the devices agreed on. This is not implemented yet
-	
+
+************************************
+
+Outline 2 (>>>BETTER! It is simple and organized)
+
+    Section: Key Exchange -
+
+        -Explain how we used Bluetooth to exchange Diffie-Hellman values
+
+            -Bluetooth sockets
+
+            -Bluetooth Client/Server delegation
+
+            -Diffie-Hellman generation using Java provided classes and objects
+
+        -Explain the specifics of the keys
+
+            -Explain how the use of the word "key" means the secret number generated from Diffie-Hellman Key Exchange, not public key encryption
+
+            -AES-256 Cipher in CBC mode [With a static IV currently, IV list is planned feature]
+
+            -Encoded to Base64 String for storage and handling purposes [Byte arrays can't be saved in SQLite directly, Strings are easier to move around activities (The functionality for this was already built-into Android SDK)]
+
+    Section: Information Storage and Control -
+
+        -Explain the basic structure of our databases, and how they are used to control keys
+
+            -Explain the sequence number idea (Consumer/Producer control scheme for storage)
+
+            -Explain key expiration (Each time key is "used", a value is decremented)
+
+            -Explain how we use the Android Contact_ID (The primary key of the Android contact DB)
+
+        -Elaborate on settings available to the user
+
+            -Ability to force a current key for a contact to expire
+
+            -Ability to force all keys with a contact to expire
+
+            -Ability to force all keys to expire with all contacts
+
+            -If the user lacks keys with a contact they can still send unencrypted messages
+
+            -User chooses a maximum and minimum number of times a key is to be used
+
+                - During Bluetooth exchange these values are sent to the other device and a decision is made on which mutual value to use for the maximum key use setting
+
+    Section: Text message headers
+
+        -Explain the use of a header in the text message to indicate that the message is from a BSecure application
+
+        -Explain the use of a header to notify that the contact has expired their key early (So keys remain synchronized)
+
+        -Explain the use of a header to notify that the contact has expired ALL keys early
+
+************************************
+
+Information to use:
+
+
 Bluetooth
 	
 	Server/client setup
@@ -58,8 +95,24 @@ Bluetooth
 	Server/client agree on a mutual value for how many times a key can be used based on the users' minimum and maximum expire settings
 	
 		The highest minimum value is always selected between the two users for maximized key security
+
+		Keys
+
+        	Diffie-Hellman generated secret byte array stored as a Base64 string
+
+        	We used Java's crypto and security packages to handle key generation
+
+        	Used the keys to encrypt/decrypt messages using AES-256 encryption in CBC mode
+
+        		Note: In design we intended to add other encryption algorithms that the user could switch between, not implemented yet
+
+        		Note: In original design we intended to create a list of initialization vectors to use that the devices agreed on. This is not implemented yet
+
 	
 databases
+
+    All persistent information generated by the application is stored in SQLite servers.
+    Persistent information in this context refers to any keys generated, contact-specific settings, general settings, uses left per key, and sequence number information.
 
 	Keys are stored in a SQLite database where each key has an associated "sequence number" value
 
@@ -75,9 +128,11 @@ databases
 		
 		two tables
 			
-			"contact" table contains stored information for each contact such as 		
+			"contact" table contains stored information for each contact
 			
-				the current sequence number, 
+				the Android contact_id the following data is associated with,
+
+				the current sequence number,
 					
 				the max sequence number, 
 				
@@ -87,11 +142,29 @@ databases
 				
 				and the amount of uses left on the current key
 				
-			"key" table contains the 
+			"key" table contains
+
+			    the Android contact_id the following data is associated with,
 				
 				generated keys for each contact
 				
 				sequence number associated with each key
+
+	Contacts
+
+    	Created our own BSecure contact objects that acts as a facade for the base Android contact data structure and our own databases
+
+    		BSecure Contacts contain the keys associated with that contact,
+
+    		The current sequence number,
+
+    		the current max sequence number,
+
+    		the current key's uses left,
+
+    		and the maximum amount of uses per key decided for this contact.
+
+
 	
 text message headers
 
@@ -105,4 +178,4 @@ text message headers
 	
 	the header that signals for a text from our application is added by appending it to the beginning of the user's message after the encryption process
 	
-	other headers are sent to the receiver as their own text message with no other content
+	other headers are sent to the receiver as their own text message with no other content (Which are the early key expiration headers)
