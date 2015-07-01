@@ -32,6 +32,7 @@ public class BluetoothPackage implements Serializable {
      * Public key encodings
      */
     private String[] keys;
+    private String[] ivs;
     /**
      * Code to inform the receiver how to handle the package.
      */
@@ -67,6 +68,12 @@ public class BluetoothPackage implements Serializable {
         this.protocolCode = protocolCode;
     }
 
+    public BluetoothPackage(String[] keys, String[] vs, int protocolCode) {
+        this.protocolCode = protocolCode;
+        this.ivs = ivs;
+        this.keys = keys;
+    }
+
     /**
      * Constructor for exchanging keys.
      * @param keys Encoded public keys to send.
@@ -83,6 +90,10 @@ public class BluetoothPackage implements Serializable {
 
     public String[] getKeys() {
         return keys;
+    }
+
+    public String[] getIvs() {
+        return ivs;
     }
 
     public int getMinExpire() {

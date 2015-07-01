@@ -1,14 +1,24 @@
 \section{RELATED WORK}
 Short Message Service security has quickly become a topic of discussion in recent years.
-Many articles have begone to propose protocols such as SMS Security\cite{SmsSecurity} and Secure SMS\cite{SecureSms} to modify existing technology to provide end-to-end encryption to SMS.
-We take a different approach by designing and implementing a application level solution to SMS security.
 
-PK-SIM\cite{PkSim} also included the use of a third party certificate authority.
-Taking a decentralized design means users never have to rely on the integrity or strength of a third party and their systems. Key exchanges are done locally with a Bluetooth connection.
-Users can be sure they are exchanging with the right person, and keys never leave the local device.
+SMS Sec \cite{SMSSec} developed in 2008 and PK-SIM \cite{PkSim} in 2009 begain to try and optimise SMS encryption.
+Both started developing a two phase approach to SMS encryption.
+First a handshake is performed using asymmetric cryptography which occurs only a few times, and a more efficient symmetric handshake which is used frequently.
+With PK-SIM \cite{PkSim} a additional trusted third party certificate authority is used to provide public key certification.
 
-There are existing works that don't require modification to existing protocols like Bleep\cite{bleep}.
-BitTorrent released Bleep in May 2015 as a end-to-end peer-to-peer encryption messaging app.
-BitTorrent
+A study done in 2010 named SMS Security \cite{SmsSecurity} concluded that large key algorithums for SMS encrytions are not suitable due to the small memory capacity of mobile phones.
+In this study they evaluated RSA, ELGamal and ECDSA algorithums which are known for having keys longer then 1024 bits.
+Secure SMS \cite{SecureSms} aimed to develop on pre exisiting protocols by evaluating security exploits, and removing the significant overhead created with public key encryption.
+Secure SMS concluded that symmetric key algorithum performance was a thousand times faster then asymmetric key algorithums.
+It must be noted that Secure SMS prefered efficiency to eschew security in the investigation, and they recommend careful independet investigation when selecting encyription algorithims.
+By using AES256 symmetric key encyrption we are not concerned with the overhead created when requiring large keys.
+
+There are existing projects that provide free encrypted comunication such as Bleep \cite{bleep} or Threema \cite(Threema).
+However these solutions rely on data connections instead of pre-exsisting SMS comunication.
+Neither Bleep or Threema are open source, and in the case of Threema, whitch uses its own servers to connect people, you can never be sure if their claims are true.
+BitTorrent has recently come under attack in March of 2015 for silently installing a bit coin mining software onto users computers. \AddCiteHere
+The packaged bitcoin miner requires registry level edits to remove from users computers \addAnotherCite
+Although just one example of the dangers of closed source software it shows how even companys trusted
+
 
 However such options are closed source. We aim to provide a freely available open source solution.

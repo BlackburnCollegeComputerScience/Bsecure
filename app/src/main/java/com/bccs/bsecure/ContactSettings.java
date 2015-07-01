@@ -133,7 +133,9 @@ public class ContactSettings extends ActionBarActivity {
             if (resultCode == RESULT_OK) {
                 //Grab the keys from the data packet
                 String[] keys = data.getExtras().getStringArray("keys");
+                String[] ivs = data.getExtras().getStringArray("ivs");
                 int expireCount = data.getExtras().getInt("expireCount");
+                contact.addIvs(ivs);
                 contact.addKeys(keys);
                 contact.setUses(expireCount);
             }
@@ -141,8 +143,7 @@ public class ContactSettings extends ActionBarActivity {
     }
 
     private String getRemainingKeys() {
-        //TODO
-        return "";
+        return "" + contact.getRemainingKeys();
     }
 
     private String getKeyExpiration() {

@@ -217,10 +217,12 @@ public class DeviceListActivity extends Activity {
             if (resultCode == RESULT_OK) {
                 //Grab the keys from the data packet
                 String[] keys = data.getExtras().getStringArray("keys");
+                String[] ivs = data.getExtras().getStringArray("ivs");
                 int expireTime = data.getExtras().getInt("expireCount");
                 //Pack the keys into a result and send it back to the calling activity
                 Intent returnIntent = new Intent();
                 returnIntent.putExtra("keys", keys);
+                returnIntent.putExtra("ivs", ivs);
                 returnIntent.putExtra("expireCount", expireTime);
                 setResult(RESULT_OK, returnIntent);
                 finish();

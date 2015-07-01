@@ -17,6 +17,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Random;
 
 /**
  * Exchange handles exchanging of encodings to compute secret keys for each devices in the exchange.
@@ -80,6 +82,8 @@ public class Exchange extends Activity {
      * Custom dialog to show if security parameters need to be selected.
      */
     Dialog expireDialog;
+
+    private String[] ivs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,6 +196,8 @@ public class Exchange extends Activity {
                             //If we are the client and the protocol tells us this is the first
                             //half of the exchange
 
+                            ivs = received.getIvs();
+
                             //Initialize our array of diffie hellman sessions
                             String[] receivedKeys = received.getKeys();
                             initializeDiffieHellmanSessionsFromKeys(Constants.KEY_AMOUNT, receivedKeys);
@@ -213,6 +219,7 @@ public class Exchange extends Activity {
                             //Pack the keys into a result and send it back to the calling activity
                             returnIntent = new Intent();
                             returnIntent.putExtra("keys", keys);
+                            returnIntent.putExtra("ivs", ivs);
                             returnIntent.putExtra("expireCount", expireCount);
                             setResult(RESULT_OK, returnIntent);
                             bluetoothService.stop();
@@ -226,6 +233,7 @@ public class Exchange extends Activity {
                             //Pack the keys into a result and send it back to the calling activity
                             returnIntent = new Intent();
                             returnIntent.putExtra("keys", keys);
+                            returnIntent.putExtra("ivs", ivs);
                             returnIntent.putExtra("expireCount", expireCount);
                             setResult(RESULT_OK, returnIntent);
                             bluetoothService.stop();
@@ -345,10 +353,22 @@ public class Exchange extends Activity {
             //Create a array of strings to hold the public (g^a mod p) key encoding
             String[] publicEncodes = getPublicEncodings(Constants.KEY_AMOUNT);
 
+            ivs = new String[Constants.KEY_AMOUNT];
+            for (int i = 0; i < ivs.length; i++) {
+                byte[] iv = new byte[16];
+                new Random().nextBytes(iv);
+                try {
+                    ivs[i] = new String(iv, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
             //Create an object to send over bluetooth containing the public
             //(g^a mod p) encoding and a protocol code to inform the next device
             //of what the stage in our exchange we are at
-            BluetoothPackage btPack = new BluetoothPackage(publicEncodes, Constants.EXCHANGE_FIRST_TRADE);
+            BluetoothPackage btPack = new BluetoothPackage(publicEncodes, ivs, Constants.EXCHANGE_FIRST_TRADE);
 
             //Serialize the bluetooth package to send over the stream
             byte[] toSend = getSerializedBytes(btPack);
