@@ -81,7 +81,7 @@ public class SecurityContact extends Contact {
             this.totalKeys = 1000;
             this.timeLeft = 0;
             this.usesLeft = 0;
-            this.usesMax = 6;
+            this.usesMax = 100;
             this.currKey = null;
             database.createSecurityContact(this);
         }
