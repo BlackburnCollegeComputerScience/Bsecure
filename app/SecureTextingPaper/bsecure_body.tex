@@ -4,13 +4,18 @@ from the point of view of a user.
 
 \subsection{Key Exchange}
 One of the more critical aspects of information security is keeping the private data secret.
-The short range of Bluetooth allows for a face-to-face exchange of information that significantly
- reduces the chances of interception. Furthermore utilizing the Diffie-Hellman Key Exchange protocol
-ensures that attackers cannot use intercepted public data to recreate keys. This section explains
-our implementation of these systems.
+The short range of Bluetooth allows for a face-to-face exchange of information that significantly reduces the chances of interception.
+Furthermore utilizing the Diffie-Hellman Key Exchange protocol ensures that attackers cannot use intercepted public data to recreate keys.
+Lastly Bluetooth's widespread avaliblity in SMS capable devices allowed us to reach a large user base.
+This section explains our implementation of these systems.
 
 \subsubsection{Bluetooth Key Generation}
-Explain Bluetooth sockets
+Bluetooth sockets are similar to that of TCP sockets.
+One device must set up a server socket, and other must set up a client socket.
+When connected together a RFCOMM connection-oriented, streaming transport Bluetooth socket is created.
+A Bluetooth socket contains a input and output stream for transmitting data.
+These streams only push bytes, but can be convered into other java stream types.
+Object input and output streams have proven proticularly useful for exchanging bulk public data.
 
 Explain Bluetooth Client/Server delegation
 
