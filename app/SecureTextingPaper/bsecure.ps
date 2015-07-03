@@ -1,7 +1,7 @@
 %!PS-Adobe-2.0
 %%Creator: dvips(k) 5.993 Copyright 2013 Radical Eye Software
 %%Title: bsecure.dvi
-%%CreationDate: Fri Jul 03 09:32:52 2015
+%%CreationDate: Fri Jul 03 11:23:07 2015
 %%Pages: 4
 %%PageOrder: Ascend
 %%BoundingBox: 0 0 612 792
@@ -12,7 +12,7 @@
 %DVIPSWebPage: (www.radicaleye.com)
 %DVIPSCommandLine: dvips -t letter bsecure.dvi
 %DVIPSParameters: dpi=600
-%DVIPSSource:  TeX output 2015.07.03:0932
+%DVIPSSource:  TeX output 2015.07.03:1123
 %%BeginProcSet: tex.pro 0 0
 %!
 /TeXDict 300 dict def TeXDict begin/N{def}def/B{bind def}N/S{exch}N/X{S
@@ -3702,59 +3702,59 @@ b(K)n(ey)24 b(Exchange)-152 4641 y Fh(This)f(is)f(a)g(placeholder)h
 5203 y(Explain)g(Blueto)r(oth)g(Clien)n(t/Serv)n(er)f(delegation)-152
 5378 y(Explain)17 b(Di\016e-Hellman)g(generation)h(using)f(Ja)n(v)l(a)g
 (pro)n(vided)f(classes)2040 -69 y(and)25 b(ob)t(jects)2063
-127 y Fb(3.1.2)90 b(K)m(e)m(y)22 b(Speci\002cs)2040 219
-y Fh(In)27 b(our)h(source)g(co)r(de)g(when)g(w)n(e)g(use)g(the)f
-(phrase)19 b(\\secret)28 b(k)n(ey")18 b(w)n(e)2040 306
-y(are)29 b(referring)g(to)g(the)f(shared)g(secret)h(n)n(um)n(b)r(er)e
-(generated)i(b)n(y)e(the)2040 393 y(Di\016e-Hellman)39
-b(pro)r(cess.)77 b(This)40 b(is)f(not)h(to)f(b)r(e)g(confused)g(with)
-2040 480 y(public-k)n(ey)20 b(encryption,)i(as)g(these)g(k)n(eys)f(are)
-h(used)f(symmetrically)-6 b(.)2040 654 y(The)33 b(k)n(eys)e(are)i(used)
-f(to)h(encrypt)e(and)g(decrypt)h(messages)i(using)2040
-742 y(the)25 b(AES-256)h(cipher)f(in)g(CBC)i(mo)r(de.)2040
-916 y(Explain)37 b(ho)n(w)h(the)f(use)g(of)h(the)f(w)n(ord)29
-b(\\k)n(ey")f(means)37 b(the)g(secret)2040 1003 y(n)n(um)n(b)r(er)30
-b(generated)i(from)g(Di\016e-Hellman)f(Key)f(Exc)n(hange,)j(not)2040
-1090 y(public)25 b(k)n(ey)g(encryption)2040 1265 y(Enco)r(ded)20
-b(to)g(Base64)i(String)d(for)i(storage)h(and)d(handling)h(purp)r(oses)
-2040 1352 y(\(Byte)29 b(arra)n(ys)h(can't)g(b)r(e)f(sa)n(v)n(ed)g(in)h
-(SQLite)f(directly)-6 b(,)30 b(Strings)f(are)2040 1439
-y(easier)h(to)e(mo)n(v)n(e)g(around)g(activities)h(\(The)f
-(functionalit)n(y)h(for)g(this)2040 1526 y(w)n(as)e(already)e(built-in)
-n(to)g(Android)g(SDK\)\))2040 1722 y Fi(3.2)99 b(Inf)n(ormation)25
-b(Storage)g(and)h(Contr)n(ol)2040 1813 y Fh(This)f(is)g(a)f
+145 y Fb(3.1.2)90 b(K)m(e)m(y)22 b(Speci\002cs)2040 236
+y Fh(The)i(\\k)n(eys")g(are)33 b(Di\016e-Hellman)g(k)n(ey)f(exc)n
+(hange)h(generated)g(32-)2040 323 y(b)n(yte)16 b(secret)i(n)n(um)n(b)r
+(ers)e(that)h(are)h(shared)f(b)r(et)n(w)n(een)g(the)g(t)n(w)n(o)g
+(devices.)2040 410 y(Our)j(application)i(uses)f(the)f(b)n(ytes)g(of)i
+(this)f(32-b)n(yte)f(n)n(um)n(b)r(er)g(as)h(the)2040
+498 y(k)n(ey)k(for)h(our)g(blo)r(c)n(k)f(cipher.)2040
+672 y(The)31 b(cipher)g(w)n(e)h(implemen)n(ted)f(is)g(an)g(AES-256)g
+(cipher)g(in)g(CBC)2040 759 y(mo)r(de.)i(This)22 b(cipher)f(handles)f
+(encryption)h(and)f(decryption)g(of)i(the)2040 846 y(text)27
+b(messages.)41 b(The)28 b(initialization)g(v)n(ector)g(is)f(a)h
+(randomly)f(gen-)2040 933 y(erated)c(128-bit)g(blo)r(c)n(k)g(that)f(is)
+i(shared)f(o)n(v)n(er)f(Blueto)r(oth)h(alongside)2040
+1021 y(the)i(k)n(eys)g(during)g(exc)n(hange.)2040 1195
+y(Both)42 b(the)f(k)n(ey)g(and)g(the)g(initialization)j(v)n(ector)d
+(are)h(stored)g(as)2040 1282 y(Strings)24 b(b)n(y)g(con)n(v)n(erting)f
+(them)h(in)n(to)h(Base64)h(format.)34 b(The)25 b(reason)2040
+1369 y(is)h(due)g(to)f(the)h(limitations)h(of)f(SQLite)g(b)n(ytes)f
+(cannot)g(b)r(e)h(directly)2040 1456 y(stored)g(in)n(to)f(a)h
+(database.)2040 1670 y Fi(3.2)99 b(Inf)n(ormation)25
+b(Storage)g(and)h(Contr)n(ol)2040 1761 y Fh(This)f(is)g(a)f
 (placeholder)h(for)g(a)f(short)h(paragraph)f(or)h(t)n(w)n(o)f(that)g
-(pro-)2040 1901 y(vides)32 b(an)f(o)n(v)n(erview)i(of)f(our)g
-(Information)g(Storage)h(and)e(Con)n(trol)2040 1988 y(systems.)2063
-2184 y Fb(3.2.1)90 b(BSecur)m(e)20 b(Databases)2040 2275
+(pro-)2040 1848 y(vides)32 b(an)f(o)n(v)n(erview)i(of)f(our)g
+(Information)g(Storage)h(and)e(Con)n(trol)2040 1935 y(systems.)2063
+2149 y Fb(3.2.1)90 b(BSecur)m(e)20 b(Databases)2040 2240
 y Fh(Explain)d(the)g(sequence)f(n)n(um)n(b)r(er)g(idea)h
-(\(Consumer/Pro)r(ducer)h(con-)2040 2362 y(trol)26 b(sc)n(heme)g(for)g
-(storage\))2040 2537 y(Explain)31 b(k)n(ey)f(expiration)h(\(Eac)n(h)g
+(\(Consumer/Pro)r(ducer)h(con-)2040 2327 y(trol)26 b(sc)n(heme)g(for)g
+(storage\))2040 2502 y(Explain)31 b(k)n(ey)f(expiration)h(\(Eac)n(h)g
 (time)g(k)n(ey)f(is)22 b(\\used,)32 b(a)g(v)l(alue)e(is)2040
-2624 y(decremen)n(ted\))2040 2798 y(Explain)c(ho)n(w)h(w)n(e)g(use)g
-(the)f(Android)f(Con)n(tact)p 3434 2798 30 3 v 30 w(ID)h(\(The)h
-(primary)2040 2885 y(k)n(ey)e(of)h(the)f(Android)g(con)n(tact)g(DB\))
-2040 3060 y(W)-6 b(e)17 b(stored)g(all)i(our)e(imp)r(ortan)n(t)g(v)l
-(alues)g(for)h(main)n(taining)g(eac)n(h)f(BSe-)2040 3147
+2589 y(decremen)n(ted\))2040 2763 y(Explain)c(ho)n(w)h(w)n(e)g(use)g
+(the)f(Android)f(Con)n(tact)p 3434 2763 30 3 v 30 w(ID)h(\(The)h
+(primary)2040 2850 y(k)n(ey)e(of)h(the)f(Android)g(con)n(tact)g(DB\))
+2040 3025 y(W)-6 b(e)17 b(stored)g(all)i(our)e(imp)r(ortan)n(t)g(v)l
+(alues)g(for)h(main)n(taining)g(eac)n(h)f(BSe-)2040 3112
 y(cure)29 b(asso)r(ciated)h(con)n(tact)e(in)n(to)h(a)f(database.)44
-b(The)29 b(v)l(alues)f(stored)2040 3234 y(in)22 b(this)h(database)g
+b(The)29 b(v)l(alues)f(stored)2040 3199 y(in)22 b(this)h(database)g
 (table)f(are)h(used)f(to)h(decide)f(what)g(k)n(ey)g(to)g(use)h(for)2040
-3321 y(that)i(con)n(tact.)2040 3495 y(Refer)h(to)g(T)-6
+3286 y(that)i(con)n(tact.)2040 3461 y(Refer)h(to)g(T)-6
 b(able)26 b(2)g(for)g(the)f(ro)n(w)h(la)n(y)n(out)f(of)i(our)e(SQL)g
-(database.)2063 3691 y Fb(3.2.2)90 b(User)21 b(Settings)2040
-3783 y Fh(Elab)r(orate)27 b(on)e(settings)h(a)n(v)l(ailable)h(to)e(the)
-g(user)2040 3957 y(Option)g(to)h(force)g(a)g(curren)n(t)f(k)n(ey)f(for)
-j(a)f(con)n(tact)f(to)h(expire)2040 4131 y(Option)f(to)h(force)g(all)h
-(k)n(eys)e(with)g(a)h(con)n(tact)g(to)f(expire)2040 4306
+(database.)2063 3674 y Fb(3.2.2)90 b(User)21 b(Settings)2040
+3765 y Fh(Elab)r(orate)27 b(on)e(settings)h(a)n(v)l(ailable)h(to)e(the)
+g(user)2040 3940 y(Option)g(to)h(force)g(a)g(curren)n(t)f(k)n(ey)f(for)
+j(a)f(con)n(tact)f(to)h(expire)2040 4114 y(Option)f(to)h(force)g(all)h
+(k)n(eys)e(with)g(a)h(con)n(tact)g(to)f(expire)2040 4288
 y(Option)g(to)h(force)g(all)h(k)n(eys)e(to)g(expire)h(with)f(all)i(con)
-n(tacts)2040 4480 y(If)f(the)g(user)g(lac)n(ks)h(k)n(eys)e(with)h(a)h
-(con)n(tact)f(they)f(can)h(still)h(send)f(un-)2040 4567
-y(encrypted)e(messages)2040 4742 y(User)k(c)n(ho)r(oses)g(a)g(maxim)n
+n(tacts)2040 4463 y(If)f(the)g(user)g(lac)n(ks)h(k)n(eys)e(with)h(a)h
+(con)n(tact)f(they)f(can)h(still)h(send)f(un-)2040 4550
+y(encrypted)e(messages)2040 4724 y(User)k(c)n(ho)r(oses)g(a)g(maxim)n
 (um)f(and)g(minim)n(um)g(n)n(um)n(b)r(er)f(of)i(times)g(a)2040
-4829 y(k)n(ey)f(is)i(to)f(b)r(e)g(used.)42 b(During)27
+4811 y(k)n(ey)f(is)i(to)f(b)r(e)g(used.)42 b(During)27
 b(Blueto)r(oth)i(exc)n(hange)f(these)g(v)l(alues)2040
-4916 y(are)23 b(sen)n(t)f(to)g(the)g(other)g(device)g(and)g(a)h
-(decision)f(is)h(made)g(on)f(whic)n(h)2040 5003 y(m)n(utual)j(v)l(alue)
+4899 y(are)23 b(sen)n(t)f(to)g(the)g(other)g(device)g(and)g(a)h
+(decision)f(is)h(made)g(on)f(whic)n(h)2040 4986 y(m)n(utual)j(v)l(alue)
 g(to)h(use)g(for)g(the)f(maxim)n(um)g(k)n(ey)g(use)g(setting.)2040
 5199 y Fi(3.3)99 b(Use)25 b(of)g(T)-9 b(ext)25 b(Message)g(Headers)2040
 5290 y Fh(This)c(is)g(a)g(placeholder)g(for)g(an)f(in)n(tro)r(ductory)g

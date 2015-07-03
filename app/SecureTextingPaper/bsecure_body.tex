@@ -3,7 +3,11 @@ This is a placeholder for an introductory paragraph to our design. Perhaps inclu
 from the point of view of a user.
 
 \subsection{Key Exchange}
-This is a placeholder for a short paragraph or two that gives an overview of our Key Exchange section.
+One of the more critical aspects of information security is keeping the private data secret.
+The short range of Bluetooth allows for a face-to-face exchange of information that significantly
+ reduces the chances of interception. Furthermore utilizing the Diffie-Hellman Key Exchange protocol
+ensures that attackers cannot use intercepted public data to recreate keys. This section explains
+our implementation of these systems.
 
 \subsubsection{Bluetooth Key Generation}
 Explain Bluetooth sockets
@@ -13,24 +17,22 @@ Explain Bluetooth Client/Server delegation
 Explain Diffie-Hellman generation using Java provided classes and objects
 
 \subsubsection{Key Specifics}
-The ``keys'' are Diffie-Hellman key exchange generated 32-byte secret numbers that are shared between
+The keys are Diffie-Hellman key exchange generated 32-byte secret numbers that are shared between
 the two devices. Our application uses the bytes of this 32-byte number as the key for our block cipher.
 
-The cipher we implemented is an AES-256 cipher in CBC mode. This cipher handles encryption and
+The cipher implemented is an AES-256 cipher in CBC mode. This cipher handles encryption and
 decryption of the text messages. The initialization vector is a randomly generated 128-bit block that
 is shared over Bluetooth alongside the keys during exchange.
-
-Both the key and the initialization vector are stored as Strings
-
-Encoded to Base64 String for storage and handling purposes (Byte arrays can't be saved in SQLite directly, Strings are easier to move around activities (The functionality for this was already built-into Android SDK))
 
 \subsection{Information Storage and Control}
 This is a placeholder for a short paragraph or two that provides an overview of our Information Storage and Control systems.
 
 \subsubsection{BSecure Databases}
+
+
 Explain the sequence number idea (Consumer/Producer control scheme for storage)
 
-Explain key expiration (Each time key is ``used, a value is decremented)
+Explain key expiration (Each time key is ``used,'' a value is decremented)
 
 Explain how we use the Android Contact\_ID (The primary key of the Android contact DB)
 
