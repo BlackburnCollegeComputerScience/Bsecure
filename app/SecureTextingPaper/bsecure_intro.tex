@@ -1,29 +1,74 @@
 \section{Introduction}
-Providing secure communication can be a difficult task for a variety of reasons. Common sense
-suggests that ideal technological solutions should be easy to use, reliable, trustworthy, and
-should present minimal barriers to adoption . In this paper, we present a mobile application
+Common sense suggests that an ideal technological solution to providing secure communication
+should be easy to use, reliable, and should present minimal barriers to adoption.
+In this paper, we present a mobile application
 developed on the Android platform that meets all of the above requirements to provide secure
 SMS communication using any device that allows standard SMS text messages and which possesses
 Bluetooth capabilities. Our app uses end-to-end encryption, and does not require the use of a
 separate server to facilitate communication or key exchange.
 
-1. There is a real need for secure communication. NSA Edward Snowden, etc.
+With the revelations of NSA surveillance \cite{greenwald2014no}, interest in the need for
+secure personal communication seems to be on the rise. A search of the Google Play store for
+``encrypted messaging'' reveals over 150 available apps. Regardless of actual government
+spying, there is clearly a market for applications capable of sending private messages.
 
-2. Servers are prone to attacks, and are owned by other people. Companies have been compelled
-to share user data by court order.
+When designing a mobile app for communication, a reasonable engineering decision is to use a
+centralized server or servers to facilitate the process. Such a server, owned and maintained by
+the app developer, can be especially useful for the problem of sending encryped messages. The
+sever can facilitate the exchange of secret keys used in the encryption, as well as connect users
+to intended recipients. However, the server can also be a point of attack. While most such apps
+(e.g., \cite {textsecure, surespot}) use end-to-end encruption, and cannot read your messages,
+they are still involved in the key exchange process, and if the server were to be compromised
+the keys would, too. Eliminating the need for the server completely would increase the security of
+the app by eliminating this possible attack point.
 
-3. SMS is basic technology enabled by all communication providers. Does not require Internet
-access, either for server or communication itself. Since encrypted, it's okay that third party
-transmits and sees the data.
+The use of a central server also requires that users have Internet access. While cell service
+and Internet access now seem to go hand in hand in industrialized countries like the U.S.,
+this is not always the case in developing nations \cite{Talukder:2010:MWU:1746740.1747015}.
+The use of SMS messages is often more available, and thus allows more reliable communication than
+systems that also depend on Internet access. Some available apps \cite{TXTCrypt} eliminate the
+server at the expense of robust encryption keys. Ideally, encryption strength should not be
+compromised despite the lack of the central server.
 
-4. Open Source allows anyone to view our source code. \cite{Kerckhoffs:1883:CMF,shannon-otp}
+Finally, the ideal secure app should be open source. It is a long standing axiom of the
+security community \cite{Kerckhoffs:1883:CMF,shannon-otp} that reliance on closed or secret systems
+does not provide the best security. Opening the system to public scrutiny allows bugs and
+algorithmic weeknesses to be found and fixed more easilty. Now, with the rise of ``free'' mobile
+apps provided by various unknown, sometimes corporate, sources, this rule takes on new meaning.
+Many examples (e.g., \cite{flashlight}) of mobile apps stealing user information or tracking
+user movements populate the news media. The only way to truly guarantee that an app is not
+behaving maliciously is to make its source code freely available to the public.
 
-The major contributions of this paper are as follows:
-1. We provide a secure, SMS-based texting app that provides end-to-end encryption, does not require
-an additional server for key exchange, and which is open source so that its security can be
-verified by anyone concerned. While several existing tools provide some, or many,  of these
-features, we are not aware of any that provide all.
+In this paper, we present BSecure, an open source, secure texting mobile app for Android that
+meets all of the above requirements. Our app provides end-to-end encryption for all messages.
+We observe that users often text friends and family who they see in person on a semi-regular basis.
+For this reason, we have developed a key exhange procedure that uses Bluetooth technology. When
+users come into close contact with each other, they can use the app to create up to 100 secure
+AES-256 keys for future communication. To further security, the keys themselves are not exchanged
+over Bluetooth, but instead the public information of a Diffie-Hellman key exhange is used. Thus,
+the actual session keys never leave mobile device in any form.
 
-2. Our app provides a high degree of configurability and automates most of the tedious aspects of
-key exchanges, thereby providing a low barrier for adoption. We believe this will make the app more
-useful to a wider variety of people.
+Settings in the app control how often these session keys will expire. Thus, for friends who are
+seen on a daily basis, the session key could, conceivably, be used only once then discarded,
+and more keys could be generated the next day. For distant family who are seen once a year
+at the holidays, keys could be set to expire, for example, after 200 messages, thus allowing
+20,000 secure messages between parties. Keys with a depth of 200 messages obviously are
+less secure than thos discarded immediately. However, we note that not all messages require
+an extrememly high level of security. Our app allows the user to decide how secure to make
+her messages.
+
+Our app was created as part of an on-going research effort at Blackburn College that was
+motivated by the lack of trustworthy mobile apps. We see the academic community as being in a
+unique position to provide a service to the community of mobile device users since we do not
+need to make a profit for our work. Student members of the development team receive either course
+credit or research stipends for their efforts, and are rewarded with valuable resume experience.
+Faculty members of the group are already compensated by the college, and are further rewarded
+with professional development experience.
+
+We believe that this paper makes the following contributions. We provide a secure, SMS-based
+texting app that provides robust end-to-end AES-256 encryption, does not require an additional
+server for key exchange, and which is open source so that its security can be verified by the
+public. While several existing tools \cite{textsecure, surespot, bleep, TXTCrypt} provide some,
+or many,  of these features, we are not aware of any that provide all. In addition, our app
+provides a high degree of configurability and automates most of the tedious aspects of
+key exchanges, thereby providing a low barrier for adoption.
