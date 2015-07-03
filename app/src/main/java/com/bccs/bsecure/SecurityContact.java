@@ -139,7 +139,7 @@ public class SecurityContact extends Contact {
 
     public int getRemainingKeys() {
         if (seqNum<=seqMax) {
-            return seqNum - seqMax;
+            return seqMax - seqNum;
         } else {
             return totalKeys - seqNum + seqMax;
         }
@@ -202,6 +202,9 @@ public class SecurityContact extends Contact {
         }
         this.seqMax = newMax;
         save();
+        if (this.seqNum<=-1) {
+            getNextKey();
+        }
     }
 
     public int getSeqMax() {

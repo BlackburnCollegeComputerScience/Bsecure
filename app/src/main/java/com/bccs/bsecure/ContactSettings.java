@@ -65,8 +65,8 @@ public class ContactSettings extends ActionBarActivity {
         nameTv.setText(contact.getName());
         androidIdTv.setText("Android ID: " + contact.getId());
         sequenceNumberTv.setText("Sequence Number: " + contact.getSeqNum());
-        expirationTv.setText("Messages Till Key Expiration" + getKeyExpiration());
-        remainingKeysTv.setText("Remaining Keys: " + getRemainingKeys());
+        expirationTv.setText("Messages Till Key Expiration: " + contact.getUsesLeft());
+        remainingKeysTv.setText("Remaining Keys: " + contact.getRemainingKeys());
 
         exchangeBtn.setText("Exchange keys with " + contact.getName());
         exchangeBtn.setOnClickListener(new View.OnClickListener() {
@@ -165,13 +165,6 @@ public class ContactSettings extends ActionBarActivity {
         }
     }
 
-    private String getRemainingKeys() {
-        return "" + contact.getRemainingKeys();
-    }
-
-    private String getKeyExpiration() {
-        return contact.getUsesLeft() + "";
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

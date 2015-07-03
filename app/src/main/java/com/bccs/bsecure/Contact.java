@@ -142,7 +142,7 @@ public class Contact {
                 }
             }
         } else {
-            throw new RuntimeException("No matching IDs for " + number + " found!");
+            throw new RuntimeException("No matching IDs");
         }
 
         cursor.close();

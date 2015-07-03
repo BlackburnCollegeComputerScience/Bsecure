@@ -196,7 +196,6 @@ public class Exchange extends Activity {
                             //half of the exchange
 
                             ivs = received.getIvs();
-
                             //Initialize our array of diffie hellman sessions
                             String[] receivedKeys = received.getKeys();
                             initializeDiffieHellmanSessionsFromKeys(Constants.KEY_AMOUNT, receivedKeys);
@@ -358,7 +357,6 @@ public class Exchange extends Activity {
                 new Random().nextBytes(iv);
                 ivs[i] = DiffieHellmanKeySession.toBase64String(iv);
             }
-
 
             //Create an object to send over bluetooth containing the public
             //(g^a mod p) encoding and a protocol code to inform the next device

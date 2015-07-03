@@ -89,7 +89,7 @@ public class CreateMessage extends ActionBarActivity {
 
         recipientList = (ListView) findViewById(R.id.recipientList);
         contactSelectionAdapter adapter = new contactSelectionAdapter();
-        adapter.addItems(SecurityContact.getAllContacts(this.getApplicationContext()));
+        adapter.addItems(SecurityContact.getSecurityContacts(this.getApplicationContext()));
         recipientList.setAdapter(adapter);
     }
 

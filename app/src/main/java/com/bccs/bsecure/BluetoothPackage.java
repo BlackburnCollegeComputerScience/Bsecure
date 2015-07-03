@@ -68,7 +68,7 @@ public class BluetoothPackage implements Serializable {
         this.protocolCode = protocolCode;
     }
 
-    public BluetoothPackage(String[] keys, String[] vs, int protocolCode) {
+    public BluetoothPackage(String[] keys, String[] ivs, int protocolCode) {
         this.protocolCode = protocolCode;
         this.ivs = ivs;
         this.keys = keys;
