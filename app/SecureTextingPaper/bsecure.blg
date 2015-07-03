@@ -5,4 +5,7 @@ Warning--entry type for "bleep" isn't style-file defined
 --line 96 of file bsecure.bib
 Warning--entry type for "threema" isn't style-file defined
 --line 105 of file bsecure.bib
-(There were 2 warnings)
+Warning--I didn't find a database entry for "textsecure"
+Warning--I didn't find a database entry for "surespot"
+Warning--I didn't find a database entry for "TXTCrypt"
+(There were 5 warnings)
