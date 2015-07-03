@@ -439,6 +439,33 @@ public class SCSQLiteHelper extends SQLiteOpenHelper {
         database.delete(KeyPairEntry.TABLE_NAME, null, null);
     }
 
+
+    public String[] getKeyPair(long id, int seqNum) {
+        String select = "SELECT * FROM " + KeyPairEntry.TABLE_NAME + " WHERE " +
+                KeyPairEntry.COLUMN_NAME_CONTACT_ID + " = " + id + " AND " +
+                KeyPairEntry.COLUMN_NAME_SEQ_NUM + " = " + seqNum;
+        SQLiteDatabase dbase = this.getReadableDatabase();
+        try {
+            Cursor c = dbase.rawQuery(select, null);
+            if (c != null && c.getCount() > 0) {
+                c.moveToFirst();
+                String[] key = new String[]{
+                        c.getString(c.getColumnIndex(KeyPairEntry.COLUMN_NAME_KEY)),
+                        c.getString(c.getColumnIndex(KeyPairEntry.COLUMN_NAME_IV))
+                };
+
+                c.close();
+                return key;
+            } else {
+
+            }
+            return new String[]{null, null};
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new String[]{null, null};
+    }
+
     public String getKey(long id, int seqNum) {
         String select = "SELECT * FROM " + KeyPairEntry.TABLE_NAME + " WHERE " +
                 KeyPairEntry.COLUMN_NAME_CONTACT_ID + " = " + id + " AND " +

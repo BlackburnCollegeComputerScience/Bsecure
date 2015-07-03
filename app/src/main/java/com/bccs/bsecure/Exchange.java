@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
 /**
@@ -357,11 +356,7 @@ public class Exchange extends Activity {
             for (int i = 0; i < ivs.length; i++) {
                 byte[] iv = new byte[16];
                 new Random().nextBytes(iv);
-                try {
-                    ivs[i] = new String(iv, "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
+                ivs[i] = DiffieHellmanKeySession.toBase64String(iv);
             }
 
 

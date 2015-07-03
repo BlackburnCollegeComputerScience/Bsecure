@@ -57,6 +57,7 @@ public class ContactSettings extends ActionBarActivity {
         exchangeBtn = (Button) findViewById(R.id.exchangeBtn);
         forceExpirationBtn = (Button) findViewById(R.id.forceExpBtn);
         forceAllKeyExperationBtn = (Button) findViewById(R.id.ExpireAllBtn);
+        Button addFakeKeys = (Button) findViewById(R.id.addFakeKeys);
 
         contact = new SecurityContact(getIntent().getExtras().getLong("contact"));
 
@@ -119,6 +120,29 @@ public class ContactSettings extends ActionBarActivity {
                 builder.setNegativeButton("No", null);
                 AlertDialog dialog = builder.create();
                 dialog.show();
+            }
+        });
+
+        addFakeKeys.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String[] keys = new String[] {
+                        "clAycpqr1ciK3ZoBXtYaNveeDXwU/OZDixy2HcPw8gI=",
+                        "+VotjZgpHO24pJ0jZDTrkJtC9KL4hAImCI/wxfjTtpg=",
+                        "N8UILlMeG3zLQxypCNvbP0Vtpwkj2aBiWfIvd/LZrQk=",
+                        "94t7nwZ9QB0RW3ujP66N9acrYylyQ2lD6TDmDxPS214=",
+                        "WnnjnvM0vIKDaCLqYBTBYgATAriAY2aj2K6/Bu0rn2A="
+                };
+
+                String[] ivs = new String[]{
+                        "SftCfKsoT7PUjn4HsmmBmA==",
+                        "a6qFpB1HK/UUGV5Qw1Tp1w==",
+                        "0K5Hi1PDZ/ZtyymZPDGhew==",
+                        "qARRXPOoLH9MEZqBvNf/Yg==",
+                        "NAUi58khEiU307IpgGE83Q=="
+                };
+
+                contact.addKeys(keys, ivs);
             }
         });
 

@@ -74,8 +74,9 @@ public class SecurityContact extends Contact {
             //Lookup in SC db.keypairentry table using id and seqnum
             //if does not exist, no more key pairs available. Throw exception??
             //this.currKey = "0123ABC";
-            this.currKey = database.getKey(getId(), this.seqNum);
-            this.currIV = database.getIV(getId(), this.seqNum);
+            String[] keyPair = database.getKeyPair(this.getId(), this.seqNum);
+            this.currKey = keyPair[0];
+            this.currIV = keyPair[1];
 
         } else {
             this.seqNum = -1;
@@ -99,7 +100,7 @@ public class SecurityContact extends Contact {
         System.out.println("Getting session key!");
         if (this.seqNum < 0 && this.seqMax == -1) return null;
         if (keyExpired() || this.seqNum < 0) {
-            currKey = getNextKey();      //lookup in SC db.keypairentry using id and seqnum
+            getNextKey();      //lookup in SC db.keypairentry using id and seqnum
         }
         this.usesLeft--;
         database.setContactUsesLeft(this.getId(), this.usesLeft);
@@ -138,9 +139,9 @@ public class SecurityContact extends Contact {
 
     public int getRemainingKeys() {
         if (seqNum<=seqMax) {
-            return seqNum - seqMax + 1;
+            return seqNum - seqMax;
         } else {
-            return totalKeys - seqNum + seqMax + 1;
+            return totalKeys - seqNum + seqMax;
         }
     }
 
@@ -165,8 +166,12 @@ public class SecurityContact extends Contact {
         }
         this.seqNum = Math.abs((this.seqNum + 1) % this.getTotalKeys());
         this.usesLeft = this.getUsesMax();
-        String key = database.getKey(this.getId(), this.seqNum);
+        String[] keyPair = database.getKeyPair(this.getId(), this.seqNum);
+        String key = keyPair[0];
+        String iv = keyPair[1];
         if (key == null) System.out.println("Key missing - LB");
+        this.currIV = iv;
+        this.currKey = key;
         save();
         return key;
     }

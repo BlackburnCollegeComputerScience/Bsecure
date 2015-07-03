@@ -41,22 +41,12 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class MessageCipher {
 
-
-    public static byte[] cutIV(byte[] IV) {
-        int len = 32;
-        byte[] b = new byte[len];
-        for (int i = 0; i < len; i++) {
-            b[i] = IV[i];
-        }
-        return b;
-    }
-
     //Dr. Coogan's encrypt method, some variations made
 
     public static String encrypt(String value, String key1, String key2) {
 
         try {
-            byte[] iv1 = cutIV(fromBase64String(key2));
+            byte[] iv1 = fromBase64String(key2);
             IvParameterSpec iv = new IvParameterSpec(iv1);
 
             SecretKeySpec skeySpec = new SecretKeySpec(fromBase64String(key1),
@@ -77,7 +67,7 @@ public class MessageCipher {
 
     public static String decrypt(String encrypted, String key1, String key2) {
         try {
-            byte[] iv1 = cutIV(fromBase64String(key2));
+            byte[] iv1 = fromBase64String(key2);
             IvParameterSpec iv = new IvParameterSpec(iv1);
 
             SecretKeySpec skeySpec = new SecretKeySpec(fromBase64String(key1),

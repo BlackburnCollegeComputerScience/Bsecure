@@ -283,6 +283,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="5dp" />
 
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/layout_border_danger_zone"
+                android:weightSum="1">
+
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="fill_parent"
+                    android:layout_height="35dp"
+                    android:text="Add Fake Keys"
+                    android:id="@+id/addFakeKeys"
+                    android:layout_weight="0.04"/>
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
