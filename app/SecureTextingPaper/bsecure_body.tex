@@ -28,7 +28,10 @@ is shared over Bluetooth alongside the keys during exchange.
 This is a placeholder for a short paragraph or two that provides an overview of our Information Storage and Control systems.
 
 \subsubsection{BSecure Databases}
-
+To organize key usage to be synchronized between both devices we utilized sequence numbers.
+These sequence numbers were sequential integer values associated with each key that represented the
+order in which the key would be used. The next key to be used would be determined by incrementing the sequence
+number of the previous key.
 
 Explain the sequence number idea (Consumer/Producer control scheme for storage)
 
