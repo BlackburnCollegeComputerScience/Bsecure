@@ -65,17 +65,17 @@ public class Settings extends ActionBarActivity {
             public void onClick(View v) {
                 String minString = minimumEt.getText().toString();
                 String maxString = maximumEt.getText().toString();
-                int min = minString.equals("") ? Integer.parseInt(minString) : 0;
-                int max = maxString.equals("") ? Integer.parseInt(maxString) : 0;
+                int min = minString.equals("") ? 0 : Integer.parseInt(minString);
+                int max = maxString.equals("") ? 0 : Integer.parseInt(maxString);
                 int[] settings = database.getGeneralSettings();
                 if (min == 0 || min > 2000) {
                     min = settings[0];
                 } else if (max == 0 || max > 2000) {
-                    max = settings[0];
+                    max = settings[1];
                 }
                 if (min > max) {
                     min = max;
-                    minimumEt.setText(min);
+                    minimumEt.setText(""+min);
                 }
                 minimumDisplayBtn.setText(String.valueOf(min));
                 maximumDisplayBtn.setText(String.valueOf(max));

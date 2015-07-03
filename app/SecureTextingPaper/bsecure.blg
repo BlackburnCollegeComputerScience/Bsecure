@@ -2,6 +2,7 @@ This is BibTeX, Version 0.99dThe top-level auxiliary file: bsecure.aux
 The style file: abbrv.bst
 Database file #1: bsecure.bib
 Warning--entry type for "bleep" isn't style-file defined
---line 87 of file bsecure.bib
-Warning--I didn't find a database entry for "("
+--line 96 of file bsecure.bib
+Warning--entry type for "threema" isn't style-file defined
+--line 105 of file bsecure.bib
 (There were 2 warnings)

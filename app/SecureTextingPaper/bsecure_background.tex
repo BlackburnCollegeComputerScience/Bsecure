@@ -1,19 +1,31 @@
 \section{RELATED WORK}
-Short Message Service security has quickly become a topic of discussion in recent years.
-SMS Sec \cite{SMSSec} developed in 2008 and PK-SIM \cite{PkSim} in 2009 began to try and optimise SMS encryption.
-Both started developing a two phase approach to SMS encryption.
-First a handshake is performed using asymmetric cryptography which occurs only a few times, and a more efficient symmetric handshake which is used frequently.
-With PK-SIM \cite{PkSim} a additional trusted third party certificate authority is used to provide public key certification.
+Pretty Good Privacy \cite{pgp} started the encryption age when it allowed anyone to securely use bulletin board systems to save messages and files.
+Today society has moved on from simple file storage, and mobile communication has become extremely important in our daily lives.
+Short Message Service is the most widely used mobile data service, and due to recent growth in business applications and increased public awareness of agency spying, attention to SMS security has grown.
+Studies and protocol designs discussed in this section have laid the foundations of development in SMS encryption, and supported design implementations.
 
-A study done in 2010 named SMS Security \cite{SmsSecurity} concluded that large key algorithms for SMS encryption are not suitable due to the small memory capacity of mobile phones.
-In this study they evaluated RSA, ELGamal and ECDSA algorithms which are known for having keys longer then 1024 bits.
-Secure SMS \cite{SecureSms} aimed to develop on pre existing protocols by evaluating security exploits, and removing the significant overhead created with public key encryption.
-Secure SMS concluded that symmetric key algorithm performance was a thousand times faster then asymmetric key algorithms.
+SMSSec \cite{SMSSec} developed in 2008 and PK-SIM \cite{PkSim} in 2009 began to try and optimize SMS encryption.
+Both protocols started developing a two phase approach to SMS encryption.
+In this approach, a handshake is performed using asymmetric cryptography.
+This occurs only a single time before a more efficient and frequently used symmetric encryption is used.
+SMSSec designed a two-factor user verification protocol.
+Users have three criteria to authenticate themselves with something the user knows (such as a password), something the user has (such as a credit card), and something this user is (such as a fingerprint).
+Two-factor authentication requires that a user has two of these forms of identification to access the system, and prove ownership of the public key.
+In contrary to this PK-SIM included a trusted third party certificate authority is used to provide public key certification.
+This trusted third party verifies the public key of both participants.
+Once confirmed each participant can use the received public key and their private key to generate a session key secret only to them.
+
+A 2010 study titled SMS Security \cite{SmsSecurity} concluded that large key algorithms for SMS encryption are not suitable due to the small memory capacity of mobile phones.
+In this study they evaluated RSA, ELGamal and ECDSA algorithms, which are known for having keys longer than 1024 bits.
+Secure SMS \cite{SecureSms} aimed to develop on preexisting protocols by evaluating security exploits, and removing the significant overhead created with public key encryption.
+Secure SMS concluded that symmetric key algorithm performance was one thousand times faster than asymmetric key algorithms.
 It must be noted that Secure SMS preferred efficiency to eschew security in the investigation, and they recommend careful independent investigation when selecting encryption algorithms.
-By using AES256 symmetric key encryption we are not concerned with the overhead created when requiring large keys.
+By using AES256 symmetric key encryption, we are not concerned with the overhead created when requiring large keys.
 
-There are existing projects that provide free and paid encrypted communication such as Bleep \cite{bleep} or Threema \cite{threema}.
-However these solutions rely on passing data connections instead of pre-existing SMS communication.
-Neither Bleep or Threema have publicly released their source code.
-Threema also passes all messages through their servers.
+Free and paid end-to-end encrypted communication options are available.
+Bleep \cite{bleep} and Threema \cite{threema} are two such options.
+Unfortunately these applications don’t use well established SMS, but instead rely on costly mobile data connections.
+Almost no options are open source and few offer direct peer-to-peer connections that don’t route through application central servers.
+Bleep is the only option we know of that has a truly decentralized operation.
+
 
