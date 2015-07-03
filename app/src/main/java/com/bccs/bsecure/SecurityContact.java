@@ -202,6 +202,9 @@ public class SecurityContact extends Contact {
         }
         this.seqMax = newMax;
         save();
+        if (this.seqNum<=-1) {
+            getNextKey();
+        }
     }
 
     public int getSeqMax() {
