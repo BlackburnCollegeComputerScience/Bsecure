@@ -70,9 +70,6 @@
         </receiver>
 
         <activity
-            android:name=".ContactsListActivity"
-            android:label="@string/title_activity_list_contacts" />
-        <activity
             android:name=".Settings"
             android:label="@string/title_activity_settings" >
         </activity>

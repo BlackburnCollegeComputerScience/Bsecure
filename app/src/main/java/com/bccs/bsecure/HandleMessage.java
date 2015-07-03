@@ -211,52 +211,58 @@ public class HandleMessage {
             sender = newSender;
 
 
-            long numberID = Contact.getIdFromNumber(sender);
-            Contact contact = new Contact(context, numberID);
-            String key = null;
-            SecurityContact sContact = null;
-            if (SecurityContact.contactIdIsASecurityContact(contact.getId())) {
-                sContact = new SecurityContact(contact.getId());
-                key = sContact.getSessionKey();
+            long numberID = -1;
+            try {
+                numberID = Contact.getIdFromNumber(sender);
+            } catch (RuntimeException re) {
+                System.out.println(re.getMessage());
             }
-
-
-            //Handling check for encryption and decryption
-            String fixed = null;
-            boolean encrypted = false;
-
-            if (message.contains(expireAllKeys) && key != null) {
-                sContact.receivedExpireAllKeys();
-            } else if (message.contains(expireKey) && key != null) {
-                sContact.receivedExpireKey();
-            } else if (message.contains(getPrepend()) && key != null) {
-                fixed = "";
-                encrypted = true;
-                for (int j = getPrepend().length(); j < message.length(); j++) {
-                    fixed += message.charAt(j);
+            if (numberID!=-1) {
+                Contact contact = new Contact(context, numberID);
+                String key = null;
+                SecurityContact sContact = null;
+                if (SecurityContact.contactIdIsASecurityContact(contact.getId())) {
+                    sContact = new SecurityContact(contact.getId());
+                    key = sContact.getSessionKey();
                 }
-                fixed = MessageCipher.decrypt(fixed, key, sContact.getSessionIV());
-                //fixed = messageCipher.decrypt(fixed, key1, key2);
 
-            } else if (message.contains(prependDH)) {
-                fixed = "";
-                for (int j = prependDH.length(); j < message.length(); j++) {
-                    fixed += message.charAt(j);
+
+                //Handling check for encryption and decryption
+                String fixed = null;
+                boolean encrypted = false;
+
+                if (message.contains(expireAllKeys) && key != null) {
+                    sContact.receivedExpireAllKeys();
+                } else if (message.contains(expireKey) && key != null) {
+                    sContact.receivedExpireKey();
+                } else if (message.contains(getPrepend()) && key != null) {
+                    fixed = "";
+                    encrypted = true;
+                    for (int j = getPrepend().length(); j < message.length(); j++) {
+                        fixed += message.charAt(j);
+                    }
+                    fixed = MessageCipher.decrypt(fixed, key, sContact.getSessionIV());
+                    //fixed = messageCipher.decrypt(fixed, key1, key2);
+
+                } else if (message.contains(prependDH)) {
+                    fixed = "";
+                    for (int j = prependDH.length(); j < message.length(); j++) {
+                        fixed += message.charAt(j);
+                    }
+                } else {
+                    fixed = message;
                 }
-            } else {
-                fixed = message;
-            }
 
-            //Return the Message
-            MyMessage msgObj = new MyMessage(numberID, fixed, false);
-            msgObj.set_encrypted(encrypted);
-            if (message.contains(prependDH)) {
-                msgObj.setIsDHKey(true);
+                //Return the Message
+                MyMessage msgObj = new MyMessage(numberID, fixed, false);
+                msgObj.set_encrypted(encrypted);
+                if (message.contains(prependDH)) {
+                    msgObj.setIsDHKey(true);
+                }
+                return msgObj;
+                //Uncommenting the line below will prevent other receivers from getting this message.
+                //abortBroadcast();
             }
-            return msgObj;
-            //Uncommenting the line below will prevent other receivers from getting this message.
-            //abortBroadcast();
-
         }
         return null;
     }
