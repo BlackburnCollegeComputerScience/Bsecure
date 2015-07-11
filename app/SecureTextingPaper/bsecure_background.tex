@@ -1,17 +1,16 @@
 \section{RELATED WORK}
 Pretty Good Privacy \cite{pgp} started the encryption age when it allowed anyone to securely use bulletin board systems to save messages and files.
-Today society has moved on from simple file storage, and mobile communication has become extremely important in our daily lives.
-Short Message Service is the most widely used mobile data service, and due to recent growth in business applications and increased public awareness of agency spying, attention to SMS security has grown.
+Today society has moved on from simple file storage and mobile communication has become an essential part of everyday life as Short Message Service is the most widely used mobile data service.
 Studies and protocol designs discussed in this section have laid the foundations of development in SMS encryption, and supported design implementations.
 
 SMSSec \cite{SMSSec} developed in 2008 and PK-SIM \cite{PkSim} in 2009 began to try and optimize SMS encryption.
-Both protocols started developing a two phase approach to SMS encryption.
+Both protocols began developing a two phase approach to SMS encryption.
 In this approach, a handshake is performed using asymmetric cryptography.
 This occurs only a single time before a more efficient and frequently used symmetric encryption is used.
 SMSSec designed a two-factor user verification protocol.
-Users have three criteria to authenticate themselves with something the user knows (such as a password), something the user has (such as a credit card), and something this user is (such as a fingerprint).
+Users have three criteria to authenticate themselves with something the user knows (such as a password), something the user has (such as a credit card), and something that's biologically unique to the user (such as a fingerprint).
 Two-factor authentication requires that a user has two of these forms of identification to access the system, and prove ownership of the public key.
-In contrary to this PK-SIM included a trusted third party certificate authority is used to provide public key certification.
+In contrast to this PK-SIM included a trusted third party certificate authority is used to provide public key certification.
 This trusted third party verifies the public key of both participants.
 Once confirmed each participant can use the received public key and their private key to generate a session key secret only to them.
 
@@ -26,6 +25,6 @@ Free and paid end-to-end encrypted communication options are available.
 Bleep \cite{bleep} and Threema \cite{threema} are two such options.
 Unfortunately these applications don’t use well established SMS, but instead rely on costly mobile data connections.
 Almost no options are open source and few offer direct peer-to-peer connections that don’t route through application central servers.
-Bleep is the only option we know of that has a truly decentralized operation.
+At present, Bleep is the only option that has a truly decentralized operation.
 
 

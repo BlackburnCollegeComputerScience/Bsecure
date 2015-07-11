@@ -10,16 +10,58 @@ Lastly Bluetooth's widespread avaliblity in SMS capable devices allowed us to re
 This section explains our implementation of these systems.
 
 \subsubsection{Bluetooth Key Generation}
-Bluetooth sockets are similar to that of TCP sockets.
-One device must set up a server socket, and other must set up a client socket.
-When connected together a RFCOMM connection-oriented, streaming transport Bluetooth socket is created.
-A Bluetooth socket contains a input and output stream for transmitting data.
-These streams only push bytes, but can be convered into other java stream types.
-Object input and output streams have proven proticularly useful for exchanging bulk public data.
+To set up the Bluetooth connection devices must be assigned a server or client role.
+Socket controllers are created and managed by a individual threads.
+Threading of the connection set up and management is necessary because socket listening and stream reading are blocking statements.
+Three threads are managed by a service we have called the Bluetooth service.
+A accept thread sets up a server socket to listen for incoming connection requests.
+Connect thread sets up the client socket to request connection between this device and the provided device.
+Lastly a connected thread manages the input and output streams created when a server and client socket connect.
+When a user starts a key exchange the Bluetooth service is created and the accept thread is ran.
+The first device to trigger the exchange to begin runs their connect thread.
+The two devices connect and both create a BluetoothSocket.
+This BluetoothSocket is fed to each device's connected thread.
+All remaining threads stop once the connection is established.
+What device becomes the client is completely dependent on what user is first to start the exchange.
+By setting up each device as a server and making the client role a first come first serve role; the entire connection is seamless to the user.
+Figure \ref{fig:serverClient} visualizes this set up.
 
-Explain Bluetooth Client/Server delegation
+\begin{figure}
+  \includegraphics[width=\linewidth]{serverClient.eps}
+  \caption{Bluetooth connection creation.}
+  \label{fig:serverClient}
+\end{figure}
 
-Explain Diffie-Hellman generation using Java provided classes and objects
+Once a Bluetooth connection is established a Diffie-Hellman key exchange begins.
+\ref{fig:keyExchange} represents this exchange.
+Both the server and client send their key expiration ranges to each other.
+Expiration ranges are set previously in the app settings.
+This range represents the acceptable amount of messages that a key may be used on before it is deleted and the next key is used.
+Both devices use the minimum amount agreeable to both users.
+If the users settings don't over lap the user with the more secure range will be allowed to select a new expiration count.
+The more secure range is defined as the range that has the lowest uses per key.
+The more secure use is allowed to chose a expiration count ranging from their maximum to the other users minimum.
+This design decision was based on the idea that more secure users should never be punished by being forced to use anything above their maximum setting.
+
+After the parameters are agreed upon the server creates a Java KeyPairGenerator.
+KeyPairGenerators created for Diffie-Hellman will result in two keys.
+Java uses some confusing terminology with Diffie-Hellman keys.
+Java labels secret values, a and b, as private keys and mod values as public keys.
+Public keys also contain the p and g parameters used to generate the keys.
+
+The server will generate one hundred public - private keys.
+Then encode all public keys and send them over the bluetooth socket to the client.
+After receiving the public key values the client will generate its own KeyPairGenerator based on the parameters received from the server.
+The client will use the generator to create its own one hundred public - private keys.
+In the same matter as before it will package its public keys and send them to the server.
+Now that both the server and the client have each others public keys and their private keys one hundred session keys are generated.
+The session keys along with the initialization factors and agreed upon key expiration are stored into the contact database.
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{keyExchange.eps}
+  \caption{Diffie-Hellman key exchange.}
+  \label{fig:keyExchange}
+\end{figure}
 
 \subsubsection{Key Specifics}
 The keys are Diffie-Hellman key exchange generated 32-byte secret numbers that are shared between
